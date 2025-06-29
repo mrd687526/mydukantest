@@ -2,13 +2,7 @@ import Link from "next/link";
 import {
   LayoutGrid,
   Facebook,
-  Wifi,
-  Users,
-  MessageSquare,
-  Bot,
-  Instagram,
   MessageSquareText,
-  Send,
   Package2,
   LineChart,
   Settings,
@@ -38,42 +32,7 @@ export function DashboardSidebar() {
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
               <Facebook className="h-4 w-4" />
-              Connect Facebook
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Wifi className="h-4 w-4" />
-              API Channels
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Users className="h-4 w-4" />
-              Subscriber Manager
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Live Chat
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Bot className="h-4 w-4" />
-              Bot Manager
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Instagram className="h-4 w-4" />
-              Instagram Bot
+              Connect Accounts
             </Link>
             <Link
               href="/dashboard/comment-manager"
@@ -81,13 +40,6 @@ export function DashboardSidebar() {
             >
               <MessageSquareText className="h-4 w-4" />
               Comment Manager
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Send className="h-4 w-4" />
-              Broadcasting
             </Link>
             <Link
               href="/dashboard/reports"

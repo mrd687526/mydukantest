@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -30,6 +32,17 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AutomationCampaign } from "@/lib/types";
+import { deleteCampaign } from "@/app/actions/campaigns";
+import { DeleteConfirmationDialog } from "../delete-confirmation-dialog";
+
+async function handleDelete(campaignId: string) {
+  const result = await deleteCampaign(campaignId);
+  if (result.error) {
+    toast.error("Failed to delete campaign", { description: result.error });
+  } else {
+    toast.success("Campaign deleted successfully.");
+  }
+}
 
 export const columns: ColumnDef<AutomationCampaign>[] = [
   {
@@ -45,7 +58,7 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "is_active",
@@ -82,15 +95,24 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/campaigns/${campaign.id}`)}>
+              Manage
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(campaign.id)}
             >
               Copy campaign ID
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/dashboard/campaigns/${campaign.id}`)}>
-              Manage
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DeleteConfirmationDialog
+              onConfirm={() => handleDelete(campaign.id)}
+              title="Are you absolutely sure?"
+              description="This action cannot be undone. This will permanently delete your campaign and all of its associated rules."
+            >
+              <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                Delete
+              </div>
+            </DeleteConfirmationDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -119,7 +141,7 @@ export function CampaignsDataTable({ data }: { data: AutomationCampaign[] }) {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="pl-4">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(

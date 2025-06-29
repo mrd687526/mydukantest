@@ -58,21 +58,10 @@ export default async function ReportsPage() {
       console.error("Error fetching reports:", reportsError);
       return <div>Error loading reports. Please try again later.</div>;
     }
-
+    
     if (fetchedReports) {
-      // Explicitly transform the data to match the CampaignReport type
-      const transformedReports: CampaignReport[] = (fetchedReports as any[]).map((report) => {
-        const campaignData = report.automation_campaigns?.[0] || null;
-        return {
-          id: report.id,
-          action_taken: report.action_taken,
-          associated_keyword: report.associated_keyword,
-          reply_text: report.reply_text,
-          sent_at: report.sent_at,
-          automation_campaigns: campaignData,
-        };
-      });
-      reports = transformedReports;
+      // The data from Supabase should match our types. We can cast it.
+      reports = fetchedReports as unknown as CampaignReport[];
     }
   }
 

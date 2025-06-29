@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,6 +30,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CommentTemplate } from "@/lib/types";
+import { deleteCommentTemplate } from "@/app/actions/templates";
+import { DeleteConfirmationDialog } from "../delete-confirmation-dialog";
+
+async function handleDelete(templateId: string) {
+  const result = await deleteCommentTemplate(templateId);
+  if (result.error) {
+    toast.error("Failed to delete template", { description: result.error });
+  } else {
+    toast.success("Template deleted successfully.");
+  }
+}
 
 export const columns: ColumnDef<CommentTemplate>[] = [
   {
@@ -63,7 +76,16 @@ export const columns: ColumnDef<CommentTemplate>[] = [
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DeleteConfirmationDialog
+            onConfirm={() => handleDelete(row.original.id)}
+            title="Are you absolutely sure?"
+            description="This action cannot be undone. This will permanently delete your template."
+          >
+            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              Delete
+            </div>
+          </DeleteConfirmationDialog>
         </DropdownMenuContent>
       </DropdownMenu>
     ),

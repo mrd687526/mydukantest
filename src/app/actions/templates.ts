@@ -89,3 +89,23 @@ export async function createReplyTemplate(
   revalidatePath("/dashboard/templates");
   return { error: null };
 }
+
+export async function deleteCommentTemplate(templateId: string) {
+  const supabase = createClient();
+  const { error } = await supabase.from("comment_templates").delete().eq("id", templateId);
+  if (error) {
+    return { error: "Database error: Could not delete template." };
+  }
+  revalidatePath("/dashboard/templates");
+  return { success: true };
+}
+
+export async function deleteReplyTemplate(templateId: string) {
+  const supabase = createClient();
+  const { error } = await supabase.from("reply_templates").delete().eq("id", templateId);
+  if (error) {
+    return { error: "Database error: Could not delete template." };
+  }
+  revalidatePath("/dashboard/templates");
+  return { success: true };
+}

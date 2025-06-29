@@ -59,3 +59,19 @@ export async function toggleCampaignStatus(campaignId: string, currentState: boo
     revalidatePath("/dashboard/campaigns");
     return { success: true };
 }
+
+export async function deleteCampaign(campaignId: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("automation_campaigns")
+    .delete()
+    .eq("id", campaignId);
+
+  if (error) {
+    console.error("Error deleting campaign:", error);
+    return { error: "Database error: Could not delete campaign." };
+  }
+
+  revalidatePath("/dashboard/campaigns");
+  return { success: true };
+}

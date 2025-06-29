@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 
-interface CampaignDetailPageProps {
+export default async function CampaignDetailPage({
+  params,
+}: {
   params: { campaignId: string };
-}
-
-export default async function CampaignDetailPage({ params }: CampaignDetailPageProps) {
+}) {
   const supabase = createClient();
   const { campaignId } = params;
 
