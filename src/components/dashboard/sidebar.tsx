@@ -6,6 +6,7 @@ import {
   Package2,
   LineChart,
   Settings,
+  BotMessageSquare,
 } from "lucide-react";
 
 export function DashboardSidebar() {
@@ -36,10 +37,17 @@ export function DashboardSidebar() {
             </Link>
             <Link
               href="/dashboard/comment-manager"
-              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
               <MessageSquareText className="h-4 w-4" />
               Comment Manager
+            </Link>
+            <Link
+              href="/dashboard/bot-manager"
+              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+            >
+              <BotMessageSquare className="h-4 w-4" />
+              Bot Manager
             </Link>
             <Link
               href="/dashboard/reports"

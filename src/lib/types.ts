@@ -32,6 +32,19 @@ export interface FacebookPage {
   category: string;
 }
 
+export interface Bot {
+  id: string;
+  profile_id: string;
+  connected_account_id: string;
+  name: string;
+  description: string | null;
+  status: 'active' | 'inactive';
+  flow_data: any | null;
+  settings: any | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // This represents the data from the connected_accounts table
 export interface ConnectedAccount {
   id: string;
@@ -40,6 +53,7 @@ export interface ConnectedAccount {
   ig_business_id: string | null;
   access_token: string | null;
   refresh_token: string | null;
+  bots: Bot[];
 }
 
 export interface ProfileCredentials {

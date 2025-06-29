@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUser, Menu, Package2, LayoutGrid, Facebook, MessageSquareText } from "lucide-react";
+import { CircleUser, Menu, Package2, LayoutGrid, Facebook, MessageSquareText, BotMessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -64,6 +64,13 @@ export function DashboardHeader({ user }: { user: User | null }) {
             >
               <MessageSquareText className="h-5 w-5" />
               Comment Manager
+            </Link>
+            <Link
+              href="/dashboard/bot-manager"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <BotMessageSquare className="h-5 w-5" />
+              Bot Manager
             </Link>
           </nav>
         </SheetContent>
