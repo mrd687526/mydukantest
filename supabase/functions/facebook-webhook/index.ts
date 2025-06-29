@@ -19,7 +19,7 @@ interface CampaignRule {
   id: string;
   keyword: string;
   match_type: 'exact' | 'contains';
-  action: 'reply' | 'dm' | 'hide' | 'delete';
+  action: 'reply' | 'dm' | 'hide' | 'delete' | 'like';
   reply_templates: ReplyTemplate | null; // Joined from reply_templates table
 }
 
@@ -153,6 +153,10 @@ async function performAction(action: string, params: { comment_id: string; user_
     case 'delete':
       url = `${GRAPH_API_URL}/${comment_id}?${authParam}`;
       options = { method: 'DELETE' };
+      break;
+    case 'like':
+      url = `${GRAPH_API_URL}/${comment_id}/likes?${authParam}`;
+      options = { method: 'POST' };
       break;
     default:
       console.log(`Unknown action: ${action}`);

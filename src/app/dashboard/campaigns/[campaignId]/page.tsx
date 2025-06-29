@@ -1,7 +1,11 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  MessageSquareReply,
+  MessageSquarePlus,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
+import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 
 export default async function Page({ params }: any) {
   const supabase = await createClient();
@@ -93,11 +98,52 @@ export default async function Page({ params }: any) {
         </CardContent>
       </Card>
 
-      <CampaignRulesClient
-        campaignId={campaign.id}
-        rules={rulesRes.data || []}
-        replyTemplates={templatesRes.data || []}
-      />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Auto Replies Sent
+            </CardTitle>
+            <MessageSquareReply className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">
+              Not replied yet
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Auto Comments Posted
+            </CardTitle>
+            <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">
+              Not commented yet
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <CampaignAdvancedSettings />
+
+      <div className="space-y-4">
+        <div className="space-y-1">
+            <h3 className="text-xl font-semibold">Comment & Inbox Reply</h3>
+            <p className="text-sm text-muted-foreground">
+                Set up rules to automatically handle comments and send private messages.
+            </p>
+        </div>
+        <CampaignRulesClient
+            campaignId={campaign.id}
+            rules={rulesRes.data || []}
+            replyTemplates={templatesRes.data || []}
+        />
+      </div>
 
       <Card>
         <CardHeader>

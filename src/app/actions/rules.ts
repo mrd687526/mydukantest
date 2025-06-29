@@ -8,7 +8,7 @@ const ruleSchema = z.object({
   campaign_id: z.string().uuid(),
   keyword: z.string().min(1, "Keyword is required."),
   match_type: z.enum(["exact", "contains"]),
-  action: z.enum(["reply", "dm", "hide", "delete"]),
+  action: z.enum(["reply", "dm", "hide", "delete", "like"]),
   reply_template_id: z.string().uuid().optional().nullable(),
 });
 

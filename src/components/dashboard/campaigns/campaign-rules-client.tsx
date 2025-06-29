@@ -44,7 +44,7 @@ import type { CampaignRule, ReplyTemplate } from "@/lib/types";
 const ruleFormSchema = z.object({
   keyword: z.string().min(1, "Keyword is required."),
   match_type: z.enum(["exact", "contains"]),
-  action: z.enum(["reply", "dm", "hide", "delete"]),
+  action: z.enum(["reply", "dm", "hide", "delete", "like"]),
   reply_template_id: z.string().uuid().optional().nullable(),
 });
 
@@ -166,6 +166,7 @@ export function CampaignRulesClient({ campaignId, rules, replyTemplates }: Campa
                     <SelectContent>
                       <SelectItem value="reply">Public Reply</SelectItem>
                       <SelectItem value="dm">Private Message</SelectItem>
+                      <SelectItem value="like">Like Comment</SelectItem>
                       <SelectItem value="hide">Hide Comment</SelectItem>
                       <SelectItem value="delete">Delete Comment</SelectItem>
                     </SelectContent>
