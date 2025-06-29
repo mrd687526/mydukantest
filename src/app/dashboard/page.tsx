@@ -17,20 +17,7 @@ import {
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
-
-// Dynamically import the chart component with SSR disabled
-const RepliesChart = dynamic(
-  () =>
-    import("@/components/dashboard/replies-chart").then(
-      (mod) => mod.RepliesChart
-    ),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-[350px] w-full" />,
-  }
-);
+import { DashboardChartContainer } from "@/components/dashboard/dashboard-chart-container";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -149,7 +136,7 @@ export default async function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <RepliesChart data={dailyCountsData || []} />
+            <DashboardChartContainer data={dailyCountsData || []} />
           </CardContent>
         </Card>
         <Card>
