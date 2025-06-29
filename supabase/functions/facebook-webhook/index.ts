@@ -2,23 +2,41 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 import OpenAI from 'https://esm.sh/openai@4.52.7'
 
-// Define types for clarity
+// --- Type Definitions ---
 interface FacebookComment {
   page_id: string;
-  item: string;
-  verb: string;
   comment_id: string;
   message: string;
   from: { id: string; name: string };
 }
-interface CommentRule {
+
+interface ReplyTemplate {
+  template_text: string;
+  reply_type: 'public' | 'private' | 'ai';
+}
+
+interface CampaignRule {
+  id: string;
   keyword: string;
   match_type: 'exact' | 'contains';
   action: 'reply' | 'dm' | 'hide' | 'delete';
+  reply_templates: ReplyTemplate | null; // Joined from reply_templates table
 }
-interface AutoReply {
-  template: string;
-  type: 'public' | 'private' | 'ai';
+
+interface AutomationCampaign {
+  id: string;
+  is_active: boolean;
+  campaign_rules: CampaignRule[];
+}
+
+interface Profile {
+  id: string;
+  automation_campaigns: AutomationCampaign[];
+}
+
+interface ConnectedAccount {
+  access_token: string;
+  profiles: Profile | null;
 }
 
 const corsHeaders = {
@@ -29,7 +47,7 @@ const corsHeaders = {
 // --- Helper Functions ---
 
 /**
- * Parses the incoming Facebook webhook payload to extract comment data.
+ * Parses the incoming Facebook webhook payload to extract essential comment data.
  */
 function parseFacebookWebhook(payload: any): Partial<FacebookComment> {
   const entry = payload.entry?.[0];
@@ -42,8 +60,6 @@ function parseFacebookWebhook(payload: any): Partial<FacebookComment> {
 
   return {
     page_id: entry.id,
-    item: value.item,
-    verb: value.verb,
     comment_id: value.comment_id,
     message: value.message,
     from: value.from,
@@ -53,7 +69,7 @@ function parseFacebookWebhook(payload: any): Partial<FacebookComment> {
 /**
  * Finds a rule that matches the comment message.
  */
-function findMatch(rules: CommentRule[], message: string): CommentRule | null {
+function findMatch(rules: CampaignRule[], message: string): CampaignRule | null {
   if (!message || !rules) return null;
   const lowerCaseMessage = message.toLowerCase();
 
@@ -96,28 +112,6 @@ async function generateAIReply(commentText: string): Promise<string> {
     console.error('Error generating AI reply:', error);
     return "We've received your comment and will get back to you shortly!";
   }
-}
-
-/**
- * Gets the appropriate response text from templates or AI.
- */
-async function getResponseText(replies: AutoReply[], action: string, originalMessage: string): Promise<string> {
-  const isReply = action === 'reply';
-  const isDm = action === 'dm';
-
-  if (!isReply && !isDm) return '';
-
-  const template = replies?.find(r => 
-    (isReply && r.type === 'public') || 
-    (isDm && r.type === 'private') ||
-    r.type === 'ai'
-  );
-
-  if (template?.type === 'ai') {
-    return await generateAIReply(originalMessage);
-  }
-
-  return template?.template || "Thanks for your comment!";
 }
 
 /**
@@ -172,6 +166,24 @@ async function performAction(action: string, params: { comment_id: string; user_
   }
 }
 
+/**
+ * Logs the executed action into the campaign_reports table.
+ */
+async function logCampaignAction(supabase: SupabaseClient, report: {
+  campaign_id: string;
+  comment_id: string;
+  reply_text: string;
+  reply_type: string | undefined;
+  action_taken: string;
+  associated_keyword: string;
+}) {
+  const { error } = await supabase.from('campaign_reports').insert(report);
+  if (error) {
+    console.error('Error logging campaign action:', error);
+  }
+}
+
+
 // --- Main Server Logic ---
 
 serve(async (req) => {
@@ -194,18 +206,39 @@ serve(async (req) => {
       });
     }
 
-    const { data: account } = await supabaseAdmin
+    // Fetch account, profile, and all campaign data in one go
+    const { data: account, error: accountError } = await supabaseAdmin
       .from('connected_accounts')
-      .select(`access_token, profiles ( id, comment_rules (*), auto_replies (*) )`)
+      .select(`
+        access_token,
+        profiles (
+          id,
+          automation_campaigns (
+            id,
+            is_active,
+            campaign_rules (
+              *,
+              reply_templates (template_text, reply_type)
+            )
+          )
+        )
+      `)
       .eq('fb_page_id', comment.page_id)
-      .single();
+      .single<ConnectedAccount>();
 
-    if (!account || !account.profiles) {
-      throw new Error(`No profile found for page ID: ${comment.page_id}`);
+    if (accountError || !account) {
+      throw new Error(`Account not found for page ID ${comment.page_id}: ${accountError?.message}`);
     }
 
-    const { access_token, profiles: profile } = account;
-    const matchedRule = findMatch(profile.comment_rules, comment.message);
+    const activeCampaign = account.profiles?.automation_campaigns.find(c => c.is_active);
+
+    if (!activeCampaign) {
+      return new Response(JSON.stringify({ status: 'ignored', reason: 'No active campaign found' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const matchedRule = findMatch(activeCampaign.campaign_rules, comment.message);
 
     if (!matchedRule) {
       return new Response(JSON.stringify({ status: 'ignored', reason: 'No matching rule found' }), {
@@ -213,23 +246,32 @@ serve(async (req) => {
       });
     }
 
-    const responseText = await getResponseText(profile.auto_replies, matchedRule.action, comment.message);
+    let responseText = '';
+    const replyTemplate = matchedRule.reply_templates;
+
+    if (replyTemplate) {
+      if (replyTemplate.reply_type === 'ai') {
+        responseText = await generateAIReply(comment.message);
+      } else {
+        responseText = replyTemplate.template_text;
+      }
+    }
 
     await performAction(matchedRule.action, {
       comment_id: comment.comment_id,
       user_id: comment.from!.id,
-      page_access_token: access_token,
+      page_access_token: account.access_token,
       text: responseText,
     });
 
-    if (responseText) {
-      await supabaseAdmin.from('reply_logs').insert({
-        comment_id: comment.comment_id,
-        reply_text: responseText,
-        reply_type: matchedRule.action,
-        profile_id: profile.id,
-      });
-    }
+    await logCampaignAction(supabaseAdmin, {
+      campaign_id: activeCampaign.id,
+      comment_id: comment.comment_id,
+      reply_text: responseText,
+      reply_type: replyTemplate?.reply_type,
+      action_taken: matchedRule.action,
+      associated_keyword: matchedRule.keyword,
+    });
 
     return new Response(JSON.stringify({ status: 'processed' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
