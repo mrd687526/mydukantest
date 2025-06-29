@@ -25,8 +25,9 @@ export const columns: ColumnDef<CampaignReport>[] = [
     accessorKey: "automation_campaigns",
     header: "Campaign",
     cell: ({ row }) => {
-      const campaign = row.original.automation_campaigns;
-      return <div className="font-medium">{campaign?.name || "N/A"}</div>;
+      const campaigns = row.original.automation_campaigns;
+      const campaignName = campaigns?.[0]?.name || "N/A";
+      return <div className="font-medium">{campaignName}</div>;
     },
   },
   {

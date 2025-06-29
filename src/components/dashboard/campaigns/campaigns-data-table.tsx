@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -70,6 +71,7 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
     id: "actions",
     cell: ({ row }) => {
       const campaign = row.original;
+      const router = useRouter();
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -85,7 +87,9 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
             >
               Copy campaign ID
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/campaigns/${campaign.id}`)}>
+              Manage
+            </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

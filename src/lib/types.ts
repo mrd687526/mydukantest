@@ -57,5 +57,5 @@ export interface CampaignReport {
   sent_at: string;
   automation_campaigns: {
     name: string;
-  } | null;
+  }[] | null;
 }
