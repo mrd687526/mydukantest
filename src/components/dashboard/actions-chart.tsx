@@ -14,11 +14,11 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-interface RepliesChartProps {
+interface ActionsChartProps {
   data: { day: string; count: number }[];
 }
 
-export function RepliesChart({ data }: RepliesChartProps) {
+export function ActionsChart({ data }: ActionsChartProps) {
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>

@@ -1,4 +1,4 @@
-import { BookUser, FileCog, MessageSquareReply } from "lucide-react";
+import { BookUser, FileCog, BotMessageSquare } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -44,31 +44,31 @@ export default async function DashboardPage() {
 
   // Fetch all data in parallel for performance
   const [
-    { count: replyCount },
-    { count: ruleCount },
+    { count: actionCount },
+    { count: campaignCount },
     { count: accountCount },
-    { data: recentReplies },
+    { data: recentActions },
     { data: dailyCountsData },
   ] = await Promise.all([
     supabase
-      .from("reply_logs")
-      .select("*", { count: "exact", head: true })
-      .eq("profile_id", profileId),
+      .from("campaign_reports")
+      .select("id", { count: "exact", head: true })
+      .in("campaign_id", supabase.from("automation_campaigns").select("id").eq("profile_id", profileId)),
     supabase
-      .from("comment_rules")
-      .select("*", { count: "exact", head: true })
+      .from("automation_campaigns")
+      .select("id", { count: "exact", head: true })
       .eq("profile_id", profileId),
     supabase
       .from("connected_accounts")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("profile_id", profileId),
     supabase
-      .from("reply_logs")
-      .select("reply_text, reply_type, sent_at")
-      .eq("profile_id", profileId)
+      .from("campaign_reports")
+      .select("action_taken, associated_keyword, sent_at")
+      .in("campaign_id", supabase.from("automation_campaigns").select("id").eq("profile_id", profileId))
       .order("sent_at", { ascending: false })
       .limit(5),
-    supabase.rpc("get_daily_reply_counts", { p_profile_id: profileId }),
+    supabase.rpc("get_daily_action_counts", { p_profile_id: profileId }),
   ]);
 
   return (
@@ -77,26 +77,26 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Replies Sent
+              Total Actions Taken
             </CardTitle>
-            <MessageSquareReply className="h-4 w-4 text-muted-foreground" />
+            <BotMessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{replyCount ?? 0}</div>
+            <div className="text-2xl font-bold">{actionCount ?? 0}</div>
             <p className="text-xs text-muted-foreground">
-              Automated replies and DMs
+              Automated actions this month
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Rules</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
             <FileCog className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ruleCount ?? 0}</div>
+            <div className="text-2xl font-bold">{campaignCount ?? 0}</div>
             <p className="text-xs text-muted-foreground">
-              Keywords and actions configured
+              Total automation campaigns
             </p>
           </CardContent>
         </Card>
@@ -118,9 +118,9 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
-            <CardTitle>Replies Overview</CardTitle>
+            <CardTitle>Actions Overview</CardTitle>
             <CardDescription>
-              Total replies sent in the last 30 days.
+              Total actions taken in the last 30 days.
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
@@ -131,31 +131,31 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>
-              The latest replies sent to your audience.
+              The latest automated actions performed.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Details</TableHead>
+                  <TableHead>Action Details</TableHead>
                   <TableHead className="text-right">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentReplies && recentReplies.length > 0 ? (
-                  recentReplies.map((reply, index) => (
+                {recentActions && recentActions.length > 0 ? (
+                  recentActions.map((action, index) => (
                     <TableRow key={index}>
                       <TableCell>
                         <div className="font-medium capitalize">
-                          {reply.reply_type}
+                          {action.action_taken}
                         </div>
                         <div className="text-sm text-muted-foreground truncate max-w-xs">
-                          {reply.reply_text}
+                          Keyword: {action.associated_keyword || "N/A"}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        {new Date(reply.sent_at).toLocaleTimeString([], {
+                        {new Date(action.sent_at).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}

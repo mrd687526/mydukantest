@@ -4,10 +4,10 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamically import the chart component with SSR disabled
-const RepliesChart = dynamic(
+const ActionsChart = dynamic(
   () =>
-    import("@/components/dashboard/replies-chart").then(
-      (mod) => mod.RepliesChart
+    import("@/components/dashboard/actions-chart").then(
+      (mod) => mod.ActionsChart
     ),
   {
     ssr: false,
@@ -22,5 +22,5 @@ interface DashboardChartContainerProps {
 export function DashboardChartContainer({
   data,
 }: DashboardChartContainerProps) {
-  return <RepliesChart data={data} />;
+  return <ActionsChart data={data} />;
 }
