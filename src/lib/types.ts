@@ -39,3 +39,14 @@ export interface ProfileCredentials {
   fb_app_id: string | null;
   fb_app_secret: string | null;
 }
+
+export interface CampaignReport {
+  id: string;
+  action_taken: string | null;
+  associated_keyword: string | null;
+  reply_text: string | null;
+  sent_at: string;
+  automation_campaigns: {
+    name: string;
+  } | null;
+}
