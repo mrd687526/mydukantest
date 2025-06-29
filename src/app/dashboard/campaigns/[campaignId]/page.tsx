@@ -13,7 +13,13 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 
-export default async function Page({ params }: { params: { campaignId: string } }) {
+// Define a complete props type that matches Next.js App Router conventions.
+type Props = {
+  params: { campaignId: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export default async function Page({ params }: Props) {
   const supabase = createClient();
   const { campaignId } = params;
 
@@ -85,7 +91,7 @@ export default async function Page({ params }: { params: { campaignId: string } 
             </div>
             <CampaignStatusToggle campaign={campaign} />
           </div>
-        </CardHeader>
+        </Header>
         <CardContent>
           <p>
             Created on: {new Date(campaign.created_at).toLocaleDateString()}
