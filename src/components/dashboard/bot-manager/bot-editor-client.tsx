@@ -26,6 +26,7 @@ import { updateBotFlow } from '@/app/actions/bots';
 import { EditorSidebar } from './editor/sidebar';
 import { EditorSettingsPanel } from './editor/settings-panel';
 import MessageNode from './editor/nodes/message-node';
+import { BotStatusToggle } from './bot-status-toggle';
 
 const nodeTypes = {
   messageNode: MessageNode,
@@ -136,7 +137,10 @@ export function BotEditorClient({ bot }: BotEditorClientProps) {
             Editing: <span className="font-bold">{bot.name}</span>
           </h1>
         </div>
-        <Button onClick={onSave}>Save Flow</Button>
+        <div className="flex items-center gap-4">
+          <BotStatusToggle bot={bot} />
+          <Button onClick={onSave}>Save Flow</Button>
+        </div>
       </header>
       <div className="flex-grow flex">
         <ReactFlowProvider>

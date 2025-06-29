@@ -64,3 +64,28 @@ export async function updateBotFlow(botId: string, flowData: any) {
   revalidatePath(`/dashboard/bot-manager/${botId}`);
   return { success: true };
 }
+
+export async function updateBotStatus(botId: string, currentStatus: 'active' | 'inactive') {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be logged in." };
+  }
+
+  const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+  const { error } = await supabase
+    .from("bots")
+    .update({ status: newStatus })
+    .eq("id", botId);
+
+  if (error) {
+    console.error("Supabase error updating bot status:", error.message);
+    return { error: "Database error: Could not update bot status." };
+  }
+
+  revalidatePath("/dashboard/bot-manager");
+  revalidatePath(`/dashboard/bot-manager/${botId}`);
+  return { success: true };
+}

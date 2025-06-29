@@ -9,9 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { ConnectedAccount } from "@/lib/types";
 import { CreateBotDialog } from "./create-bot-dialog";
+import { BotStatusToggle } from "./bot-status-toggle";
 
 interface BotManagerClientProps {
   accounts: ConnectedAccount[];
@@ -50,9 +50,9 @@ export function BotManagerClient({ accounts }: BotManagerClientProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{bot.name}</p>
-                    <Badge variant={bot.status === 'active' ? 'default' : 'outline'} className="capitalize mt-1">
-                      {bot.status}
-                    </Badge>
+                    <div className="mt-2">
+                      <BotStatusToggle bot={bot} />
+                    </div>
                   </div>
                   <Button asChild>
                     <Link href={`/dashboard/bot-manager/${bot.id}`}>Manage Bot</Link>
