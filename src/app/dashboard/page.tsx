@@ -1,8 +1,4 @@
-import {
-  BookUser,
-  FileCog,
-  MessageSquareReply,
-} from "lucide-react";
+import { BookUser, FileCog, MessageSquareReply } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,20 +16,21 @@ import {
 } from "@/components/ui/table";
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Helper to format date for the chart
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
+// Dynamically import the chart component with SSR disabled
+const RepliesChart = dynamic(
+  () =>
+    import("@/components/dashboard/replies-chart").then(
+      (mod) => mod.RepliesChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[350px] w-full" />,
+  }
+);
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -76,13 +73,27 @@ export default async function DashboardPage() {
     { count: ruleCount },
     { count: accountCount },
     { data: recentReplies },
-    { data: dailyCountsData }
+    { data: dailyCountsData },
   ] = await Promise.all([
-    supabase.from("reply_logs").select("*", { count: "exact", head: true }).eq("profile_id", profileId),
-    supabase.from("comment_rules").select("*", { count: "exact", head: true }).eq("profile_id", profileId),
-    supabase.from("connected_accounts").select("*", { count: "exact", head: true }).eq("profile_id", profileId),
-    supabase.from("reply_logs").select("reply_text, reply_type, sent_at").eq("profile_id", profileId).order("sent_at", { ascending: false }).limit(5),
-    supabase.rpc('get_daily_reply_counts', { p_profile_id: profileId })
+    supabase
+      .from("reply_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("profile_id", profileId),
+    supabase
+      .from("comment_rules")
+      .select("*", { count: "exact", head: true })
+      .eq("profile_id", profileId),
+    supabase
+      .from("connected_accounts")
+      .select("*", { count: "exact", head: true })
+      .eq("profile_id", profileId),
+    supabase
+      .from("reply_logs")
+      .select("reply_text, reply_type, sent_at")
+      .eq("profile_id", profileId)
+      .order("sent_at", { ascending: false })
+      .limit(5),
+    supabase.rpc("get_daily_reply_counts", { p_profile_id: profileId }),
   ]);
 
   return (
@@ -90,12 +101,16 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Replies Sent</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Replies Sent
+            </CardTitle>
             <MessageSquareReply className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{replyCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Automated replies and DMs</p>
+            <p className="text-xs text-muted-foreground">
+              Automated replies and DMs
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -105,17 +120,23 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ruleCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Keywords and actions configured</p>
+            <p className="text-xs text-muted-foreground">
+              Keywords and actions configured
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Connected Accounts</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Connected Accounts
+            </CardTitle>
             <BookUser className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{accountCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Facebook Pages connected</p>
+            <p className="text-xs text-muted-foreground">
+              Facebook Pages connected
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -123,35 +144,20 @@ export default async function DashboardPage() {
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Replies Overview</CardTitle>
-            <CardDescription>Total replies sent in the last 30 days.</CardDescription>
+            <CardDescription>
+              Total replies sent in the last 30 days.
+            </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-             <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={dailyCountsData || []}>
-                  <XAxis
-                    dataKey="day"
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => formatDate(value)}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-                  <Bar dataKey="count" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
-                </BarChart>
-              </ResponsiveContainer>
+            <RepliesChart data={dailyCountsData || []} />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>The latest replies sent to your audience.</CardDescription>
+            <CardDescription>
+              The latest replies sent to your audience.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -166,17 +172,26 @@ export default async function DashboardPage() {
                   recentReplies.map((reply, index) => (
                     <TableRow key={index}>
                       <TableCell>
-                        <div className="font-medium capitalize">{reply.reply_type}</div>
+                        <div className="font-medium capitalize">
+                          {reply.reply_type}
+                        </div>
                         <div className="text-sm text-muted-foreground truncate max-w-xs">
                           {reply.reply_text}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">{new Date(reply.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                      <TableCell className="text-right">
+                        {new Date(reply.sent_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">No recent activity.</TableCell>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                      No recent activity.
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
