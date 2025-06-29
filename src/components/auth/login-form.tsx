@@ -5,6 +5,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { createClient } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginForm() {
   const supabase = createClient();
@@ -43,6 +44,15 @@ export default function LoginForm() {
               : ""
           }
         />
+      </div>
+      <div className="text-center text-sm text-gray-600">
+        <p>
+          By signing in, you agree to our{" "}
+          <Link href="/privacy-policy" className="font-medium text-primary hover:underline">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
