@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { MoreVertical, Zap, ZapOff } from "lucide-react";
+import { MoreVertical, Zap, ZapOff, MessageSquarePlus } from "lucide-react";
 
 import {
   Select,
@@ -31,6 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import type { ConnectedAccount, FacebookPost, AutomationCampaign } from "@/lib/types";
 import { AutomatePostDialog } from "./automate-post-dialog";
+import { LeaveCommentDialog } from "./leave-comment-dialog";
 import { unassignCampaignFromPost } from "@/app/actions/campaigns";
 
 interface PostsClientProps {
@@ -43,6 +44,7 @@ export function PostsClient({ accounts, campaigns }: PostsClientProps) {
   const [posts, setPosts] = useState<FacebookPost[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [automatingPostId, setAutomatingPostId] = useState<string | null>(null);
+  const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
 
   const handleAccountChange = async (accountId: string) => {
     setSelectedAccountId(accountId);
@@ -200,6 +202,10 @@ export function PostsClient({ accounts, campaigns }: PostsClientProps) {
                           <Zap className="h-4 w-4 mr-2" />
                           Automate Replies
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCommentingPostId(post.id)}>
+                          <MessageSquarePlus className="h-4 w-4 mr-2" />
+                          Leave a comment
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -225,6 +231,13 @@ export function PostsClient({ accounts, campaigns }: PostsClientProps) {
           postId={automatingPostId}
           campaigns={campaigns.filter(c => !c.post_id)}
           onClose={() => setAutomatingPostId(null)}
+        />
+      )}
+
+      {commentingPostId && (
+        <LeaveCommentDialog
+          postId={commentingPostId}
+          onClose={() => setCommentingPostId(null)}
         />
       )}
     </div>
