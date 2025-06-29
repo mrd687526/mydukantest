@@ -42,3 +42,20 @@ export async function createCampaign(values: z.infer<typeof campaignFormSchema>)
   revalidatePath("/dashboard/campaigns");
   return { error: null };
 }
+
+export async function toggleCampaignStatus(campaignId: string, currentState: boolean) {
+    const supabase = createClient();
+    const { error } = await supabase
+        .from("automation_campaigns")
+        .update({ is_active: !currentState })
+        .eq("id", campaignId);
+
+    if (error) {
+        console.error("Error toggling campaign status:", error);
+        return { error: "Failed to update campaign status." };
+    }
+
+    revalidatePath(`/dashboard/campaigns/${campaignId}`);
+    revalidatePath("/dashboard/campaigns");
+    return { success: true };
+}

@@ -57,5 +57,17 @@ export interface CampaignReport {
   sent_at: string;
   automation_campaigns: {
     name: string;
-  }[] | null;
+  } | null;
+}
+
+export interface CampaignRule {
+    id: string;
+    campaign_id: string;
+    keyword: string | null;
+    match_type: 'exact' | 'contains' | null;
+    action: 'reply' | 'dm' | 'hide' | 'delete' | null;
+    reply_template_id: string | null;
+    reply_templates: {
+        name: string;
+    } | null;
 }

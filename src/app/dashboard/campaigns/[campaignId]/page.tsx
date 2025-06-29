@@ -1,5 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -7,37 +9,40 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
+import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 
-export default async function CampaignDetailPage({
-  params,
-}: {
+interface CampaignDetailPageProps {
   params: { campaignId: string };
-}) {
+}
+
+export default async function CampaignDetailPage({ params }: CampaignDetailPageProps) {
   const supabase = createClient();
   const { campaignId } = params;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  const { data: campaign, error } = await supabase
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+  if (!profile) redirect("/dashboard");
+
+  const campaignRes = await supabase
     .from("automation_campaigns")
     .select("*")
     .eq("id", campaignId)
+    .eq("profile_id", profile.id)
     .single();
 
-  if (error || !campaign) {
+  if (campaignRes.error || !campaignRes.data) {
     return (
       <div>
         <h1 className="text-2xl font-bold">Campaign not found</h1>
-        <p>The requested campaign could not be found.</p>
+        <p>The requested campaign could not be found or you do not have permission to view it.</p>
         <Button asChild variant="outline" className="mt-4">
           <Link href="/dashboard/campaigns">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,6 +52,17 @@ export default async function CampaignDetailPage({
       </div>
     );
   }
+  const campaign = campaignRes.data;
+
+  const rulesRes = await supabase
+    .from("campaign_rules")
+    .select(`*, reply_templates ( name )`)
+    .eq("campaign_id", campaignId);
+
+  const templatesRes = await supabase
+    .from("reply_templates")
+    .select("*")
+    .eq("profile_id", profile.id);
 
   return (
     <div className="space-y-6">
@@ -66,9 +82,7 @@ export default async function CampaignDetailPage({
                 Manage settings, rules, and tags for this campaign.
               </CardDescription>
             </div>
-            <Badge variant={campaign.is_active ? "default" : "outline"}>
-              {campaign.is_active ? "Active" : "Inactive"}
-            </Badge>
+            <CampaignStatusToggle campaign={campaign} />
           </div>
         </CardHeader>
         <CardContent>
@@ -76,19 +90,11 @@ export default async function CampaignDetailPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Campaign Rules</CardTitle>
-          <CardDescription>
-            Define keywords and actions for incoming comments.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-muted-foreground py-8">
-            Rule management will be implemented here soon.
-          </p>
-        </CardContent>
-      </Card>
+      <CampaignRulesClient
+        campaignId={campaign.id}
+        rules={rulesRes.data || []}
+        replyTemplates={templatesRes.data || []}
+      />
 
       <Card>
         <CardHeader>
