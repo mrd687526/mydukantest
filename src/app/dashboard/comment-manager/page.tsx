@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileCog, MessageSquareText, BarChart2 } from "lucide-react";
+import { FileCog, MessageSquareText, BarChart2, Tags } from "lucide-react";
 
 const tools = [
   {
@@ -27,6 +27,12 @@ const tools = [
     description: "View all campaign reports.",
     href: "/dashboard/reports",
     icon: BarChart2,
+  },
+  {
+    title: "Campaign Tags",
+    description: "Organize your campaigns with custom tags.",
+    href: "/dashboard/campaign-tags",
+    icon: Tags,
   },
 ];
 
