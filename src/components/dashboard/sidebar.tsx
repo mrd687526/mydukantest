@@ -7,6 +7,7 @@ import {
   LineChart,
   Settings,
   BotMessageSquare,
+  Newspaper,
 } from "lucide-react";
 
 export function DashboardSidebar() {
@@ -34,6 +35,13 @@ export function DashboardSidebar() {
             >
               <Facebook className="h-4 w-4" />
               Connect Accounts
+            </Link>
+            <Link
+              href="/dashboard/facebook-posts"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Newspaper className="h-4 w-4" />
+              Facebook Posts
             </Link>
             <Link
               href="/dashboard/comment-manager"

@@ -92,3 +92,11 @@ export interface CampaignRule {
         name: string;
     } | null;
 }
+
+export interface FacebookPost {
+  id: string;
+  message?: string;
+  created_time: string;
+  full_picture?: string;
+  permalink_url: string;
+}
