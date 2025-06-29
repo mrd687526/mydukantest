@@ -8,6 +8,7 @@ export interface AutomationCampaign {
   start_date: string | null;
   end_date: string | null;
   created_at: string;
+  post_id: string | null;
 }
 
 export interface CommentTemplate {
@@ -40,7 +41,7 @@ export interface BotFlow {
 }
 
 export interface Bot {
-  id: string;
+  id:string;
   profile_id: string;
   connected_account_id: string;
   name: string;

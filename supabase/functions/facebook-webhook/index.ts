@@ -5,6 +5,7 @@ import OpenAI from 'https://esm.sh/openai@4.52.7'
 // --- Type Definitions ---
 interface FacebookComment {
   page_id: string;
+  post_id: string;
   comment_id: string;
   message: string;
   from: { id: string; name: string };
@@ -26,6 +27,7 @@ interface CampaignRule {
 interface AutomationCampaign {
   id: string;
   is_active: boolean;
+  post_id: string | null;
   campaign_rules: CampaignRule[];
 }
 
@@ -60,6 +62,7 @@ function parseFacebookWebhook(payload: any): Partial<FacebookComment> {
 
   return {
     page_id: entry.id,
+    post_id: value.post_id,
     comment_id: value.comment_id,
     message: value.message,
     from: value.from,
@@ -204,7 +207,7 @@ serve(async (req) => {
     const payload = await req.json();
     const comment = parseFacebookWebhook(payload);
 
-    if (!comment.page_id || !comment.message || !comment.comment_id) {
+    if (!comment.page_id || !comment.message || !comment.comment_id || !comment.post_id) {
       return new Response(JSON.stringify({ status: 'ignored', reason: 'Not a valid new comment payload' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -220,6 +223,7 @@ serve(async (req) => {
           automation_campaigns (
             id,
             is_active,
+            post_id,
             campaign_rules (
               *,
               reply_templates (template_text, reply_type)
@@ -234,10 +238,16 @@ serve(async (req) => {
       throw new Error(`Account not found for page ID ${comment.page_id}: ${accountError?.message}`);
     }
 
-    const activeCampaign = account.profiles?.automation_campaigns.find(c => c.is_active);
+    const allCampaigns = account.profiles?.automation_campaigns || [];
+    let activeCampaign = allCampaigns.find(c => c.is_active && c.post_id === comment.post_id);
 
     if (!activeCampaign) {
-      return new Response(JSON.stringify({ status: 'ignored', reason: 'No active campaign found' }), {
+      // Fallback to a page-wide campaign if no post-specific one is found
+      activeCampaign = allCampaigns.find(c => c.is_active && c.post_id === null);
+    }
+
+    if (!activeCampaign) {
+      return new Response(JSON.stringify({ status: 'ignored', reason: 'No active campaign found for this post or page' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

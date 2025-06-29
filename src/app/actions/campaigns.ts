@@ -75,3 +75,63 @@ export async function deleteCampaign(campaignId: string) {
   revalidatePath("/dashboard/campaigns");
   return { success: true };
 }
+
+export async function assignCampaignToPost(campaignId: string, postId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in to assign a campaign." };
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+  if (!profile) return { error: "Profile not found." };
+
+  // Un-assign any other campaign from this post by this user to avoid conflicts.
+  const { data: existingCampaigns, error: fetchError } = await supabase
+    .from("automation_campaigns")
+    .select("id")
+    .eq("profile_id", profile.id)
+    .eq("post_id", postId);
+
+  if (fetchError) {
+    console.error("Error fetching existing campaigns for post:", fetchError);
+    return { error: "Database error: Could not verify existing campaigns." };
+  }
+
+  if (existingCampaigns) {
+    for (const camp of existingCampaigns) {
+      await supabase.from("automation_campaigns").update({ post_id: null }).eq("id", camp.id);
+    }
+  }
+
+  // Assign the new campaign
+  const { error } = await supabase
+    .from("automation_campaigns")
+    .update({ post_id: postId })
+    .eq("id", campaignId);
+
+  if (error) {
+    console.error("Error assigning campaign to post:", error);
+    return { error: "Database error: Could not assign campaign." };
+  }
+
+  revalidatePath("/dashboard/facebook-posts");
+  return { success: true };
+}
+
+export async function unassignCampaignFromPost(campaignId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in to unassign a campaign." };
+
+  const { error } = await supabase
+    .from("automation_campaigns")
+    .update({ post_id: null })
+    .eq("id", campaignId);
+
+  if (error) {
+    console.error("Error unassigning campaign from post:", error);
+    return { error: "Database error: Could not unassign campaign." };
+  }
+
+  revalidatePath("/dashboard/facebook-posts");
+  return { success: true };
+}

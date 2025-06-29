@@ -2,7 +2,7 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { PostsClient } from "@/components/dashboard/facebook-posts/posts-client";
-import type { ConnectedAccount } from "@/lib/types";
+import type { ConnectedAccount, AutomationCampaign } from "@/lib/types";
 
 export default async function FacebookPostsPage() {
   const supabase = await createClient();
@@ -24,14 +24,26 @@ export default async function FacebookPostsPage() {
     return <CompleteProfilePrompt user={user} />;
   }
 
-  const { data: accounts, error } = await supabase
-    .from("connected_accounts")
-    .select("*")
-    .eq("profile_id", profile.id);
+  const [accountsRes, campaignsRes] = await Promise.all([
+    supabase
+      .from("connected_accounts")
+      .select("*")
+      .eq("profile_id", profile.id),
+    supabase
+      .from("automation_campaigns")
+      .select("*")
+      .eq("profile_id", profile.id)
+  ]);
 
-  if (error) {
-    console.error("Error fetching connected accounts:", error);
-    return <div>Error loading data. Please try again later.</div>;
+
+  if (accountsRes.error) {
+    console.error("Error fetching connected accounts:", accountsRes.error);
+    return <div>Error loading account data. Please try again later.</div>;
+  }
+  
+  if (campaignsRes.error) {
+    console.error("Error fetching campaigns:", campaignsRes.error);
+    return <div>Error loading campaign data. Please try again later.</div>;
   }
 
   return (
@@ -39,10 +51,13 @@ export default async function FacebookPostsPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Facebook Posts</h1>
         <p className="text-muted-foreground">
-          Select a page to view and manage its posts.
+          Select a page to view its posts and manage automation.
         </p>
       </div>
-      <PostsClient accounts={accounts as ConnectedAccount[]} />
+      <PostsClient 
+        accounts={accountsRes.data as ConnectedAccount[]} 
+        campaigns={campaignsRes.data as AutomationCampaign[]}
+      />
     </div>
   );
 }
