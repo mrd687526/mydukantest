@@ -1,10 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Facebook, CheckCircle, Link as LinkIcon } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Facebook,
+  CheckCircle,
+  Link as LinkIcon,
+  AlertTriangle,
+} from "lucide-react";
 import type { FacebookPage, ConnectedAccount } from "@/lib/types";
 import { connectFacebookPage } from "@/app/actions/accounts";
 
@@ -17,14 +29,22 @@ declare global {
 
 interface ConnectAccountsClientProps {
   connectedAccounts: ConnectedAccount[];
+  fbAppId: string | null;
 }
 
-export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClientProps) {
+export function ConnectAccountsClient({
+  connectedAccounts,
+  fbAppId,
+}: ConnectAccountsClientProps) {
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [availablePages, setAvailablePages] = useState<FacebookPage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!fbAppId) {
+      return;
+    }
+
     if (document.getElementById("facebook-jssdk")) {
       setSdkLoaded(true);
       return;
@@ -32,7 +52,7 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
 
     window.fbAsyncInit = function () {
       window.FB.init({
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+        appId: fbAppId,
         cookie: true,
         xfbml: true,
         version: "v19.0",
@@ -46,7 +66,7 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
-  }, []);
+  }, [fbAppId]);
 
   const handleFacebookLogin = () => {
     if (!sdkLoaded) {
@@ -61,7 +81,10 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
           toast.error("Facebook login was cancelled or failed.");
         }
       },
-      { scope: "public_profile,email,pages_show_list,pages_manage_posts,pages_read_engagement" }
+      {
+        scope:
+          "public_profile,email,pages_show_list,pages_manage_posts,pages_read_engagement",
+      }
     );
   };
 
@@ -103,7 +126,29 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
   };
 
   const isPageConnected = (pageId: string) => {
-    return connectedAccounts.some(acc => acc.fb_page_id === pageId);
+    return connectedAccounts.some((acc) => acc.fb_page_id === pageId);
+  };
+
+  if (!fbAppId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            Configuration Required
+          </CardTitle>
+          <CardDescription>
+            You need to add your Facebook App ID in the settings before you can
+            connect an account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild>
+            <Link href="/dashboard/settings">Go to Settings</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -112,11 +157,15 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
         <CardHeader>
           <CardTitle>Connect a Facebook Page</CardTitle>
           <CardDescription>
-            Click the button below to log in with Facebook and authorize the app to manage your pages.
+            Click the button below to log in with Facebook and authorize the app
+            to manage your pages.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleFacebookLogin} disabled={!sdkLoaded || isLoading}>
+          <Button
+            onClick={handleFacebookLogin}
+            disabled={!sdkLoaded || isLoading}
+          >
             <Facebook className="mr-2 h-4 w-4" />
             {isLoading ? "Loading..." : "Connect with Facebook"}
           </Button>
@@ -127,15 +176,22 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
         <Card>
           <CardHeader>
             <CardTitle>Available Pages</CardTitle>
-            <CardDescription>Choose a page to connect to the application.</CardDescription>
+            <CardDescription>
+              Choose a page to connect to the application.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
               {availablePages.map((page) => (
-                <li key={page.id} className="flex items-center justify-between p-2 border rounded-md">
+                <li
+                  key={page.id}
+                  className="flex items-center justify-between p-2 border rounded-md"
+                >
                   <div>
                     <p className="font-medium">{page.name}</p>
-                    <p className="text-sm text-muted-foreground">{page.category}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {page.category}
+                    </p>
                   </div>
                   <Button
                     onClick={() => handleConnectPage(page)}
@@ -157,19 +213,24 @@ export function ConnectAccountsClient({ connectedAccounts }: ConnectAccountsClie
           </CardContent>
         </Card>
       )}
-      
+
       {connectedAccounts.length > 0 && (
-         <Card>
+        <Card>
           <CardHeader>
             <CardTitle>Already Connected</CardTitle>
-            <CardDescription>These pages are currently connected to your profile.</CardDescription>
+            <CardDescription>
+              These pages are currently connected to your profile.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-             <ul className="space-y-2">
+            <ul className="space-y-2">
               {connectedAccounts.map((acc) => (
-                <li key={acc.id} className="flex items-center p-2 border rounded-md">
-                   <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
-                   <p className="font-medium">Page ID: {acc.fb_page_id}</p>
+                <li
+                  key={acc.id}
+                  className="flex items-center p-2 border rounded-md"
+                >
+                  <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
+                  <p className="font-medium">Page ID: {acc.fb_page_id}</p>
                 </li>
               ))}
             </ul>
