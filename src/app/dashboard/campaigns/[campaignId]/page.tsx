@@ -18,13 +18,7 @@ import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 
-interface CampaignPageProps {
-  params: {
-    campaignId: string;
-  };
-}
-
-export default async function Page({ params }: CampaignPageProps) {
+export default async function Page({ params }: { params: { campaignId: string } }) {
   const supabase = await createClient();
   const { campaignId } = params;
 
