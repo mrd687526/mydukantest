@@ -18,7 +18,7 @@ import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 
-export default async function Page({ params }: { params: { campaignId: string } }) {
+export default async function Page({ params }: any) {
   const supabase = await createClient();
   const { campaignId } = params;
 
@@ -154,7 +154,7 @@ export default async function Page({ params }: { params: { campaignId: string } 
           <p className="text-center text-muted-foreground py-8">
             Tag management will be implemented here soon.
           </p>
-        </CardContent>
+        </_CardContent>
       </Card>
     </div>
   );
