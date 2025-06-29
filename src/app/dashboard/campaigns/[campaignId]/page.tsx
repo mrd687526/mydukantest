@@ -154,7 +154,7 @@ export default async function Page({ params }: any) {
           <p className="text-center text-muted-foreground py-8">
             Tag management will be implemented here soon.
           </p>
-        </_CardContent>
+        </CardContent>
       </Card>
     </div>
   );
