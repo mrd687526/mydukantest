@@ -15,6 +15,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/integrations/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
+import { clearCacheAction } from "@/app/actions/cache";
 
 export function DashboardHeader({ user }: { user: User | null }) {
   const router = useRouter();
@@ -24,6 +26,19 @@ export function DashboardHeader({ user }: { user: User | null }) {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  };
+
+  const handleClearCache = () => {
+    const promise = clearCacheAction();
+    toast.promise(promise, {
+      loading: "Clearing cache...",
+      success: (data) => {
+        if (data.error) throw new Error(data.error);
+        router.refresh();
+        return "Cache cleared successfully!";
+      },
+      error: (err) => err.message || "Failed to clear cache.",
+    });
   };
 
   return (
@@ -89,6 +104,7 @@ export function DashboardHeader({ user }: { user: User | null }) {
           <DropdownMenuItem asChild>
             <Link href="/dashboard/settings">Settings</Link>
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleClearCache}>Clear Cache</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>

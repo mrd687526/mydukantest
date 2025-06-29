@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { saveCredentials } from "@/app/actions/settings";
 import type { ProfileCredentials } from "@/lib/types";
 
+// Make fb_app_secret optional. It's only required if the user wants to update it.
 const credentialsSchema = z.object({
   fb_app_id: z.string().trim().min(1, "Facebook App ID is required."),
-  fb_app_secret: z.string().trim().min(1, "Facebook App Secret is required."),
+  fb_app_secret: z.string().trim().optional(),
 });
 
 type CredentialsFormValues = z.infer<typeof credentialsSchema>;
@@ -76,10 +77,10 @@ export function SettingsForm({ credentials }: SettingsFormProps) {
                 <FormItem>
                   <FormLabel>Facebook App Secret</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter your App Secret" {...field} />
+                    <Input type="password" placeholder="Enter new secret to update" {...field} />
                   </FormControl>
                   <FormDescription>
-                    For security, your existing secret is not displayed. Enter it here to save or update your credentials.
+                    Leave blank to keep your existing secret. Enter a new value to update it.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
