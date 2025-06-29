@@ -196,7 +196,7 @@ serve(async (req) => {
 
     const { data: account } = await supabaseAdmin
       .from('connected_accounts')
-      .select(`access_token, profiles ( comment_rules (*), auto_replies (*) )`)
+      .select(`access_token, profiles ( id, comment_rules (*), auto_replies (*) )`)
       .eq('fb_page_id', comment.page_id)
       .single();
 
@@ -227,6 +227,7 @@ serve(async (req) => {
         comment_id: comment.comment_id,
         reply_text: responseText,
         reply_type: matchedRule.action,
+        profile_id: profile.id,
       });
     }
 
