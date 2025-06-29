@@ -1,19 +1,36 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { ConnectAccountsClient } from "@/components/dashboard/accounts/connect-accounts-client";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { ConnectedAccount } from "@/lib/types";
 
-export default function AccountsPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Connected Accounts</CardTitle>
-        <CardDescription>
-          Connect and manage your Facebook Pages and other social accounts.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-48">
-          <p>Account connection interface coming soon.</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+export default async function AccountsPage() {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: connectedAccounts, error } = await supabase
+    .from("connected_accounts")
+    .select("*")
+    .eq("profile_id", profile.id);
+
+  if (error) {
+    console.error("Error fetching connected accounts:", error);
+    // We can still render the page, just show an empty list.
+  }
+
+  return <ConnectAccountsClient connectedAccounts={connectedAccounts || []} />;
 }

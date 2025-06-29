@@ -15,3 +15,20 @@ export interface CommentTemplate {
   template_text: string | null;
   created_at: string;
 }
+
+export interface FacebookPage {
+  id: string;
+  name: string;
+  access_token: string;
+  category: string;
+}
+
+// This represents the data from the connected_accounts table
+export interface ConnectedAccount {
+  id: string;
+  profile_id: string;
+  fb_page_id: string | null;
+  ig_business_id: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+}
