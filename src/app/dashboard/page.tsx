@@ -42,18 +42,28 @@ export default async function DashboardPage() {
 
   const profileId = profile.id;
 
+  // Fetch campaign IDs first
+  const { data: campaigns } = await supabase
+    .from("automation_campaigns")
+    .select("id")
+    .eq("profile_id", profileId);
+
+  const campaignIds = campaigns?.map((c) => c.id) || [];
+
   // Fetch all data in parallel for performance
   const [
-    { count: actionCount },
-    { count: campaignCount },
-    { count: accountCount },
-    { data: recentActions },
-    { data: dailyCountsData },
+    actionCountRes,
+    campaignCountRes,
+    accountCountRes,
+    recentActionsRes,
+    dailyCountsDataRes,
   ] = await Promise.all([
-    supabase
-      .from("campaign_reports")
-      .select("id", { count: "exact", head: true })
-      .in("campaign_id", supabase.from("automation_campaigns").select("id").eq("profile_id", profileId)),
+    campaignIds.length > 0
+      ? supabase
+          .from("campaign_reports")
+          .select("id", { count: "exact", head: true })
+          .in("campaign_id", campaignIds)
+      : Promise.resolve({ count: 0, error: null }),
     supabase
       .from("automation_campaigns")
       .select("id", { count: "exact", head: true })
@@ -62,14 +72,22 @@ export default async function DashboardPage() {
       .from("connected_accounts")
       .select("id", { count: "exact", head: true })
       .eq("profile_id", profileId),
-    supabase
-      .from("campaign_reports")
-      .select("action_taken, associated_keyword, sent_at")
-      .in("campaign_id", supabase.from("automation_campaigns").select("id").eq("profile_id", profileId))
-      .order("sent_at", { ascending: false })
-      .limit(5),
+    campaignIds.length > 0
+      ? supabase
+          .from("campaign_reports")
+          .select("action_taken, associated_keyword, sent_at")
+          .in("campaign_id", campaignIds)
+          .order("sent_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [], error: null }),
     supabase.rpc("get_daily_action_counts", { p_profile_id: profileId }),
   ]);
+
+  const actionCount = actionCountRes.count;
+  const campaignCount = campaignCountRes.count;
+  const accountCount = accountCountRes.count;
+  const recentActions = recentActionsRes.data;
+  const dailyCountsData = dailyCountsDataRes.data;
 
   return (
     <div className="flex flex-col gap-4">
