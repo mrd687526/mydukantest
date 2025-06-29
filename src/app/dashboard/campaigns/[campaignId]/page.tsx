@@ -13,12 +13,7 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 
-// Define the props interface with the name 'PageProps' to satisfy the build constraint.
-interface PageProps {
-  params: { campaignId: string };
-}
-
-export default async function CampaignDetailPage({ params }: PageProps) {
+export default async function Page({ params }: { params: { campaignId: string } }) {
   const supabase = createClient();
   const { campaignId } = params;
 
