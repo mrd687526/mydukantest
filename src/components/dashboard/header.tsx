@@ -79,7 +79,9 @@ export function DashboardHeader({ user }: { user: User | null }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{user?.email || "My Account"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings">Settings</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>

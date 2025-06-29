@@ -11,6 +11,7 @@ import {
   Send,
   Package2,
   LineChart,
+  Settings,
 } from "lucide-react";
 
 export function DashboardSidebar() {
@@ -23,7 +24,7 @@ export function DashboardSidebar() {
             <span>CommentFlow</span>
           </Link>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             <Link
               href="/dashboard"
@@ -96,6 +97,15 @@ export function DashboardSidebar() {
               Reports
             </Link>
           </nav>
+        </div>
+        <div className="mt-auto p-4 border-t">
+           <Link
+              href="/dashboard/settings"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
         </div>
       </div>
     </div>

@@ -32,3 +32,10 @@ export interface ConnectedAccount {
   access_token: string | null;
   refresh_token: string | null;
 }
+
+export interface ProfileCredentials {
+  id: string;
+  profile_id: string;
+  fb_app_id: string | null;
+  fb_app_secret: string | null;
+}

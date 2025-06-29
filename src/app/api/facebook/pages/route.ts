@@ -1,22 +1,44 @@
 import { NextResponse } from "next/server";
-
-const APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
+import { createClient } from "@/integrations/supabase/server";
 
 export async function POST(request: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return NextResponse.json({ error: "User profile not found." }, { status: 404 });
+  }
+
+  const { data: credentials } = await supabase
+    .from("profile_credentials")
+    .select("fb_app_id, fb_app_secret")
+    .eq("profile_id", profile.id)
+    .single();
+
+  const APP_ID = credentials?.fb_app_id;
+  const APP_SECRET = credentials?.fb_app_secret;
+
+  if (!APP_ID || !APP_SECRET) {
+    return NextResponse.json({ error: "Facebook App credentials are not configured in your settings." }, { status: 400 });
+  }
+
   const { accessToken } = await request.json();
 
   if (!accessToken) {
     return NextResponse.json({ error: "Access Token not provided" }, { status: 400 });
   }
 
-  if (!APP_ID || !APP_SECRET) {
-    console.error("Facebook App ID or Secret is not configured.");
-    return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-  }
-
   try {
-    // 1. Verify the short-lived user token
     const debugUrl = `https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${APP_ID}|${APP_SECRET}`;
     const debugResponse = await fetch(debugUrl);
     const debugData = await debugResponse.json();
@@ -26,10 +48,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid Facebook Token" }, { status: 401 });
     }
 
-    // 2. Exchange for a long-lived user token (optional but good practice)
-    // For this flow, we'll proceed with the verified short-lived token to fetch pages.
-
-    // 3. Fetch the pages the user has access to
     const userId = debugData.data.user_id;
     const pagesUrl = `https://graph.facebook.com/v19.0/${userId}/accounts?access_token=${accessToken}`;
     const pagesResponse = await fetch(pagesUrl);
