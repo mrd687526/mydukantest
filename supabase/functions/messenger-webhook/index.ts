@@ -1,22 +1,29 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import type { Node, Edge } from 'https://esm.sh/reactflow@11.11.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Basic type for incoming message
+// --- Type Definitions ---
 interface MessengerEvent {
   sender: { id: string };
   recipient: { id: string };
-  message: {
-    mid: string;
-    text: string;
-  };
+  message: { mid: string; text: string };
 }
 
-// Function to parse the webhook payload
+interface BotFlow {
+  nodes: Node[];
+  edges: Edge[];
+}
+
+// --- Helper Functions ---
+
+/**
+ * Parses the incoming Facebook webhook payload to extract essential message data.
+ */
 function parseMessengerWebhook(payload: any): MessengerEvent | null {
   const entry = payload.entry?.[0];
   const messaging = entry?.messaging?.[0];
@@ -31,40 +38,89 @@ function parseMessengerWebhook(payload: any): MessengerEvent | null {
   return null;
 }
 
+/**
+ * Finds the first message node connected to the 'start' node.
+ */
+function getFirstMessage(flow: BotFlow): string | null {
+  if (!flow || !flow.nodes || !flow.edges) {
+    return null;
+  }
+
+  const startNode = flow.nodes.find(node => node.id === 'start');
+  if (!startNode) {
+    return null;
+  }
+
+  const firstEdge = flow.edges.find(edge => edge.source === 'start');
+  if (!firstEdge) {
+    return null;
+  }
+
+  const firstMessageNode = flow.nodes.find(node => node.id === firstEdge.target);
+  if (firstMessageNode && firstMessageNode.type === 'messageNode' && firstMessageNode.data.text) {
+    return firstMessageNode.data.text;
+  }
+
+  return null;
+}
+
+/**
+ * Sends a message to a user via the Facebook Graph API.
+ */
+async function sendMessengerMessage(pageAccessToken: string, recipientId: string, text: string) {
+  const GRAPH_API_URL = 'https://graph.facebook.com/v20.0/me/messages';
+  const authParam = `access_token=${pageAccessToken}`;
+
+  const response = await fetch(`${GRAPH_API_URL}?${authParam}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text },
+      messaging_type: 'RESPONSE',
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error(`Failed to send message:`, errorData);
+    throw new Error('Failed to send message via Graph API.');
+  }
+
+  console.log(`Message sent successfully to user ${recipientId}`);
+  return await response.json();
+}
+
+
+// --- Main Server Logic ---
+
 serve(async (req) => {
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // 1. Initialize Supabase Admin Client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // 2. Parse incoming request body
     const payload = await req.json();
-    console.log("Received payload:", JSON.stringify(payload, null, 2));
-
     const event = parseMessengerWebhook(payload);
 
     if (!event) {
-      console.log("Ignored: Payload is not a standard message event.");
       return new Response(JSON.stringify({ status: 'ignored', reason: 'Not a message event' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const pageId = event.recipient.id;
-    const messageText = event.message.text;
-    console.log(`Processing message for page ${pageId}: "${messageText}"`);
+    const userId = event.sender.id;
 
-    // 3. Find the active bot for the page
+    // Fetch the connected account, its access token, and the active bot in one go.
     const { data: account, error: accountError } = await supabaseAdmin
       .from('connected_accounts')
-      .select('id, bots!inner(id, name, status, flow_data)')
+      .select('id, access_token, bots!inner(id, name, status, flow_data)')
       .eq('fb_page_id', pageId)
       .eq('bots.status', 'active')
       .single();
@@ -77,14 +133,23 @@ serve(async (req) => {
     }
 
     const bot = account.bots[0];
-    console.log(`Found active bot: ${bot.name} (ID: ${bot.id})`);
+    const pageAccessToken = account.access_token;
 
-    // 4. TODO: Process the bot flow
-    // For now, we just log that we found the bot and its flow data.
-    console.log("Bot flow data:", JSON.stringify(bot.flow_data, null, 2));
-    
-    // This is where the logic to traverse the nodes and edges would go.
-    // We would start at the 'start' node and follow the connections.
+    if (!pageAccessToken) {
+        console.error(`Access token not found for page ID ${pageId}.`);
+        return new Response(JSON.stringify({ status: 'error', reason: 'Access token missing' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500
+        });
+    }
+
+    const firstMessageText = getFirstMessage(bot.flow_data as BotFlow);
+
+    if (firstMessageText) {
+      await sendMessengerMessage(pageAccessToken, userId, firstMessageText);
+    } else {
+      console.log(`No initial message found in flow for bot ${bot.id}`);
+    }
 
     return new Response(JSON.stringify({ status: 'processed', botName: bot.name }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
