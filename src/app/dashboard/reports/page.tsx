@@ -34,7 +34,7 @@ export default async function ReportsPage() {
     return <div>Error loading data. Please try again later.</div>;
   }
 
-  const campaignIds = campaigns.map((c) => c.id);
+  const campaignIds = campaigns?.map((c) => c.id) || [];
   let reports: CampaignReport[] = [];
 
   if (campaignIds.length > 0) {
@@ -59,9 +59,9 @@ export default async function ReportsPage() {
       return <div>Error loading reports. Please try again later.</div>;
     }
 
-    // The Supabase client sometimes infers a to-one relationship as a to-many, returning an array.
-    // We know a report belongs to a single campaign, so we manually correct the data structure.
     if (fetchedReports) {
+      // The Supabase client sometimes infers a to-one relationship as a to-many, returning an array.
+      // We know a report belongs to a single campaign, so we manually correct the data structure.
       reports = (fetchedReports as any[]).map((report) => ({
         ...report,
         automation_campaigns: report.automation_campaigns?.[0] || null,

@@ -16,6 +16,15 @@ export interface CommentTemplate {
   created_at: string;
 }
 
+export interface ReplyTemplate {
+  id: string;
+  profile_id: string;
+  name: string;
+  template_text: string | null;
+  reply_type: 'public' | 'private' | 'ai' | null;
+  created_at: string;
+}
+
 export interface FacebookPage {
   id: string;
   name: string;
