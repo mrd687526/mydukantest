@@ -51,16 +51,16 @@ export function DashboardHeader({ user }: { user: User | null }) {
               Dashboard
             </Link>
             <Link
-              href="/dashboard/rules"
+              href="/dashboard/campaigns"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
-              Rules
+              Campaigns
             </Link>
             <Link
-              href="/dashboard/replies"
+              href="/dashboard/templates"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
-              Replies
+              Templates
             </Link>
             <Link
               href="/dashboard/accounts"

@@ -1,17 +1,17 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
-export default function RepliesPage() {
+export default function CampaignsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Auto Replies</CardTitle>
+        <CardTitle>Automation Campaigns</CardTitle>
         <CardDescription>
-          Manage your reply templates for public, private, and AI-generated responses.
+          Create, manage, and monitor your automation campaigns.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-48">
-          <p>Reply template management interface coming soon.</p>
+          <p>Campaign management interface coming soon.</p>
         </div>
       </CardContent>
     </Card>
