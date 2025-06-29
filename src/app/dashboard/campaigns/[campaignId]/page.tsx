@@ -91,7 +91,7 @@ export default async function Page({ params }: Props) {
             </div>
             <CampaignStatusToggle campaign={campaign} />
           </div>
-        </Header>
+        </CardHeader>
         <CardContent>
           <p>
             Created on: {new Date(campaign.created_at).toLocaleDateString()}
