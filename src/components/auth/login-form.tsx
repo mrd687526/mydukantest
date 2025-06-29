@@ -51,6 +51,10 @@ export default function LoginForm() {
           <Link href="/privacy-policy" className="font-medium text-primary hover:underline">
             Privacy Policy
           </Link>
+          . You can also review our{" "}
+          <Link href="/data-deletion" className="font-medium text-primary hover:underline">
+            Data Deletion Instructions
+          </Link>
           .
         </p>
       </div>
