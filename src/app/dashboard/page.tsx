@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/table";
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { DashboardChartContainer } from "@/components/dashboard/dashboard-chart-container";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -37,19 +37,7 @@ export default async function DashboardPage() {
     .single();
 
   if (!profile) {
-    return (
-      <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-full">
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h3 className="text-2xl font-bold tracking-tight">
-            Welcome to your Dashboard!
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Please complete your profile to get started.
-          </p>
-          <Button className="mt-4">Complete Profile</Button>
-        </div>
-      </div>
-    );
+    return <CompleteProfilePrompt user={user} />;
   }
 
   const profileId = profile.id;
