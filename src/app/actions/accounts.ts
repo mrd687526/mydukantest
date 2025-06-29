@@ -63,5 +63,7 @@ export async function connectFacebookPage(page: FacebookPage) {
   }
 
   revalidatePath("/dashboard/accounts");
+  revalidatePath("/dashboard/bot-manager");
+  revalidatePath("/dashboard");
   return { success: true };
 }
