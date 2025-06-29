@@ -29,12 +29,12 @@ export default async function ReportsPage() {
     .select("id")
     .eq("profile_id", profile.id);
 
-  if (campaignsError) {
+  if (campaignsError || !campaigns) {
     console.error("Error fetching campaigns for reports:", campaignsError);
     return <div>Error loading data. Please try again later.</div>;
   }
 
-  const campaignIds = campaigns?.map((c) => c.id) || [];
+  const campaignIds = campaigns.map((c) => c.id);
   let reports: CampaignReport[] = [];
 
   if (campaignIds.length > 0) {
@@ -60,12 +60,19 @@ export default async function ReportsPage() {
     }
 
     if (fetchedReports) {
-      // The Supabase client sometimes infers a to-one relationship as a to-many, returning an array.
-      // We know a report belongs to a single campaign, so we manually correct the data structure.
-      reports = (fetchedReports as any[]).map((report) => ({
-        ...report,
-        automation_campaigns: report.automation_campaigns?.[0] || null,
-      }));
+      // Explicitly transform the data to match the CampaignReport type
+      const transformedReports: CampaignReport[] = (fetchedReports as any[]).map((report) => {
+        const campaignData = report.automation_campaigns?.[0] || null;
+        return {
+          id: report.id,
+          action_taken: report.action_taken,
+          associated_keyword: report.associated_keyword,
+          reply_text: report.reply_text,
+          sent_at: report.sent_at,
+          automation_campaigns: campaignData,
+        };
+      });
+      reports = transformedReports;
     }
   }
 
