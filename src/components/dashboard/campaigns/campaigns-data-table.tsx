@@ -98,11 +98,6 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
             <DropdownMenuItem onClick={() => router.push(`/dashboard/campaigns/${campaign.id}`)}>
               Manage
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(campaign.id)}
-            >
-              Copy campaign ID
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DeleteConfirmationDialog
               onConfirm={() => handleDelete(campaign.id)}
