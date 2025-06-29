@@ -13,7 +13,7 @@ const ruleSchema = z.object({
 });
 
 export async function createCampaignRule(values: z.infer<typeof ruleSchema>) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.from("campaign_rules").insert({
     campaign_id: values.campaign_id,
@@ -33,7 +33,7 @@ export async function createCampaignRule(values: z.infer<typeof ruleSchema>) {
 }
 
 export async function deleteCampaignRule(ruleId: string, campaignId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.from("campaign_rules").delete().eq("id", ruleId);
 

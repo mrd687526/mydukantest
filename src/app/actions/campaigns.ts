@@ -9,7 +9,7 @@ const campaignFormSchema = z.object({
 });
 
 export async function createCampaign(values: z.infer<typeof campaignFormSchema>) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -44,7 +44,7 @@ export async function createCampaign(values: z.infer<typeof campaignFormSchema>)
 }
 
 export async function toggleCampaignStatus(campaignId: string, currentState: boolean) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase
         .from("automation_campaigns")
         .update({ is_active: !currentState })
@@ -61,7 +61,7 @@ export async function toggleCampaignStatus(campaignId: string, currentState: boo
 }
 
 export async function deleteCampaign(campaignId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("automation_campaigns")
     .delete()

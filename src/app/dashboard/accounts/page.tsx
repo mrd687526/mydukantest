@@ -5,7 +5,7 @@ import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-p
 import { ConnectedAccount } from "@/lib/types";
 
 export default async function AccountsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

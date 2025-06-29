@@ -20,7 +20,7 @@ import { DashboardChartContainer } from "@/components/dashboard/dashboard-chart-
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

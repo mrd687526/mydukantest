@@ -4,7 +4,7 @@ import { TemplatesClient } from "@/components/dashboard/templates/templates-clie
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
 export default async function TemplatesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

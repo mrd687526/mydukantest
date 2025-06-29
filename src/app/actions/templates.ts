@@ -12,7 +12,7 @@ const commentTemplateFormSchema = z.object({
 export async function createCommentTemplate(
   values: z.infer<typeof commentTemplateFormSchema>
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -55,7 +55,7 @@ const replyTemplateFormSchema = z.object({
 export async function createReplyTemplate(
   values: z.infer<typeof replyTemplateFormSchema>
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -91,7 +91,7 @@ export async function createReplyTemplate(
 }
 
 export async function deleteCommentTemplate(templateId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("comment_templates").delete().eq("id", templateId);
   if (error) {
     return { error: "Database error: Could not delete template." };
@@ -101,7 +101,7 @@ export async function deleteCommentTemplate(templateId: string) {
 }
 
 export async function deleteReplyTemplate(templateId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("reply_templates").delete().eq("id", templateId);
   if (error) {
     return { error: "Database error: Could not delete template." };

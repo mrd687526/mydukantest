@@ -5,7 +5,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 
 export default async function DashboardLayout({ children }: PropsWithChildren) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

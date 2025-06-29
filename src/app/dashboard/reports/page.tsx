@@ -5,7 +5,7 @@ import { ReportsClient } from "@/components/dashboard/reports/reports-client";
 import { CampaignReport } from "@/lib/types";
 
 export default async function ReportsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

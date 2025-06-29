@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { FacebookPage } from "@/lib/types";
 
 export async function connectFacebookPage(page: FacebookPage) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
