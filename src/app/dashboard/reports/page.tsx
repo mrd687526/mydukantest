@@ -58,7 +58,15 @@ export default async function ReportsPage() {
       console.error("Error fetching reports:", reportsError);
       return <div>Error loading reports. Please try again later.</div>;
     }
-    reports = (fetchedReports as CampaignReport[]) || [];
+
+    // The Supabase client sometimes infers a to-one relationship as a to-many, returning an array.
+    // We know a report belongs to a single campaign, so we manually correct the data structure.
+    if (fetchedReports) {
+      reports = (fetchedReports as any[]).map((report) => ({
+        ...report,
+        automation_campaigns: report.automation_campaigns?.[0] || null,
+      }));
+    }
   }
 
   return <ReportsClient reports={reports} />;
