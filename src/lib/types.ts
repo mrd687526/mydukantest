@@ -1,3 +1,5 @@
+import type { Node, Edge } from 'reactflow';
+
 export interface AutomationCampaign {
   id: string;
   profile_id: string;
@@ -32,6 +34,11 @@ export interface FacebookPage {
   category: string;
 }
 
+export interface BotFlow {
+  nodes: Node[];
+  edges: Edge[];
+}
+
 export interface Bot {
   id: string;
   profile_id: string;
@@ -39,7 +46,7 @@ export interface Bot {
   name: string;
   description: string | null;
   status: 'active' | 'inactive';
-  flow_data: any | null;
+  flow_data: BotFlow | null;
   settings: any | null;
   created_at: string;
   updated_at: string;

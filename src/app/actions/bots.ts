@@ -42,3 +42,25 @@ export async function createBot(values: z.infer<typeof botSchema>) {
   revalidatePath("/dashboard/bot-manager");
   return { success: true };
 }
+
+export async function updateBotFlow(botId: string, flowData: any) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be logged in." };
+  }
+
+  const { error } = await supabase
+    .from("bots")
+    .update({ flow_data: flowData })
+    .eq("id", botId);
+
+  if (error) {
+    console.error("Supabase error saving bot flow:", error.message);
+    return { error: "Database error: Could not save bot flow." };
+  }
+
+  revalidatePath(`/dashboard/bot-manager/${botId}`);
+  return { success: true };
+}

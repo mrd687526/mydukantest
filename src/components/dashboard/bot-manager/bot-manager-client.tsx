@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -53,7 +54,9 @@ export function BotManagerClient({ accounts }: BotManagerClientProps) {
                       {bot.status}
                     </Badge>
                   </div>
-                  <Button disabled>Manage Bot</Button>
+                  <Button asChild>
+                    <Link href={`/dashboard/bot-manager/${bot.id}`}>Manage Bot</Link>
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-start gap-4">
