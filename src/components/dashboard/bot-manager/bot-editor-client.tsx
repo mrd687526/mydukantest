@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   addEdge,
@@ -13,6 +13,7 @@ import ReactFlow, {
   type Edge,
   type Node,
   type ReactFlowInstance,
+  type OnNodesChange,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ import { type Bot } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { updateBotFlow } from '@/app/actions/bots';
 import { EditorSidebar } from './editor/sidebar';
+import { EditorSettingsPanel } from './editor/settings-panel';
 import MessageNode from './editor/nodes/message-node';
 
 const nodeTypes = {
@@ -42,7 +44,25 @@ export function BotEditorClient({ bot }: BotEditorClientProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(bot.flow_data?.nodes || initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(bot.flow_data?.edges || []);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const nodeIdCounter = useRef(bot.flow_data?.nodes.length || 1);
+
+  const handleNodesChange: OnNodesChange = (changes) => {
+    onNodesChange(changes);
+    const selectionChange = changes.find(change => change.type === 'select');
+    if (selectionChange) {
+      const selected = selectionChange.selected;
+      const nodeId = selectionChange.id;
+      setSelectedNode(selected ? nodes.find(n => n.id === nodeId) || null : null);
+    }
+  };
+
+  useEffect(() => {
+    const node = nodes.find(n => n.id === selectedNode?.id);
+    if (node) {
+      setSelectedNode(node);
+    }
+  }, [nodes, selectedNode?.id]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
@@ -95,6 +115,14 @@ export function BotEditorClient({ bot }: BotEditorClientProps) {
     [reactFlowInstance, setNodes, getId]
   );
 
+  const updateNodeData = (nodeId: string, data: any) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === nodeId ? { ...node, data } : node
+      )
+    );
+  };
+
   return (
     <div className="h-[calc(100vh-60px)] w-full flex flex-col bg-gray-50 dark:bg-gray-900">
       <header className="flex items-center justify-between p-2 border-b bg-white dark:bg-gray-950">
@@ -117,7 +145,7 @@ export function BotEditorClient({ bot }: BotEditorClientProps) {
             <ReactFlow
               nodes={nodes}
               edges={edges}
-              onNodesChange={onNodesChange}
+              onNodesChange={handleNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onInit={setReactFlowInstance}
@@ -131,6 +159,7 @@ export function BotEditorClient({ bot }: BotEditorClientProps) {
               <Background gap={16} size={1} />
             </ReactFlow>
           </div>
+          <EditorSettingsPanel selectedNode={selectedNode} onUpdateNode={updateNodeData} />
         </ReactFlowProvider>
       </div>
     </div>
