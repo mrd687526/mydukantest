@@ -14,6 +14,7 @@ export const createClient = () => {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
+            // @ts-ignore
             cookieStore.set({ name, value, ...options });
           } catch (error) {
             // The `set` method was called from a Server Component.
@@ -23,6 +24,7 @@ export const createClient = () => {
         },
         remove(name: string, options: CookieOptions) {
           try {
+            // @ts-ignore
             cookieStore.delete({ name, ...options });
           } catch (error) {
             // The `delete` method was called from a Server Component.
