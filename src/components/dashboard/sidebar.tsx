@@ -8,9 +8,24 @@ import {
   Settings,
   BotMessageSquare,
   Newspaper,
+  ShoppingCart, // New icon for E-Commerce
 } from "lucide-react";
+import { SidebarNav } from "./sidebar-nav";
 
 export function DashboardSidebar() {
+  const marketingNavItems = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+    { href: "/dashboard/accounts", label: "Connect Accounts", icon: Facebook },
+    { href: "/dashboard/facebook-posts", label: "Facebook Posts", icon: Newspaper },
+    { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
+    { href: "/dashboard/bot-manager", label: "Bot Manager", icon: BotMessageSquare },
+    { href: "/dashboard/reports", label: "Reports", icon: LineChart },
+  ];
+
+  const ecommerceNavItems = [
+    // No items yet, but ready for future expansion
+  ];
+
   return (
     <div className="hidden border-r bg-white md:block dark:bg-gray-950">
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -21,50 +36,27 @@ export function DashboardSidebar() {
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard/accounts"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Facebook className="h-4 w-4" />
-              Connect Accounts
-            </Link>
-            <Link
-              href="/dashboard/facebook-posts"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Newspaper className="h-4 w-4" />
-              Facebook Posts
-            </Link>
-            <Link
-              href="/dashboard/comment-manager"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <MessageSquareText className="h-4 w-4" />
-              Comment Manager
-            </Link>
-            <Link
-              href="/dashboard/bot-manager"
-              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-            >
-              <BotMessageSquare className="h-4 w-4" />
-              Bot Manager
-            </Link>
-            <Link
-              href="/dashboard/reports"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <LineChart className="h-4 w-4" />
-              Reports
-            </Link>
-          </nav>
+          <div className="px-4 lg:px-6 mb-4">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+              Marketing
+            </h3>
+            <SidebarNav items={marketingNavItems} />
+          </div>
+          <div className="px-4 lg:px-6">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+              E-Commerce
+            </h3>
+            {ecommerceNavItems.length > 0 ? (
+              <SidebarNav items={ecommerceNavItems} />
+            ) : (
+              <div className="text-sm text-muted-foreground py-2 px-3">
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Coming Soon</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="mt-auto p-4 border-t">
            <Link
