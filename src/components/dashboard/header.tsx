@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUser, Menu, Package2 } from "lucide-react";
+import { CircleUser, Menu, Package2, LayoutGrid, Facebook, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,25 +48,22 @@ export function DashboardHeader({ user }: { user: User | null }) {
               href="/dashboard"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
+              <LayoutGrid className="h-5 w-5" />
               Dashboard
-            </Link>
-            <Link
-              href="/dashboard/campaigns"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              Campaigns
-            </Link>
-            <Link
-              href="/dashboard/templates"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              Templates
             </Link>
             <Link
               href="/dashboard/accounts"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
-              Accounts
+              <Facebook className="h-5 w-5" />
+              Connect Facebook
+            </Link>
+            <Link
+              href="/dashboard/comment-manager"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <MessageSquareText className="h-5 w-5" />
+              Comment Manager
             </Link>
           </nav>
         </SheetContent>

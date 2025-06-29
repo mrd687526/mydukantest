@@ -1,11 +1,16 @@
 import Link from "next/link";
 import {
-  Home,
-  LineChart,
-  Package2,
+  LayoutGrid,
+  Facebook,
+  Wifi,
+  Users,
+  MessageSquare,
+  Bot,
+  Instagram,
   MessageSquareText,
-  BookUser,
-  FileCog,
+  Send,
+  Package2,
+  LineChart,
 } from "lucide-react";
 
 export function DashboardSidebar() {
@@ -24,36 +29,71 @@ export function DashboardSidebar() {
               href="/dashboard"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
-              <Home className="h-4 w-4" />
+              <LayoutGrid className="h-4 w-4" />
               Dashboard
-            </Link>
-            <Link
-              href="/dashboard/campaigns"
-              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-            >
-              <FileCog className="h-4 w-4" />
-              Campaigns
-            </Link>
-            <Link
-              href="/dashboard/templates"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <MessageSquareText className="h-4 w-4" />
-              Templates
             </Link>
             <Link
               href="/dashboard/accounts"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
-              <BookUser className="h-4 w-4" />
-              Connected Accounts
+              <Facebook className="h-4 w-4" />
+              Connect Facebook
             </Link>
             <Link
               href="#"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
             >
+              <Wifi className="h-4 w-4" />
+              API Channels
+            </Link>
+            <Link
+              href="#"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Users className="h-4 w-4" />
+              Subscriber Manager
+            </Link>
+            <Link
+              href="#"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Live Chat
+            </Link>
+            <Link
+              href="#"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Bot className="h-4 w-4" />
+              Bot Manager
+            </Link>
+            <Link
+              href="#"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Instagram className="h-4 w-4" />
+              Instagram Bot
+            </Link>
+            <Link
+              href="/dashboard/comment-manager"
+              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+            >
+              <MessageSquareText className="h-4 w-4" />
+              Comment Manager
+            </Link>
+            <Link
+              href="#"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Send className="h-4 w-4" />
+              Broadcasting
+            </Link>
+            <Link
+              href="/dashboard/reports"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
               <LineChart className="h-4 w-4" />
-              Analytics
+              Reports
             </Link>
           </nav>
         </div>
