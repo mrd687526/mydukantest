@@ -13,15 +13,18 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 
-export default async function CampaignDetailPage({
-  params,
-}: {
+// Define the props interface with the name 'PageProps' to satisfy the build constraint.
+interface PageProps {
   params: { campaignId: string };
-}) {
+}
+
+export default async function CampaignDetailPage({ params }: PageProps) {
   const supabase = createClient();
   const { campaignId } = params;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -42,7 +45,10 @@ export default async function CampaignDetailPage({
     return (
       <div>
         <h1 className="text-2xl font-bold">Campaign not found</h1>
-        <p>The requested campaign could not be found or you do not have permission to view it.</p>
+        <p>
+          The requested campaign could not be found or you do not have
+          permission to view it.
+        </p>
         <Button asChild variant="outline" className="mt-4">
           <Link href="/dashboard/campaigns">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -86,7 +92,9 @@ export default async function CampaignDetailPage({
           </div>
         </CardHeader>
         <CardContent>
-          <p>Created on: {new Date(campaign.created_at).toLocaleDateString()}</p>
+          <p>
+            Created on: {new Date(campaign.created_at).toLocaleDateString()}
+          </p>
         </CardContent>
       </Card>
 
@@ -99,9 +107,7 @@ export default async function CampaignDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Campaign Tags</CardTitle>
-          <CardDescription>
-            Organize your campaigns with tags.
-          </CardDescription>
+          <CardDescription>Organize your campaigns with tags.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-8">
