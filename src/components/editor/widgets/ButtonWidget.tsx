@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cva } from "class-variance-authority";
+import { Button } from "@/components/ui/button";
 
 export const ButtonWidget = ({
   label,
