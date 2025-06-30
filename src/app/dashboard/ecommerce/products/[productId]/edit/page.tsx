@@ -2,9 +2,9 @@ import { createClient } from "@/integrations/supabase/server";
 import { ProductForm }
 from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
-import type PageProps from "next/types"; // Corrected import
+import type PageProps from "next/types";
 
-interface EditProductPageProps extends PageProps<typeof PageProps, { productId: string }> {}
+interface EditProductPageProps extends PageProps<{ productId: string }> {}
 
 export default async function EditProductPage(props: EditProductPageProps) {
   const { params } = props;

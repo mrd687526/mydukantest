@@ -5,9 +5,9 @@ import type { Bot } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type PageProps from "next/types"; // Corrected import
+import type PageProps from "next/types";
 
-interface BotEditorPageProps extends PageProps<typeof PageProps, { botId: string }> {}
+interface BotEditorPageProps extends PageProps<{ botId: string }> {}
 
 export default async function BotEditorPage(props: BotEditorPageProps) {
   const { params } = props;
