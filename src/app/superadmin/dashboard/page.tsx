@@ -1,9 +1,16 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import { DashboardOverviewClient } from "@/components/dashboard/dashboard-overview-client";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { DashboardOverviewClient } from "@/components/dashboard/dashboard-overview-client";
+import { UsersClient } from "@/components/superadmin/users-client";
+import { Profile, Subscription } from "@/lib/types";
 
-export default async function DashboardPage() {
+// Define a type for the data passed to the UsersClient, combining Profile and Subscription info
+interface UserProfileWithSubscription extends Profile {
+  subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
+}
+
+export default async function SuperAdminDashboardPage() {
   const supabase = await createClient();
 
   const {
@@ -16,7 +23,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, role")
     .eq("user_id", user.id)
     .single();
 
@@ -24,33 +31,13 @@ export default async function DashboardPage() {
     return <CompleteProfilePrompt user={user} />;
   }
 
-  // Check subscription status for store_admin users
-  const { data: userProfileWithRole } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", user.id)
-    .single();
-
-  const isStoreAdmin = userProfileWithRole?.role === 'store_admin';
-
-  if (isStoreAdmin) {
-    const { data: subscription, error: subscriptionError } = await supabase
-      .from('subscriptions')
-      .select('status')
-      .eq('profile_id', profile.id)
-      .single();
-
-    const allowedStatuses = ['trialing', 'active'];
-
-    if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
-      // If store admin has no active/trialing subscription, redirect to pricing page
-      redirect("/dashboard/pricing?needsSubscription=true");
-    }
+  if (profile.role !== 'super_admin') {
+    redirect("/dashboard?error=Permission denied. Not a super admin.");
   }
 
   const profileId = profile.id;
 
-  // Fetch campaign IDs first
+  // --- Fetch data for Dashboard Overview ---
   const { data: campaigns } = await supabase
     .from("automation_campaigns")
     .select("id")
@@ -58,7 +45,6 @@ export default async function DashboardPage() {
 
   const campaignIds = campaigns?.map((c) => c.id) || [];
 
-  // Fetch all data in parallel for performance
   const [
     actionCountRes,
     campaignCountRes,
@@ -97,13 +83,49 @@ export default async function DashboardPage() {
   const recentActions = recentActionsRes.data;
   const dailyCountsData = dailyCountsDataRes.data;
 
+  // --- Fetch data for User Management ---
+  const { data: users, error: usersError } = await supabase
+    .from("profiles")
+    .select(`
+      id,
+      user_id,
+      name,
+      auth_users:user_id ( email ),
+      role,
+      created_at,
+      subscriptions ( status, current_period_end )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (usersError) {
+    console.error("Supabase error fetching all profiles for super admin dashboard:", usersError.message);
+    // Handle error gracefully, perhaps show a partial dashboard or an error message
+  }
+
+  const profilesWithEmail = users?.map(userProfile => ({
+    ...userProfile,
+    email: userProfile.auth_users?.email || null,
+  })) as UserProfileWithSubscription[] || [];
+
+
   return (
-    <DashboardOverviewClient
-      actionCount={actionCount}
-      campaignCount={campaignCount}
-      accountCount={accountCount}
-      recentActions={recentActions}
-      dailyCountsData={dailyCountsData}
-    />
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Super Admin Dashboard</h1>
+      <p className="text-muted-foreground">
+        Overview of the application and user management.
+      </p>
+
+      <DashboardOverviewClient
+        actionCount={actionCount}
+        campaignCount={campaignCount}
+        accountCount={accountCount}
+        recentActions={recentActions}
+        dailyCountsData={dailyCountsData}
+      />
+
+      <div className="mt-8">
+        <UsersClient users={profilesWithEmail} />
+      </div>
+    </div>
   );
 }

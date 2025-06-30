@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin";
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription } from "@/lib/types";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface UserProfileWithSubscription extends Profile {
   subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
@@ -51,7 +53,14 @@ export default async function SuperAdminUsersPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
+      <Link
+        href="/superadmin/dashboard"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Super Admin Dashboard
+      </Link>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">User Management</h1>
         <p className="text-muted-foreground">

@@ -36,7 +36,7 @@ export async function DashboardSidebar() {
   }
 
   const marketingNavItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+    { href: isSuperAdmin ? "/superadmin/dashboard" : "/dashboard", label: "Dashboard", icon: LayoutGrid }, // Updated link for Super Admin
     { href: "/dashboard/accounts", label: "Connect Accounts", icon: Facebook },
     { href: "/dashboard/facebook-posts", label: "Facebook Posts", icon: Newspaper },
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
