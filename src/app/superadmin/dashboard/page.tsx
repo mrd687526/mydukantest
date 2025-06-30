@@ -47,7 +47,7 @@ export default async function SuperAdminDashboardPage() {
     .select(`
       id,
       name,
-      auth_users:id ( email ), -- Join on 'id' which is now the user_id
+      auth_users:id ( email ),
       role,
       created_at,
       subscriptions ( status, current_period_end )
