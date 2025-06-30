@@ -2,7 +2,7 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { ThemesClient } from "@/components/dashboard/themes/themes-client";
-import { getAllThemeManifests } from "@/lib/theme-utils";
+import { getThemes } from "@/app/actions/themes"; // Import the getThemes action
 
 export default async function ThemesPage() {
   const supabase = createClient();
@@ -24,7 +24,8 @@ export default async function ThemesPage() {
     return <CompleteProfilePrompt user={user} />;
   }
 
-  const { data: themes, error } = await getAllThemeManifests();
+  // Use the getThemes action which returns { data, error }
+  const { data: themes, error } = await getThemes();
 
   if (error) {
     console.error("Error fetching themes:", error);
