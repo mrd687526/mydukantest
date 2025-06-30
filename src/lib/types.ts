@@ -117,6 +117,14 @@ export interface Product {
   variant: string | null;
   created_at: string;
   updated_at: string;
+  subcategory: string | null;
+  sale_price: number | null;
+  weight_kg: number | null;
+  tags: string[] | null;
+  stock_status: 'in_stock' | 'out_of_stock' | 'on_backorder' | null;
+  product_specification: string | null;
+  product_details: string | null;
+  is_trending: boolean | null;
 }
 
 export interface Customer {

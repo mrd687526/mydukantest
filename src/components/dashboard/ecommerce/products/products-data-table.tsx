@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ColumnDef,
   flexRender,
@@ -38,7 +39,6 @@ import { Badge } from "@/components/ui/badge";
 import { Product } from "@/lib/types";
 import { deleteProduct } from "@/app/actions/products";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
-import { EditProductDialog } from "./edit-product-dialog";
 
 async function handleDelete(productId: string) {
   const result = await deleteProduct(productId);
@@ -76,11 +76,6 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => <div>{row.getValue("brand") || "N/A"}</div>,
   },
   {
-    accessorKey: "label",
-    header: "Label",
-    cell: ({ row }) => <div>{row.getValue("label") || "N/A"}</div>,
-  },
-  {
     accessorKey: "image_url",
     header: "Cover Image",
     cell: ({ row }) => {
@@ -91,11 +86,6 @@ export const columns: ColumnDef<Product>[] = [
         <div className="h-12 w-12 bg-muted flex items-center justify-center rounded-md text-muted-foreground text-xs text-center">No Image</div>
       );
     },
-  },
-  {
-    accessorKey: "variant",
-    header: "Variant",
-    cell: ({ row }) => <div>{row.getValue("variant") || "N/A"}</div>,
   },
   {
     accessorKey: "price",
@@ -121,27 +111,31 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "inventory_quantity",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Stock Quantity
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Stock",
     cell: ({ row }) => <div>{row.getValue("inventory_quantity")}</div>,
   },
   {
-    id: "stock_status",
+    accessorKey: "stock_status",
     header: "Stock Status",
     cell: ({ row }) => {
+      const status = row.getValue("stock_status") as string || 'in_stock';
       const quantity = row.getValue("inventory_quantity") as number;
-      const status = quantity > 0 ? "In Stock" : "Out of Stock";
-      const variant = quantity > 0 ? "default" : "destructive";
-      return <Badge variant={variant}>{status}</Badge>;
+      
+      let displayStatus: string;
+      let variant: "default" | "destructive" | "secondary" = "default";
+
+      if (status === 'out_of_stock' || quantity === 0) {
+        displayStatus = "Out of Stock";
+        variant = "destructive";
+      } else if (status === 'on_backorder') {
+        displayStatus = "On Backorder";
+        variant = "secondary";
+      } else {
+        displayStatus = "In Stock";
+        variant = "default";
+      }
+      
+      return <Badge variant={variant}>{displayStatus}</Badge>;
     },
   },
   {
@@ -158,11 +152,11 @@ export const columns: ColumnDef<Product>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <EditProductDialog product={product}>
+            <Link href={`/dashboard/ecommerce/products/${product.id}/edit`} passHref>
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 Edit
               </DropdownMenuItem>
-            </EditProductDialog>
+            </Link>
             <DropdownMenuSeparator />
             <DeleteConfirmationDialog
               onConfirm={() => handleDelete(row.original.id)}

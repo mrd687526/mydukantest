@@ -3,8 +3,9 @@
 import { createClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
-const productSchema = z.object({
+const productFormSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters."),
   description: z.string().optional().nullable(),
   price: z.preprocess(
@@ -21,9 +22,25 @@ const productSchema = z.object({
   brand: z.string().optional().nullable(),
   label: z.string().optional().nullable(),
   variant: z.string().optional().nullable(),
+  subcategory: z.string().optional().nullable(),
+  sale_price: z.preprocess(
+    (val) => val ? parseFloat(String(val)) : null,
+    z.number().min(0).optional().nullable()
+  ),
+  weight_kg: z.preprocess(
+    (val) => val ? parseFloat(String(val)) : null,
+    z.number().min(0).optional().nullable()
+  ),
+  tags: z.string().optional().nullable(), // Will be processed into an array
+  stock_status: z.enum(['in_stock', 'out_of_stock', 'on_backorder']).optional().nullable(),
+  product_specification: z.string().optional().nullable(),
+  product_details: z.string().optional().nullable(),
+  is_trending: z.boolean().optional().nullable(),
 });
 
-export async function createProduct(values: z.infer<typeof productSchema>) {
+type ProductFormValues = z.infer<typeof productFormSchema>;
+
+export async function createProduct(values: ProductFormValues) {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -41,18 +58,12 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
     return { error: "You must have a profile to create a product." };
   }
 
+  const tagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim()) : null;
+
   const { error } = await supabase.from("products").insert({
     profile_id: profile.id,
-    name: values.name,
-    description: values.description,
-    price: values.price,
-    sku: values.sku,
-    inventory_quantity: values.inventory_quantity,
-    image_url: values.image_url,
-    category: values.category,
-    brand: values.brand,
-    label: values.label,
-    variant: values.variant,
+    ...values,
+    tags: tagsArray,
   });
 
   if (error) {
@@ -61,12 +72,12 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
   }
 
   revalidatePath("/dashboard/ecommerce/products");
-  return { success: true };
+  redirect("/dashboard/ecommerce/products");
 }
 
 export async function updateProduct(
   productId: string,
-  values: z.infer<typeof productSchema>
+  values: ProductFormValues
 ) {
   const supabase = await createClient();
 
@@ -95,19 +106,13 @@ export async function updateProduct(
     return { error: "You are not authorized to update this product." };
   }
 
+  const tagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim()) : null;
+
   const { error } = await supabase
     .from("products")
     .update({
-      name: values.name,
-      description: values.description,
-      price: values.price,
-      sku: values.sku,
-      inventory_quantity: values.inventory_quantity,
-      image_url: values.image_url,
-      category: values.category,
-      brand: values.brand,
-      label: values.label,
-      variant: values.variant,
+      ...values,
+      tags: tagsArray,
     })
     .eq("id", productId);
 
@@ -117,7 +122,8 @@ export async function updateProduct(
   }
 
   revalidatePath("/dashboard/ecommerce/products");
-  return { success: true };
+  revalidatePath(`/dashboard/ecommerce/products/${productId}/edit`);
+  redirect("/dashboard/ecommerce/products");
 }
 
 export async function deleteProduct(productId: string) {

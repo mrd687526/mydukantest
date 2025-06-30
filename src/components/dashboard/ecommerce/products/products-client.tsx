@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { PlusCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ProductsDataTable } from "./products-data-table";
-import { CreateProductDialog } from "./create-product-dialog";
+import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 
 interface ProductsClientProps {
@@ -20,7 +22,12 @@ export function ProductsClient({ products }: ProductsClientProps) {
               Manage your store's products and inventory.
             </CardDescription>
           </div>
-          <CreateProductDialog />
+          <Link href="/dashboard/ecommerce/products/new" passHref>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
+          </Link>
         </div>
       </CardHeader>
       <CardContent>
