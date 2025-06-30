@@ -13,7 +13,7 @@ export type Bot = {
   connected_account_id: string;
   name: string;
   description: string | null;
-  status: string;
+  status: 'active' | 'inactive'; // Changed from string to specific literal types
   flow_data: any | null;
   settings: any | null;
   created_at: string;
