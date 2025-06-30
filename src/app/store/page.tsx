@@ -3,7 +3,7 @@ import { ProductCard } from "@/components/storefront/product-card";
 import { Product } from "@/lib/types";
 
 export default async function StoreHomePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: products, error } = await supabase
     .from("products")
     .select("*")
