@@ -64,6 +64,62 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
   return { success: true };
 }
 
+export async function updateProduct(
+  productId: string,
+  values: z.infer<typeof productSchema>
+) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be logged in to update a product." };
+  }
+
+  const { data: product, error: fetchError } = await supabase
+    .from("products")
+    .select("profile_id")
+    .eq("id", productId)
+    .single();
+
+  if (fetchError || !product) {
+    return { error: "Product not found." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile || product.profile_id !== profile.id) {
+    return { error: "You are not authorized to update this product." };
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name: values.name,
+      description: values.description,
+      price: values.price,
+      sku: values.sku,
+      inventory_quantity: values.inventory_quantity,
+      image_url: values.image_url,
+      category: values.category,
+      brand: values.brand,
+      label: values.label,
+      variant: values.variant,
+    })
+    .eq("id", productId);
+
+  if (error) {
+    console.error("Supabase error updating product:", error.message);
+    return { error: "Database error: Could not update product." };
+  }
+
+  revalidatePath("/dashboard/ecommerce/products");
+  return { success: true };
+}
+
 export async function deleteProduct(productId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("products").delete().eq("id", productId);

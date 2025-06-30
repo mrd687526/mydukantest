@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Product } from "@/lib/types";
 import { deleteProduct } from "@/app/actions/products";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
+import { EditProductDialog } from "./edit-product-dialog";
 
 async function handleDelete(productId: string) {
   const result = await deleteProduct(productId);
@@ -145,30 +146,37 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DeleteConfirmationDialog
-            onConfirm={() => handleDelete(row.original.id)}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete your product."
-          >
-            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              Delete
-            </div>
-          </DeleteConfirmationDialog>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const product = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <EditProductDialog product={product}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                Edit
+              </DropdownMenuItem>
+            </EditProductDialog>
+            <DropdownMenuSeparator />
+            <DeleteConfirmationDialog
+              onConfirm={() => handleDelete(row.original.id)}
+              title="Are you absolutely sure?"
+              description="This action cannot be undone. This will permanently delete your product."
+            >
+              <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                Delete
+              </div>
+            </DeleteConfirmationDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
 
