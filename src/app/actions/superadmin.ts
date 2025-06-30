@@ -105,7 +105,7 @@ export async function getAllUsersAndProfiles() {
     return { data: null, error: "Unauthorized: Only super admins can view all users." };
   }
 
-  -- Initialize an admin client for privileged data fetching
+  // Initialize an admin client for privileged data fetching
   const supabaseAdmin = createAdminSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -116,7 +116,7 @@ export async function getAllUsersAndProfiles() {
     .select(`
       id,
       name,
-      auth_users:id ( email ), -- Join on 'id' which is now the user_id
+      auth_users:id ( email ), // Join on 'id' which is now the user_id
       role,
       created_at,
       subscriptions ( status, current_period_end )
@@ -179,7 +179,7 @@ export async function deleteUserAndProfile(userId: string) {
   );
 
   try {
-    -- Delete the user from auth.users, which should cascade delete the profile due to RLS policy
+    // Delete the user from auth.users, which should cascade delete the profile due to RLS policy
     const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authError) {
