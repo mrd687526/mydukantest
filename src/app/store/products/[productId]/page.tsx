@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
-import type { PageProps } from "next/types";
+import type PageProps from "next/types"; // Corrected import
 
 interface ProductPageProps extends PageProps<{ productId: string }> {}
 

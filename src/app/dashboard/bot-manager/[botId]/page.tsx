@@ -5,7 +5,7 @@ import type { Bot } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type { PageProps } from "next/types";
+import type PageProps from "next/types"; // Corrected import
 
 interface BotEditorPageProps extends PageProps<{ botId: string }> {}
 

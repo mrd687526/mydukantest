@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
-import type { PageProps } from "next/types";
+import type PageProps from "next/types"; // Corrected import
 
 interface CampaignPageProps extends PageProps<{ campaignId: string }> {}
 

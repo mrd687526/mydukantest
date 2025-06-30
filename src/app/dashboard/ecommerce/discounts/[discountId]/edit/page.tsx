@@ -4,7 +4,7 @@ import { DiscountForm } from "@/components/dashboard/ecommerce/discounts/discoun
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { PageProps } from "next/types";
+import type PageProps from "next/types"; // Corrected import
 
 interface EditDiscountPageProps extends PageProps<{ discountId: string }> {}
 
