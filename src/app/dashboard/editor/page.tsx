@@ -5,10 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
-import { PaletteItem } from "@/components/editor/PaletteItem";
-// Removed all dnd-kit imports for debugging purposes:
-// import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
-// import { arrayMove } from "@dnd-kit/sortable";
+import PaletteItem from "@/components/editor/PaletteItem"; // Updated to default import
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { createClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -168,7 +174,7 @@ export default function EditorPage() {
   const [tree, setTree] = useState<Node>(DEFAULT_TREE);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  // const sensors = useSensors(useSensor(PointerSensor)); // Removed for debugging
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const selectedNode = selectedId ? findNodeById(tree, selectedId) : null;
 
@@ -220,78 +226,132 @@ export default function EditorPage() {
     setIsSaving(false);
   };
 
-  // Removed handleDragEnd function for debugging.
-  // function handleDragEnd(event: DragEndEvent) { /* ... */ }
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    if (activeId.startsWith("palette-")) {
+      const widgetType = active.data.current?.type;
+      if (!widgetType) return;
+      const newNode = createNewNode(widgetType);
+      setTree((prevTree) => {
+        const overNodeInfo = findNodeAndParent(prevTree, overId);
+        if (!overNodeInfo) return prevTree;
+        const { node: overNode, parent: overParent } = overNodeInfo;
+        const targetContainerId =
+          overNode.type === "container" ? overNode.id : overParent!.id;
+        return updateNodeById(prevTree, targetContainerId, (container) => ({
+          ...container,
+          children: [...(container.children || []), newNode],
+        }));
+      });
+      return;
+    }
+
+    if (activeId !== overId) {
+      setTree((prevTree) => {
+        const activeNodeInfo = findNodeAndParent(prevTree, activeId);
+        const overNodeInfo = findNodeAndParent(prevTree, overId);
+        if (
+          !activeNodeInfo?.parent ||
+          !overNodeInfo?.parent ||
+          activeNodeInfo.parent.id !== overNodeInfo.parent.id
+        ) {
+          return prevTree;
+        }
+        const parentNode = activeNodeInfo.parent;
+        const oldIndex = parentNode.children!.findIndex(
+          (c) => c.id === activeId
+        );
+        const newIndex = parentNode.children!.findIndex(
+          (c) => c.id === overId
+        );
+        const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
+        return updateNodeById(prevTree, parentNode.id, (n) => ({
+          ...n,
+          children: newChildren,
+        }));
+      });
+    }
+  }
 
   return (
-    // Removed DndContext wrapper for debugging.
-    <div className="flex h-screen bg-gray-200 font-sans">
-      <aside className="w-[350px] bg-white border-r flex flex-col shadow-lg">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h1 className="text-lg font-semibold">Elements</h1>
-        </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex h-screen bg-gray-200 font-sans">
+        <aside className="w-[350px] bg-white border-r flex flex-col shadow-lg">
+          <div className="p-4 border-b flex justify-between items-center">
+            <h1 className="text-lg font-semibold">Elements</h1>
+          </div>
 
-        <div className="flex-1 overflow-y-auto">
-          {selectedNode && selectedId !== "root" ? (
-            <PropertiesPanel
-              node={selectedNode}
-              onUpdate={handleUpdateProperty}
-              onBack={() => setSelectedId(null)}
-            />
-          ) : (
-            <div className="p-4">
-              <Input
-                placeholder="Search widgets..."
-                className="mb-4 bg-gray-50"
+          <div className="flex-1 overflow-y-auto">
+            {selectedNode && selectedId !== "root" ? (
+              <PropertiesPanel
+                node={selectedNode}
+                onUpdate={handleUpdateProperty}
+                onBack={() => setSelectedId(null)}
               />
-              <div className="grid grid-cols-2 gap-2">
-                {WIDGETS.map((w) => (
-                  <PaletteItem
-                    key={w.type}
-                    type={w.type}
-                    label={w.label}
-                    icon={w.icon}
-                  />
-                ))}
+            ) : (
+              <div className="p-4">
+                <Input
+                  placeholder="Search widgets..."
+                  className="mb-4 bg-gray-50"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  {WIDGETS.map((w) => (
+                    <PaletteItem
+                      key={w.type}
+                      type={w.type}
+                      label={w.label}
+                      icon={w.icon}
+                    />
+                  ))}
+                </div>
               </div>
+            )}
+          </div>
+
+          {selectedId && selectedId !== "root" && (
+            <div className="p-4 mt-auto border-t">
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Selected
+              </Button>
             </div>
           )}
-        </div>
+        </aside>
 
-        {selectedId && selectedId !== "root" && (
-          <div className="p-4 mt-auto border-t">
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Selected
+        <main className="flex-1 flex flex-col">
+          <header className="bg-white border-b p-3 flex gap-2 justify-end items-center shadow-sm">
+            <Button variant="outline" disabled>
+              Preview
             </Button>
-          </div>
-        )}
-      </aside>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </header>
 
-      <main className="flex-1 flex flex-col">
-        <header className="bg-white border-b p-3 flex gap-2 justify-end items-center shadow-sm">
-          <Button variant="outline" disabled>
-            Preview
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-        </header>
-
-        <div className="flex-1 overflow-auto p-8">
-          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 max-w-4xl mx-auto min-h-full">
-            <RenderEngine
-              node={tree}
-              selectedId={selectedId}
-              onSelect={handleSelect}
-            />
+          <div className="flex-1 overflow-auto p-8">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 max-w-4xl mx-auto min-h-full">
+              <RenderEngine
+                node={tree}
+                selectedId={selectedId}
+                onSelect={handleSelect}
+              />
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </DndContext>
   );
 }

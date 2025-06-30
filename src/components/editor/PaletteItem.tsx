@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import { useDraggable } from "@dnd-kit/core";
 
-export function PaletteItem({
+function PaletteItem({
   type,
   label,
   icon,
@@ -11,11 +12,16 @@ export function PaletteItem({
   label: string;
   icon: React.ReactNode;
 }) {
-  // All dnd-kit related code has been removed for debugging purposes.
-  // This component will now render as a static div.
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: `palette-${type}`,
+    data: { type },
+  });
 
   return (
     <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
       className="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-400 cursor-grab transition-colors aspect-square"
     >
       {icon}
@@ -23,3 +29,5 @@ export function PaletteItem({
     </div>
   );
 }
+
+export default PaletteItem;
