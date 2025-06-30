@@ -94,6 +94,11 @@ export function DashboardHeader({ user }: { user: User | null }) {
       <Link href="/store">
         <Button variant="outline" className="mr-2">View Store</Button>
       </Link>
+      {process.env.NODE_ENV === 'development' && (
+        <Link href="/superadmin/dashboard">
+          <Button variant="secondary" className="mr-2">Super Admin Dashboard</Button>
+        </Link>
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
