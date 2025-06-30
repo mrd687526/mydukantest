@@ -59,7 +59,7 @@ export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
 
     if (error) {
       toast.error("Failed to create/update profile. Please try again.");
-      console.error("Profile creation/update error:", error);
+      console.error("Profile creation/update error:", error.message || JSON.stringify(error));
     } else {
       toast.success("Profile created successfully!");
       setIsOpen(false);
