@@ -71,8 +71,9 @@ export async function POST(req: Request) {
           const customerId = subscription.customer as string;
           const priceId = subscription.items.data[0].price.id;
           const status = subscription.status;
-          const currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
-          const currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+          // Cast to any to bypass potential type inference issues with Stripe.Subscription properties
+          const currentPeriodStart = new Date((subscription as any).current_period_start * 1000).toISOString();
+          const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000).toISOString();
 
           // Find the profile associated with this Stripe customer ID
           const { data: profileData, error: profileError } = await supabase
