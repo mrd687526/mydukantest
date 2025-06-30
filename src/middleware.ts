@@ -48,7 +48,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/data-deletion') ||
     pathname.startsWith('/store') ||
-    pathname.startsWith('/api/stripe/webhook')
+    pathname.startsWith('/api/stripe/webhook') ||
+    pathname.startsWith('/superadmin/signup') // Allow access to super admin signup
   ) {
     return response;
   }

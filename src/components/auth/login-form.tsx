@@ -184,14 +184,13 @@ export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps)
                         <Input type="password" placeholder="********" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
+                </FormItem>
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={superAdminForm.formState.isSubmitting}>
                   {superAdminForm.formState.isSubmitting ? "Logging in..." : "Sign In as Super Admin"}
                 </Button>
               </form>
-            </Form>
             <Button
               variant="outline"
               className="w-full mt-4"
@@ -200,6 +199,12 @@ export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps)
             >
               {isDemoLoading ? "Logging in..." : "Quick Access (Super Admin Demo)"}
             </Button>
+            <div className="text-center text-sm text-gray-600 mt-4">
+              Don't have a Super Admin account?{" "}
+              <Link href="/superadmin/signup" className="font-medium text-primary hover:underline">
+                Sign up here
+              </Link>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
