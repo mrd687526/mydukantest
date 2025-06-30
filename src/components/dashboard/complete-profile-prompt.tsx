@@ -52,14 +52,32 @@ export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
   });
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // Use upsert to create or update the profile based on user.id
-    const { error } = await supabase
+    let error;
+
+    // First, try to update the profile (if it already exists, e.g., from a trigger)
+    const { error: updateError, count } = await supabase
       .from("profiles")
-      .upsert({ id: user.id, name: data.name }, { onConflict: 'id' }); // Conflict on 'id' to update if exists
+      .update({ name: data.name })
+      .eq("id", user.id);
+
+    if (updateError) {
+      error = updateError;
+    } else if (count === 0) {
+      // If no rows were updated, it means the profile doesn't exist yet, so insert it.
+      // This case should ideally be handled by the `handle_new_user` trigger,
+      // but this provides a fallback if the trigger hasn't fired or data isn't consistent yet.
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({ id: user.id, name: data.name, role: 'store_admin' }); // Explicitly set role for insert
+
+      if (insertError) {
+        error = insertError;
+      }
+    }
 
     if (error) {
       toast.error("Failed to create/update profile. Please try again.");
-      console.error("Profile creation/update error:", error.message || JSON.stringify(error));
+      console.error("Profile operation error:", error.message || JSON.stringify(error));
     } else {
       toast.success("Profile created successfully!");
       setIsOpen(false);
