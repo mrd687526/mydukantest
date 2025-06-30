@@ -2,13 +2,9 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin";
 import { UsersClient } from "@/components/superadmin/users-client";
-import { Profile, Subscription } from "@/lib/types";
+import { UserProfileWithSubscription } from "@/lib/types";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-
-interface UserProfileWithSubscription extends Profile {
-  subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
-}
 
 export default async function SuperAdminUsersPage() {
   const supabase = createClient();
@@ -32,12 +28,12 @@ export default async function SuperAdminUsersPage() {
     redirect("/dashboard?error=Permission denied.");
   }
 
-  const { data: existingSuperAdminProfiles } = await supabase
+  const { count: superAdminCount } = await supabase
     .from("profiles")
     .select("id", { count: "exact", head: true })
     .eq("role", "super_admin");
 
-  if (existingSuperAdminProfiles === null || existingSuperAdminProfiles === 0) {
+  if (superAdminCount === 0) {
     console.log("No super admin found, creating default super admin...");
     await createNewUserAndProfile({
       email: 'superadmin@example.com',
@@ -69,7 +65,7 @@ export default async function SuperAdminUsersPage() {
           View and manage all user accounts and their profiles.
         </p>
       </div>
-      <UsersClient users={users as UserProfileWithSubscription[] || []} />
+      <UsersClient users={users || []} />
     </div>
   );
 }
