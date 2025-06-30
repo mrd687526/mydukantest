@@ -52,28 +52,17 @@ export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
   });
 
   const onSubmit = async (data: ProfileFormValues) => {
-    let error;
-
-    // First, try to update the profile (if it already exists, e.g., from a trigger)
-    const { error: updateError, count } = await supabase
+    // Use upsert to handle both insert and update scenarios
+    const { error } = await supabase
       .from("profiles")
-      .update({ name: data.name })
-      .eq("id", user.id);
-
-    if (updateError) {
-      error = updateError;
-    } else if (count === 0) {
-      // If no rows were updated, it means the profile doesn't exist yet, so insert it.
-      // This case should ideally be handled by the `handle_new_user` trigger,
-      // but this provides a fallback if the trigger hasn't fired or data isn't consistent yet.
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .insert({ id: user.id, name: data.name, role: 'store_admin' }); // Explicitly set role for insert
-
-      if (insertError) {
-        error = insertError;
-      }
-    }
+      .upsert(
+        {
+          id: user.id, // The profile ID is the user's auth ID
+          name: data.name,
+          role: 'store_admin', // Explicitly set role for new profiles or ensure it's set
+        },
+        { onConflict: 'id' } // Conflict on the 'id' (primary key) to update if exists, insert if not
+      );
 
     if (error) {
       toast.error("Failed to create/update profile. Please try again.");
@@ -81,7 +70,7 @@ export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
     } else {
       toast.success("Profile created successfully!");
       setIsOpen(false);
-      router.refresh();
+      router.refresh(); // Re-fetch data for the current route
     }
   };
 
