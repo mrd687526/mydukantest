@@ -6,6 +6,7 @@ interface EditProductPageProps {
   params: {
     productId: string;
   };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
