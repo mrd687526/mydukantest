@@ -122,7 +122,7 @@ export async function getAllUsersAndProfiles() {
     .select(`
       id,
       name,
-      auth_users:id ( email ),
+      users ( email ),
       role,
       created_at,
       subscriptions ( status, current_period_end )
@@ -137,7 +137,7 @@ export async function getAllUsersAndProfiles() {
   // Map the data to include email directly in the profile object
   const profilesWithEmail = profiles.map(profile => ({
     ...profile,
-    email: profile.auth_users?.email || null, // Extract email from joined auth_users
+    email: profile.users?.email || null, // Extract email from joined users
   }));
 
   return { data: profilesWithEmail, error: null };

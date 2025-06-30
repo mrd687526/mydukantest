@@ -47,7 +47,7 @@ export default async function SuperAdminDashboardPage() {
     .select(`
       id,
       name,
-      auth_users:id ( email ),
+      users ( email ),
       role,
       created_at,
       subscriptions ( status, current_period_end )
@@ -61,7 +61,7 @@ export default async function SuperAdminDashboardPage() {
 
   const profilesWithEmail = users?.map(userProfile => ({
     ...userProfile,
-    email: userProfile.auth_users?.email || null,
+    email: userProfile.users?.email || null,
   })) as UserProfileWithSubscription[] || [];
 
   // --- Fetch data for New User Analytics (last 30 days) ---
