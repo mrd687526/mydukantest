@@ -169,6 +169,8 @@ export interface Order {
   payment_type: string | null; // Added payment_type
   created_at: string;
   updated_at: string;
+  stripe_payment_intent_id: string | null; // New: Stripe Payment Intent ID
+  stripe_charge_id: string | null; // New: Stripe Charge ID
   order_items?: OrderItem[]; // Optional: to hold associated items
 }
 
