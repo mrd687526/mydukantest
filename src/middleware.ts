@@ -41,14 +41,9 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  // Explicitly allow access to the superadmin login page first
-  if (pathname.startsWith('/superadmin/login')) {
-    return response;
-  }
-
-  // Allow access to other public pages
+  // Allow access to public pages
   if (
-    pathname.startsWith('/login') ||
+    pathname.startsWith('/login') || // Main login page now handles both
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/data-deletion') ||
