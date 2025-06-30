@@ -13,7 +13,6 @@ import {
   Users,
   Ticket,
   Palette,
-  ShieldCheck, // New icon for Super Admin
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarReportsSection } from "./sidebar-reports-section";
@@ -36,7 +35,7 @@ export async function DashboardSidebar() {
   }
 
   const marketingNavItems = [
-    { href: isSuperAdmin ? "/superadmin/dashboard" : "/dashboard", label: "Dashboard", icon: LayoutGrid }, // Updated link for Super Admin
+    { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
     { href: "/dashboard/accounts", label: "Connect Accounts", icon: Facebook },
     { href: "/dashboard/facebook-posts", label: "Facebook Posts", icon: Newspaper },
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
@@ -52,11 +51,6 @@ export async function DashboardSidebar() {
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
     { href: "/dashboard/themes", label: "Themes", icon: Palette },
-  ];
-
-  const superAdminNavItems = [
-    { href: "/superadmin/users", label: "Users", icon: Users },
-    // Add other super admin links here
   ];
 
   return (
@@ -82,14 +76,7 @@ export async function DashboardSidebar() {
             <SidebarNav items={ecommerceNavItems} />
             <SidebarReportsSection />
           </div>
-          {isSuperAdmin && (
-            <div className="px-4 lg:px-6">
-              <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                Super Admin
-              </h3>
-              <SidebarNav items={superAdminNavItems} />
-            </div>
-          )}
+          {/* Super Admin section removed from here, now in its own sidebar */}
         </div>
         <div className="mt-auto p-4 border-t">
            <Link

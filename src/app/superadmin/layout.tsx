@@ -1,8 +1,8 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { type PropsWithChildren } from "react";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { SuperAdminHeader } from "@/components/superadmin/super-admin-header"; // Import new header
+import { SuperAdminSidebar } from "@/components/superadmin/super-admin-sidebar"; // Import new sidebar
 
 export default async function SuperAdminLayout({ children }: PropsWithChildren) {
   const supabase = await createClient();
@@ -23,9 +23,9 @@ export default async function SuperAdminLayout({ children }: PropsWithChildren) 
     // If a profile doesn't exist, the CompleteProfilePrompt will handle it.
     return (
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        <DashboardSidebar />
+        <SuperAdminSidebar /> {/* Use new SuperAdminSidebar */}
         <div className="flex flex-col">
-          <DashboardHeader user={user} />
+          <SuperAdminHeader user={user} /> {/* Use new SuperAdminHeader */}
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gray-100/40 dark:bg-gray-800/40">
             {children}
           </main>
@@ -49,9 +49,9 @@ export default async function SuperAdminLayout({ children }: PropsWithChildren) 
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <DashboardSidebar /> {/* Re-use existing sidebar, will add super admin links */}
+      <SuperAdminSidebar /> {/* Use new SuperAdminSidebar */}
       <div className="flex flex-col">
-        <DashboardHeader user={user} />
+        <SuperAdminHeader user={user} /> {/* Use new SuperAdminHeader */}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gray-100/40 dark:bg-gray-800/40">
           {children}
         </main>
