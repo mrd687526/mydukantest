@@ -7,18 +7,17 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// Define the props type directly as a simple object
-interface BotEditorPageProps {
+export default async function BotEditorPage({
+  params,
+}: {
   params: { botId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
-export default async function BotEditorPage(props: BotEditorPageProps) {
-  const { params } = props;
+}) {
   const supabase = createClient();
   const { botId } = params;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: bot, error } = await supabase
@@ -29,7 +28,7 @@ export default async function BotEditorPage(props: BotEditorPageProps) {
 
   if (error || !bot) {
     return (
-       <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full">
         <h1 className="text-2xl font-bold">Bot not found</h1>
         <p className="text-muted-foreground">
           The requested bot could not be found.
@@ -41,7 +40,7 @@ export default async function BotEditorPage(props: BotEditorPageProps) {
           </Link>
         </Button>
       </div>
-    )
+    );
   }
 
   return <BotEditorClient bot={bot as Bot} />;
