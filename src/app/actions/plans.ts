@@ -12,7 +12,7 @@ async function isSuperAdmin() {
     return true; // Bypass for local development
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createServerSupabaseClient();
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   if (!currentUser) return false;
 
@@ -169,7 +169,7 @@ export async function getPlans(): Promise<{ data: Plan[] | null; error: string |
 }
 
 export async function getPublicPlans(): Promise<{ data: Plan[] | null; error: string | null }> {
-  const supabase = await createServerSupabaseClient(); // Use regular client
+  const supabase = createServerSupabaseClient(); // Use regular client
 
   const { data, error } = await supabase
     .from("plans")
