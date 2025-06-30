@@ -1,9 +1,14 @@
-import { createClient } from "@/integrations/supabase/client";
+import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
-export default async function ProductPage({ params }: { params: { productId: string } }) {
+type PageProps = {
+  params: { productId: string };
+};
+
+export default async function ProductPage({ params }: PageProps) {
   const supabase = createClient();
+  const { productId } = params;
 
   // Determine the profile_id for the public storefront (same logic as /store/page.tsx)
   const { data: storeProfile, error: profileError } = await supabase
@@ -23,7 +28,7 @@ export default async function ProductPage({ params }: { params: { productId: str
   const { data: product } = await supabase
     .from("products")
     .select("*")
-    .eq("id", params.productId)
+    .eq("id", productId)
     .eq("profile_id", storeProfileId) // Ensure the product belongs to the demo store
     .single();
 
