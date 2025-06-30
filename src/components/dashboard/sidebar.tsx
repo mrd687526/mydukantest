@@ -13,7 +13,8 @@ import {
   Users,
   Ticket,
   Palette,
-  ReceiptText, // New import for the refund requests icon
+  ReceiptText,
+  BarChart3, // New import for customer reports icon
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -34,7 +35,8 @@ export function DashboardSidebar() {
     { href: "/dashboard/ecommerce/customers", label: "Customers", icon: Users },
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
-    { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText }, // New Refunds link
+    { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText },
+    { href: "/dashboard/ecommerce/customer-reports", label: "Customer Reports", icon: BarChart3 }, // New Customer Reports link
     { href: "/dashboard/themes", label: "Themes", icon: Palette },
   ];
 

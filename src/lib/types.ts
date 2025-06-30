@@ -198,3 +198,10 @@ export interface Discount {
   created_at: string;
   updated_at: string;
 }
+
+export interface CustomerOrderReportData {
+  period: string;
+  customer_orders: number;
+  guest_orders: number;
+  total_orders: number;
+}
