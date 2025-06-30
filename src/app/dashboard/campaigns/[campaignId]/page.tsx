@@ -18,13 +18,18 @@ import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 
-export default async function Page({
-  params,
-}: {
-  params: { campaignId: string };
-}) {
+// This interface is designed to explicitly match the erroneous type
+// that the Next.js compiler seems to be expecting for `params` and `searchParams`.
+interface CampaignPageProps {
+  params: Promise<{ campaignId: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function Page(props: CampaignPageProps) {
+  // Await the params object, as the compiler seems to treat it as a Promise.
+  const actualParams = await props.params;
   const supabase = createClient();
-  const { campaignId } = params;
+  const { campaignId } = actualParams;
 
   const {
     data: { user },

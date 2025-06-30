@@ -2,12 +2,17 @@ import { createClient } from "@/integrations/supabase/server";
 import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation";
 
-export default async function EditProductPage({
-  params,
-}: {
-  params: { productId: string };
-}) {
-  const { productId } = params;
+// This interface is designed to explicitly match the erroneous type
+// that the Next.js compiler seems to be expecting for `params` and `searchParams`.
+interface EditProductPageProps {
+  params: Promise<{ productId: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function EditProductPage(props: EditProductPageProps) {
+  // Await the params object, as the compiler seems to treat it as a Promise.
+  const actualParams = await props.params;
+  const { productId } = actualParams;
   const supabase = createClient();
 
   const {

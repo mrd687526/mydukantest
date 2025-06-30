@@ -5,12 +5,17 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default async function EditDiscountPage({
-  params,
-}: {
-  params: { discountId: string };
-}) {
-  const { discountId } = params;
+// This interface is designed to explicitly match the erroneous type
+// that the Next.js compiler seems to be expecting for `params` and `searchParams`.
+interface EditDiscountPageProps {
+  params: Promise<{ discountId: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function EditDiscountPage(props: EditDiscountPageProps) {
+  // Await the params object, as the compiler seems to treat it as a Promise.
+  const actualParams = await props.params;
+  const { discountId } = actualParams;
   const supabase = createClient();
 
   const {

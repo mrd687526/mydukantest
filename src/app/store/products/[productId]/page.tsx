@@ -2,13 +2,18 @@ import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { productId: string };
-}) {
+// This interface is designed to explicitly match the erroneous type
+// that the Next.js compiler seems to be expecting for `params` and `searchParams`.
+interface ProductPageProps {
+  params: Promise<{ productId: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function ProductPage(props: ProductPageProps) {
+  // Await the params object, as the compiler seems to treat it as a Promise.
+  const actualParams = await props.params;
   const supabase = createClient();
-  const { productId } = params;
+  const { productId } = actualParams;
 
   const { data: storeProfile, error: profileError } = await supabase
     .from("profiles")
