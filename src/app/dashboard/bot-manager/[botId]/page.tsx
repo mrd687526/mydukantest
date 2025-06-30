@@ -1,13 +1,13 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { BotEditorClient } from "@/components/dashboard/bot-manager/bot-editor-client";
-import type { Bot } from "@/lib/types"; // Keep Bot type, remove AppPageProps
+import type { Bot } from "@/lib/types";
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// Define the interface directly here, matching Next.js's expected PageProps structure
+// Define the props type directly as a simple object
 interface BotEditorPageProps {
   params: { botId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
