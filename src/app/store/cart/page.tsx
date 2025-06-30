@@ -2,6 +2,7 @@
 import { useCart } from "@/components/storefront/cart-context";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Label } from "@/components/ui/label"; // Added this import
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
