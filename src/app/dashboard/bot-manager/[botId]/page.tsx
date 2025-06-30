@@ -7,13 +7,18 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function BotEditorPage({
-  params,
-}: {
-  params: { botId: string };
-}) {
+// This interface is designed to explicitly match the erroneous type
+// that the Next.js compiler seems to be expecting for `params`.
+interface BotEditorPageProps {
+  params: Promise<{ botId: string }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default async function BotEditorPage(props: BotEditorPageProps) {
+  // Await the params object, as the compiler seems to treat it as a Promise.
+  const actualParams = await props.params;
   const supabase = createClient();
-  const { botId } = params;
+  const { botId } = actualParams; // Use the awaited params
 
   const {
     data: { user },
