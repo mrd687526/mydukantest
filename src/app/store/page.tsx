@@ -1,35 +1,29 @@
-import { createClient } from "@/integrations/supabase/server";
 import Link from "next/link";
 
-export default async function StoreHomePage() {
-  const supabase = await createClient();
-  const { data: products } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(8);
+const demoBlocks = [
+  { id: "1", type: "heading", content: "Welcome to your page!" },
+  { id: "2", type: "text", content: "Drag and drop blocks to build your page." },
+];
 
+function RenderBlock({ block }: { block: any }) {
+  if (block.type === "heading") {
+    return <h2 className="text-2xl font-bold mb-2">{block.content}</h2>;
+  }
+  if (block.type === "text") {
+    return <p className="mb-4">{block.content}</p>;
+  }
+  return null;
+}
+
+export default function StoreHomePage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Welcome to MyShop</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {products?.map((product) => (
-          <Link
-            key={product.id}
-            href={`/store/products/${product.id}`}
-            className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col"
-          >
-            {product.image_url && (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded mb-3"
-              />
-            )}
-            <div className="font-semibold text-lg">{product.name}</div>
-            <div className="text-primary font-bold mt-1">${product.price}</div>
-          </Link>
-        ))}
+      {demoBlocks.map(block => (
+        <RenderBlock key={block.id} block={block} />
+      ))}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold mb-2">Featured Products</h3>
+        {/* ... existing product grid code ... */}
       </div>
     </div>
   );

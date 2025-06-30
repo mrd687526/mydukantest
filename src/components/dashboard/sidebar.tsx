@@ -23,6 +23,7 @@ export function DashboardSidebar() {
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
     { href: "/dashboard/bot-manager", label: "Bot Manager", icon: BotMessageSquare },
     { href: "/dashboard/reports", label: "Reports", icon: LineChart },
+    { href: "/dashboard/editor", label: "Drag and Drop Editor", icon: LayoutGrid }, // NEW
   ];
 
   const ecommerceNavItems = [
