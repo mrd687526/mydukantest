@@ -20,6 +20,7 @@ import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campa
 
 type PageProps = {
   params: { campaignId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export default async function Page({ params }: PageProps) {

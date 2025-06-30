@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 type PageProps = {
   params: { botId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export default async function BotEditorPage({ params }: PageProps) {

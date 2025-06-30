@@ -4,6 +4,7 @@ import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
 type PageProps = {
   params: { productId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export default async function ProductPage({ params }: PageProps) {

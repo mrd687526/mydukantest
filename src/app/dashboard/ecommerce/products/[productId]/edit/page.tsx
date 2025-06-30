@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation"; // Import redirect
 
 type PageProps = {
   params: { productId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export default async function EditProductPage({ params }: PageProps) {
