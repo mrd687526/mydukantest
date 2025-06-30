@@ -2,7 +2,7 @@ import { createClient } from "@/integrations/supabase/server";
 import { ProductForm }
 from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
-import type { AppPageProps } from "@/lib/types"; // Updated import
+import type { AppPageProps } from "@/lib/types";
 
 interface EditProductPageProps extends AppPageProps<{ productId: string }> {}
 
@@ -28,7 +28,7 @@ export default async function EditProductPage(props: EditProductPageProps) {
     redirect("/dashboard"); // Redirect if no profile
   }
 
-  const { data: product, error } = await supabase
+  const { data: product } = await supabase
     .from("products")
     .select("*")
     .eq("id", productId)

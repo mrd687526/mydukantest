@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { BotEditorClient } from "@/components/dashboard/bot-manager/bot-editor-client";
-import type { Bot, AppPageProps } from "@/lib/types"; // Updated import
+import type { Bot, AppPageProps } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

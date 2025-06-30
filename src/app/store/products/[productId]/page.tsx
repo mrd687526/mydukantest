@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
-import type { AppPageProps } from "@/lib/types"; // Updated import
+import type { AppPageProps } from "@/lib/types";
 
 interface ProductPageProps extends AppPageProps<{ productId: string }> {}
 
