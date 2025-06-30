@@ -3,11 +3,13 @@
 import React from "react";
 
 export const TextWidget = ({
+  id,
   content,
   align = "left",
   fontSize = 16,
   children,
 }: {
+  id: string;
   content: string;
   align?: "left" | "center" | "right";
   fontSize?: number;

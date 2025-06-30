@@ -3,11 +3,13 @@
 import React from "react";
 
 export const HeadingWidget = ({
+  id,
   text,
   align = "left",
   fontSize = 24,
   children,
 }: {
+  id: string;
   text: string;
   align?: "left" | "center" | "right";
   fontSize?: number;

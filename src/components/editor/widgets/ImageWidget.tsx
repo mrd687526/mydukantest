@@ -3,11 +3,13 @@
 import React from "react";
 
 export const ImageWidget = ({
+  id,
   src,
   alt,
   href,
   children,
 }: {
+  id: string;
   src: string;
   alt: string;
   href?: string;

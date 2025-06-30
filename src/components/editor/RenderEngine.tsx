@@ -4,7 +4,10 @@ import { TextWidget } from "./widgets/TextWidget";
 import { ImageWidget } from "./widgets/ImageWidget";
 import { ButtonWidget } from "./widgets/ButtonWidget";
 import { ContainerWidget } from "./widgets/ContainerWidget";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { SortableItem } from "./SortableItem";
 
 const componentMap: Record<string, React.FC<any>> = {
@@ -30,6 +33,8 @@ export function RenderEngine({
   const isSelected = selectedId === node.id;
   const isContainer = node.type === "container";
 
+  const widgetProps = { ...node.props, id: node.id };
+
   return (
     <div
       style={{
@@ -44,21 +49,23 @@ export function RenderEngine({
         onSelect?.(node.id);
       }}
     >
-      <Widget {...node.props} id={node.id}>
+      <Widget {...widgetProps}>
         {node.children && isContainer && (
           <SortableContext
             items={node.children.map((c: any) => c.id)}
             strategy={verticalListSortingStrategy}
           >
-            {node.children.map((child: any) => (
-              <SortableItem key={child.id} id={child.id}>
-                <RenderEngine
-                  node={child}
-                  selectedId={selectedId}
-                  onSelect={onSelect}
-                />
-              </SortableItem>
-            ))}
+            <div className="flex flex-col">
+              {node.children.map((child: any) => (
+                <SortableItem key={child.id} id={child.id}>
+                  <RenderEngine
+                    node={child}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                  />
+                </SortableItem>
+              ))}
+            </div>
           </SortableContext>
         )}
         {node.children &&

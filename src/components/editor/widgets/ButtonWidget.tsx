@@ -4,11 +4,13 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 export const ButtonWidget = ({
+  id,
   label,
   variant = "default",
   href,
   children,
 }: {
+  id: string;
   label: string;
   variant?: any;
   href?: string;
