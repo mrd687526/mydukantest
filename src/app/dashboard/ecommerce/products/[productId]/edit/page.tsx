@@ -1,14 +1,13 @@
 import { createClient } from "@/integrations/supabase/server";
-import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
+import { ProductForm }
+from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
 
-export default async function EditProductPage({
-  params,
-  searchParams,
-}: {
+export default async function EditProductPage(props: {
   params: { productId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
+  const { params } = props;
   const { productId } = params;
   const supabase = createClient();
 
