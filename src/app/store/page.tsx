@@ -7,6 +7,16 @@ function RenderBlock({ block }: { block: any }) {
   if (block.type === "text") {
     return <p className="mb-4">{block.content}</p>;
   }
+  if (block.type === "image" && block.imageUrl) {
+    return <img src={block.imageUrl} alt="Block" className="max-h-40 rounded mb-4" />;
+  }
+  if (block.type === "button") {
+    return (
+      <button className="px-4 py-2 bg-blue-600 text-white rounded font-semibold mb-4">
+        {block.buttonLabel || "Click Me"}
+      </button>
+    );
+  }
   return null;
 }
 
