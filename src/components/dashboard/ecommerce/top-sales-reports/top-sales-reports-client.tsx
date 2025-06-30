@@ -103,226 +103,48 @@ export function TopSalesReportsClient({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <Button
-          variant={activeFilter === 'year' ? 'default' : 'outline'}
-          onClick={() => handleFilterChange('year')}
+          variant={activeFilter === 'all' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('all')}
         >
-          Year
+          All Products
         </Button>
         <Button
-          variant={activeFilter === 'last_month' ? 'default' : 'outline'}
-          onClick={() => handleFilterChange('last_month')}
+          variant={activeFilter === 'low_stock' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('low_stock')}
         >
-          Last month
+          Low in Stock
         </Button>
         <Button
-          variant={activeFilter === 'this_month' ? 'default' : 'outline'}
-          onClick={() => handleFilterChange('this_month')}
+          variant={activeFilter === 'out_of_stock' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('out_of_stock')}
         >
-          This month
+          Out of Stock
         </Button>
         <Button
-          variant={activeFilter === 'last_7_days' ? 'default' : 'outline'}
-          onClick={() => handleFilterChange('last_7_days')}
+          variant={activeFilter === 'most_stocked' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('most_stocked')}
         >
-          Last 7 days
-        </Button>
-        <Input
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            setActiveFilter('custom');
-          }}
-          className="w-auto"
-        />
-        <Input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setActiveFilter('custom');
-          }}
-          className="w-auto"
-        />
-        <Button onClick={handleGenerateReport} disabled={loading}>
-          {loading ? "Generating..." : "Generate"}
+          Most Stocked
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
-            <CardDescription>Top products by sales volume.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : topSellingProducts.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Total Sales</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topSellingProducts.map((item, index) => (
-                    <TableRow key={item.product_id}>
-                      <TableCell className="font-medium flex items-center gap-2">
-                        {item.product_image_url && (
-                          <Image
-                            src={item.product_image_url}
-                            alt={item.product_name}
-                            width={32}
-                            height={32}
-                            className="rounded object-cover"
-                          />
-                        )}
-                        {item.product_name}
-                      </TableCell>
-                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
-                      <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(item.total_sales_amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No Data Found.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Categories</CardTitle>
-            <CardDescription>Top categories by sales volume.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : topSellingCategories.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Total Sales</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topSellingCategories.map((item, index) => (
-                    <TableRow key={item.category_name || index}>
-                      <TableCell className="font-medium capitalize">{item.category_name || "Uncategorized"}</TableCell>
-                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
-                      <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(item.total_sales_amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No Data Found.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Brands</CardTitle>
-            <CardDescription>Top brands by sales volume.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : topSellingBrands.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Brand</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Total Sales</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topSellingBrands.map((item, index) => (
-                    <TableRow key={item.brand_name || index}>
-                      <TableCell className="font-medium capitalize">{item.brand_name || "Unbranded"}</TableCell>
-                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
-                      <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(item.total_sales_amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No Data Found.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Payment Method</CardTitle>
-            <CardDescription>
-              Breakdown of orders by payment method.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : topPaymentMethods.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Method</TableHead>
-                    <TableHead className="text-right">Orders</TableHead>
-                    <TableHead className="text-right">Total Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topPaymentMethods.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium capitalize">{item.payment_method}</TableCell>
-                      <TableCell className="text-right">{item.total_orders}</TableCell>
-                      <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(item.total_amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No Data Found.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Stock Overview</CardTitle>
+          <CardDescription>
+            View and manage your product inventory based on stock levels.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="h-[300px] flex items-center justify-center">
+              Loading products...
+            </div>
+          ) : (
+            <StockReportsDataTable data={products} />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Package, Users, LineChart, Ticket, ReceiptText } from "lucide-react"; // Added ReceiptText icon
+import { ShoppingCart, Package, Users, LineChart, Ticket, ReceiptText, TrendingUp } from "lucide-react"; // Added TrendingUp icon
 
 const tools = [
   {
@@ -41,10 +41,16 @@ const tools = [
     icon: Ticket,
   },
   {
-    title: "Refund Requests", // New tool
+    title: "Refund Requests",
     description: "Manage customer refund requests.",
     href: "/dashboard/ecommerce/refunds",
-    icon: ReceiptText, // Using ReceiptText icon
+    icon: ReceiptText,
+  },
+  {
+    title: "Top Sales Reports", // New tool
+    description: "Analyze top-performing products, categories, and brands.",
+    href: "/dashboard/ecommerce/top-sales-reports",
+    icon: TrendingUp, // Using TrendingUp icon
   },
 ];
 
