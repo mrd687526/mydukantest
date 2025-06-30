@@ -114,3 +114,15 @@ export interface Product {
   created_at: string;
   updated_at: string;
 }
+
+export interface Order {
+  id: string;
+  profile_id: string;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  total_amount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+}

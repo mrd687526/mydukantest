@@ -1,7 +1,37 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart } from "lucide-react";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { OrdersClient } from "@/components/dashboard/ecommerce/orders/orders-client";
 
-export default function OrdersPage() {
+export default async function OrdersPage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching orders:", error);
+    return <div>Error loading orders. Please try again later.</div>;
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -10,21 +40,7 @@ export default function OrdersPage() {
           View and manage all orders from your customers.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Orders</CardTitle>
-          <CardDescription>A list of all orders placed in your store.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <ShoppingCart className="h-12 w-12 mb-4" />
-            <p className="text-lg font-semibold">No Orders Yet</p>
-            <p className="mt-2">
-              When customers place orders, they will appear here.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <OrdersClient orders={orders || []} />
     </div>
   );
 }
