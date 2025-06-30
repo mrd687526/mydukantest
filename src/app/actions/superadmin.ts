@@ -195,3 +195,27 @@ export async function deleteUserAndProfile(userId: string) {
     return { error: "An unexpected error occurred." };
   }
 }
+
+// New action to fetch daily new user counts
+export async function getDailyNewUserCounts(startDate: string, endDate: string): Promise<{ data: { day: string; count: number }[] | null; error: string | null }> {
+  if (!await isSuperAdmin()) {
+    return { data: null, error: "Unauthorized: Only super admins can view this report." };
+  }
+
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data, error } = await supabaseAdmin.rpc("get_daily_new_user_counts", {
+    p_start_date: startDate,
+    p_end_date: endDate,
+  });
+
+  if (error) {
+    console.error("Supabase error fetching daily new user counts:", error.message);
+    return { data: null, error: "Database error: Could not fetch new user counts." };
+  }
+
+  return { data: data as { day: string; count: number }[], error: null };
+}
