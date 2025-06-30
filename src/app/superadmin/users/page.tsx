@@ -1,10 +1,9 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin"; // Import createNewUserAndProfile
+import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin";
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription } from "@/lib/types";
 
-// Define a type for the data passed to the table, combining Profile and Subscription info
 interface UserProfileWithSubscription extends Profile {
   subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
 }
@@ -19,7 +18,6 @@ export default async function SuperAdminUsersPage() {
     redirect("/login");
   }
 
-  // The layout already checks for super_admin role, but we'll re-check for safety
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -30,29 +28,19 @@ export default async function SuperAdminUsersPage() {
     redirect("/dashboard?error=Permission denied.");
   }
 
-  // Attempt to create a default super admin user if none exists (for initial setup)
-  // This is a simplified approach for demo/initial setup. In production, you'd have a dedicated setup flow.
   const { data: existingSuperAdminProfiles } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id", { count: "exact", head: true })
     .eq("role", "super_admin");
 
-  if (!existingSuperAdminProfiles || existingSuperAdminProfiles.length === 0) {
-    console.log("No super admin found, attempting to create default super admin...");
-    const result = await createNewUserAndProfile({
+  if (existingSuperAdminProfiles === null || existingSuperAdminProfiles === 0) {
+    console.log("No super admin found, creating default super admin...");
+    await createNewUserAndProfile({
       email: 'superadmin@example.com',
-      password: 'password', // Use a strong password in production!
+      password: 'password',
       name: 'Super Admin',
       role: 'super_admin',
     });
-    if (result.error) {
-      console.error("Failed to create default super admin:", result.error);
-      // Optionally, display an error to the user if this is critical
-    } else {
-      console.log("Default super admin created successfully.");
-      // Revalidate path to show the new user
-      redirect('/superadmin/users'); // Redirect to refresh data
-    }
   }
 
   const { data: users, error } = await getAllUsersAndProfiles();
