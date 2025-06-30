@@ -9,7 +9,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export default function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string; // New prop
+}
+
+export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,12 +24,12 @@ export default function LoginForm() {
     const checkUserAndRedirect = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        router.push('/dashboard');
+        router.push(redirectTo); // Use the redirectTo prop
       }
     };
 
     checkUserAndRedirect();
-  }, [supabase, router]);
+  }, [supabase, router, redirectTo]);
 
   const handleQuickAccess = async () => {
     setIsDemoLoading(true);
@@ -41,7 +45,7 @@ export default function LoginForm() {
       });
       console.error("Demo login error:", error.message);
     } else {
-      router.push('/dashboard');
+      router.push(redirectTo); // Use the redirectTo prop
     }
     setIsDemoLoading(false);
   };
@@ -62,7 +66,7 @@ export default function LoginForm() {
           theme="light"
           redirectTo={
             typeof window !== "undefined"
-              ? `${window.location.origin}/auth/callback`
+              ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
               : ""
           }
         />

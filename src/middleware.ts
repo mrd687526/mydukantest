@@ -48,7 +48,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/data-deletion') ||
     pathname.startsWith('/store') ||
-    pathname.startsWith('/api/stripe/webhook') // Allow webhook to be publicly accessible
+    pathname.startsWith('/api/stripe/webhook') ||
+    pathname.startsWith('/superadmin/login') // Allow access to superadmin login page
   ) {
     return response;
   }
