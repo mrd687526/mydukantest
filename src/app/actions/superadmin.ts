@@ -122,7 +122,7 @@ export async function getAllUsersAndProfiles() {
     .select(`
       id,
       name,
-      users ( email ),
+      users!id ( email ),
       role,
       created_at,
       subscriptions ( status, current_period_end )
