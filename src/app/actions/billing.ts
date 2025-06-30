@@ -19,8 +19,8 @@ export async function createCheckoutSession(values: z.infer<typeof checkoutSessi
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, stripe_customer_id")
-    .eq("user_id", user.id)
+    .select("id, stripe_customer_id, name") // Added 'name' to the select query
+    .eq("id", user.id) // Assuming 'id' in profiles table is user.id
     .single();
 
   if (profileError || !profile) {
@@ -81,5 +81,5 @@ export async function createCheckoutSession(values: z.infer<typeof checkoutSessi
   } catch (stripeError: any) {
     console.error("Stripe checkout session creation error:", stripeError.message);
     return { error: "Failed to create checkout session. Please try again." };
-  }
+    }
 }
