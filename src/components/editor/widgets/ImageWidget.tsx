@@ -3,17 +3,13 @@
 import React from "react";
 
 export const ImageWidget = ({
-  id,
   src,
   alt,
   href,
-  children,
 }: {
-  id: string;
   src: string;
   alt: string;
   href?: string;
-  children?: React.ReactNode;
 }) => {
   if (!src) {
     return (
@@ -27,7 +23,6 @@ export const ImageWidget = ({
 
   if (href) {
     return (
-      // In editor, prevent navigation
       <a
         href={href}
         onClick={(e) => e.preventDefault()}
@@ -35,15 +30,8 @@ export const ImageWidget = ({
         rel="noopener noreferrer"
       >
         {image}
-        {children}
       </a>
     );
   }
-
-  return (
-    <div>
-      {image}
-      {children}
-    </div>
-  );
+  return <div>{image}</div>;
 };
