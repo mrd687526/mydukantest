@@ -1,9 +1,21 @@
 import Link from "next/link";
-import { ShoppingCart, Package2 } from "lucide-react";
+import { ShoppingCart, Package2, User } from "lucide-react";
 import { CartProvider } from "@/components/storefront/cart-context";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default async function StoreLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const handleSignOut = async () => {
+    "use server";
+    const supabaseAdmin = await createClient(); // Use admin client if needed, or regular client
+    await supabaseAdmin.auth.signOut();
+    redirect("/store/login");
+  };
+
   return (
     <CartProvider>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -25,6 +37,23 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                 Cart
               </Link>
             </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/store/account" className="flex items-center gap-1">
+                    <User className="w-4 h-4" />
+                    My Account
+                  </Link>
+                </Button>
+                <form action={handleSignOut}>
+                  <Button variant="outline" type="submit">Logout</Button>
+                </form>
+              </>
+            ) : (
+              <Button variant="outline" asChild>
+                <Link href="/store/login">Login</Link>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link href="/dashboard">Dashboard</Link>
             </Button>
