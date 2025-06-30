@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link"; // Import Link
 import {
   ColumnDef,
   flexRender,
@@ -129,30 +130,37 @@ export const columns: ColumnDef<Discount>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DeleteConfirmationDialog
-            onConfirm={() => handleDelete(row.original.id)}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete this discount code."
-          >
-            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              Delete
-            </div>
-          </DeleteConfirmationDialog>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const discount = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <Link href={`/dashboard/ecommerce/discounts/${discount.id}/edit`} passHref>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                Edit
+              </DropdownMenuItem>
+            </Link>
+            <DropdownMenuSeparator />
+            <DeleteConfirmationDialog
+              onConfirm={() => handleDelete(row.original.id)}
+              title="Are you absolutely sure?"
+              description="This action cannot be undone. This will permanently delete this discount code."
+            >
+              <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                Delete
+              </div>
+            </DeleteConfirmationDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
 
