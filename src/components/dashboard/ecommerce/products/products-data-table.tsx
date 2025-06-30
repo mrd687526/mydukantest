@@ -196,7 +196,7 @@ export function ProductsDataTable({ data }: { data: Product[] }) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowodel(),
+    getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
