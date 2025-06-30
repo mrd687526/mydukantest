@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, name") // Select name as well
+    .select("*") // Select all fields to match the Profile type
     .eq("user_id", user.id)
     .single();
 
