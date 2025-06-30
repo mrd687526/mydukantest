@@ -4,10 +4,27 @@ import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
 export default async function ProductPage({ params }: { params: { productId: string } }) {
   const supabase = createClient();
+
+  // Determine the profile_id for the public storefront (same logic as /store/page.tsx)
+  const { data: storeProfile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "store_admin")
+    .limit(1)
+    .single();
+
+  if (profileError || !storeProfile) {
+    console.error("Error fetching store profile for public storefront product page:", profileError?.message);
+    return notFound(); // Or redirect to a generic error page
+  }
+
+  const storeProfileId = storeProfile.id;
+
   const { data: product } = await supabase
     .from("products")
     .select("*")
     .eq("id", params.productId)
+    .eq("profile_id", storeProfileId) // Ensure the product belongs to the demo store
     .single();
 
   if (!product) return notFound();

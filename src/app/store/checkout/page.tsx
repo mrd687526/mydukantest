@@ -24,6 +24,7 @@ import {
 import { CheckoutForm } from "@/components/storefront/checkout-form";
 import { createOrder } from "@/app/actions/orders";
 import { v4 as uuidv4 } from 'uuid'; // For generating unique order numbers
+import { createClient } from "@/integrations/supabase/client"; // Import client for fetching profile_id
 
 // Make sure to call loadStripe outside of a component’s render to avoid
 // recreating the Stripe object on every render.
@@ -49,6 +50,9 @@ export default function CheckoutPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+  const [storeProfileId, setStoreProfileId] = useState<string | null>(null); // State to hold the store's profile_id
+
+  const supabase = createClient();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -74,11 +78,38 @@ export default function CheckoutPage() {
     }
   }, [items, router]);
 
+  // Fetch the store's profile_id on component mount
+  useEffect(() => {
+    const fetchStoreProfileId = async () => {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("role", "store_admin")
+        .limit(1)
+        .single();
+
+      if (error || !profile) {
+        console.error("Error fetching store profile for checkout:", error?.message);
+        toast.error("Could not determine store. Please try again later.");
+        router.push("/store"); // Redirect if store profile cannot be determined
+        return;
+      }
+      setStoreProfileId(profile.id);
+    };
+    fetchStoreProfileId();
+  }, [supabase, router]);
+
   const handleCreateOrderAndPaymentIntent = async (values: CheckoutFormValues) => {
+    if (!storeProfileId) {
+      toast.error("Store information not loaded. Please try again.");
+      return;
+    }
+
     setIsProcessingOrder(true);
     const orderNumber = `ORD-${uuidv4().substring(0, 8).toUpperCase()}`; // Generate a unique order number
 
     const orderData = {
+      profile_id: storeProfileId, // Pass the store's profile_id
       order_number: orderNumber,
       customer_name: values.customer_name,
       customer_email: values.customer_email,
@@ -282,7 +313,7 @@ export default function CheckoutPage() {
             </div>
 
             {!clientSecret ? (
-              <Button type="submit" className="w-full" disabled={isProcessingOrder}>
+              <Button type="submit" className="w-full" disabled={isProcessingOrder || !storeProfileId}>
                 {isProcessingOrder ? "Processing Order..." : "Continue to Payment"}
               </Button>
             ) : (

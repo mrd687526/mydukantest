@@ -6,11 +6,37 @@ import { Product } from "@/lib/types";
 export default async function StoreHomePage() {
   const supabase = await createClient();
 
-  // Fetch dynamic page content from the database
+  // For multi-tenancy in the public storefront, we need to determine which store's data to show.
+  // In a real application, this would typically be derived from a subdomain (e.g., storename.myapp.com)
+  // or a path parameter (e.g., myapp.com/store/storename).
+  // For this demo, we'll fetch the profile_id of the first 'store_admin' to act as the default demo store.
+  const { data: storeProfile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "store_admin")
+    .limit(1)
+    .single();
+
+  if (profileError || !storeProfile) {
+    console.error("Error fetching store profile for public storefront:", profileError?.message);
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-bold mb-2">Store Not Found</h2>
+        <p className="text-muted-foreground">
+          It looks like there are no active stores configured.
+        </p>
+      </div>
+    );
+  }
+
+  const storeProfileId = storeProfile.id;
+
+  // Fetch dynamic page content from the database for the specific store
   const { data: pageData, error: pageError } = await supabase
     .from("store_pages")
     .select("data")
     .eq("slug", "home")
+    .eq("profile_id", storeProfileId) // Filter by profile_id
     .single();
 
   if (pageError && pageError.code !== "PGRST116") { // PGRST116 means no rows found, which is fine
@@ -28,10 +54,11 @@ export default async function StoreHomePage() {
 
   const contentTree = pageData?.data || null;
 
-  // Fetch products (existing logic)
+  // Fetch products for the specific store
   const { data: products, error: productsError } = await supabase
     .from("products")
     .select("*")
+    .eq("profile_id", storeProfileId) // Filter by profile_id
     .order("created_at", { ascending: false });
 
   if (productsError) {

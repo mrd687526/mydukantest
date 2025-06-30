@@ -178,7 +178,24 @@ export default function EditorPage() {
 
   useEffect(() => {
     const loadPage = async () => {
-      const res = await fetch("/api/store-page?slug=home");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to edit pages.");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile) {
+        toast.error("Profile not found. Cannot load page.");
+        return;
+      }
+
+      const res = await fetch(`/api/store-page?slug=home&profileId=${profile.id}`);
       if (res.ok) {
         const { data } = await res.json();
         if (data) setTree(data as Node);

@@ -14,11 +14,38 @@ export default async function CustomerAccountPage() {
     redirect("/store/login");
   }
 
-  // Fetch the customer's profile (if it exists, linked by email or user_id)
+  // Determine the profile_id for the public storefront (same logic as /store/page.tsx)
+  const { data: storeProfile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "store_admin")
+    .limit(1)
+    .single();
+
+  if (profileError || !storeProfile) {
+    console.error("Error fetching store profile for customer account page:", profileError?.message);
+    return (
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 space-y-6">
+        <h1 className="text-2xl font-bold">My Account</h1>
+        <p className="text-muted-foreground">Welcome, {user.email}!</p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Orders</CardTitle>
+            <CardDescription>Could not load store information. Please try again later.</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const storeProfileId = storeProfile.id;
+
+  // Fetch the customer's profile associated with this store's profile_id
   const { data: customerProfile, error: customerError } = await supabase
     .from("customers")
     .select("id, name, email")
     .eq("email", user.email!) // Assuming customer email matches auth email
+    .eq("profile_id", storeProfileId) // Filter by store's profile_id
     .single();
 
   if (customerError || !customerProfile) {
@@ -47,11 +74,12 @@ export default async function CustomerAccountPage() {
     );
   }
 
-  // Fetch orders associated with this customer_id
+  // Fetch orders associated with this customer_id and store's profile_id
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
     .select("*")
     .eq("customer_id", customerProfile.id)
+    .eq("profile_id", storeProfileId) // Filter by store's profile_id
     .order("created_at", { ascending: false });
 
   if (ordersError) {
