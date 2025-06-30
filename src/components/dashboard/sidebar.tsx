@@ -8,7 +8,10 @@ import {
   Settings,
   BotMessageSquare,
   Newspaper,
-  ShoppingCart, // New icon for E-Commerce
+  ShoppingCart,
+  Package,
+  Users,
+  Ticket,
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -23,7 +26,11 @@ export function DashboardSidebar() {
   ];
 
   const ecommerceNavItems = [
-    // No items yet, but ready for future expansion
+    { href: "/dashboard/ecommerce/orders", label: "Orders", icon: ShoppingCart },
+    { href: "/dashboard/ecommerce/products", label: "Products", icon: Package },
+    { href: "/dashboard/ecommerce/customers", label: "Customers", icon: Users },
+    { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
+    { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
   ];
 
   return (
@@ -46,16 +53,7 @@ export function DashboardSidebar() {
             <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
               E-Commerce
             </h3>
-            {ecommerceNavItems.length > 0 ? (
-              <SidebarNav items={ecommerceNavItems} />
-            ) : (
-              <div className="text-sm text-muted-foreground py-2 px-3">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span>Coming Soon</span>
-                </div>
-              </div>
-            )}
+            <SidebarNav items={ecommerceNavItems} />
           </div>
         </div>
         <div className="mt-auto p-4 border-t">
