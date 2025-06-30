@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; // Ensure React is explicitly imported
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
-import { PaletteItem } from "@/components/editor/PaletteItem";
+import { PaletteItem } from "@/components/editor/PaletteItem"; // This is the import
 import {
   DndContext,
   closestCenter,
@@ -25,6 +25,9 @@ import {
   Container,
   Trash2,
 } from "lucide-react";
+
+// Add this line to check the import status of PaletteItem
+console.log("PaletteItem imported:", PaletteItem);
 
 const supabase = createClient();
 
