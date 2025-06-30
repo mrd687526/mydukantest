@@ -4,6 +4,7 @@ import { createClient as createServerSupabaseClient } from "@/integrations/supab
 import { createClient as createAdminSupabaseClient } from '@supabase/supabase-js'; // Import directly for admin client
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { UserProfileWithSubscription } from "@/lib/types"; // Import the new interface
 
 // Helper to check if the current user is a super admin (uses regular client as it checks current user's session)
 async function isSuperAdmin() {
@@ -106,7 +107,7 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
   }
 }
 
-export async function getAllUsersAndProfiles() {
+export async function getAllUsersAndProfiles(): Promise<{ data: UserProfileWithSubscription[] | null; error: string | null }> {
   if (!await isSuperAdmin()) {
     return { data: null, error: "Unauthorized: Only super admins can view all users." };
   }
@@ -117,30 +118,16 @@ export async function getAllUsersAndProfiles() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: profiles, error } = await supabaseAdmin
-    .from("profiles")
-    .select(`
-      id,
-      name,
-      users!id ( email ),
-      role,
-      created_at,
-      subscriptions ( status, current_period_end )
-    `)
-    .order("created_at", { ascending: false });
+  // Call the RPC function instead of direct select with embedding
+  const { data, error } = await supabaseAdmin.rpc("get_all_profiles_with_auth_info");
 
   if (error) {
     console.error("Supabase error fetching all profiles:", error.message);
     return { data: null, error: "Database error: Could not fetch user data." };
   }
 
-  // Map the data to include email directly in the profile object
-  const profilesWithEmail = profiles.map(profile => ({
-    ...profile,
-    email: profile.users?.email || null, // Extract email from joined users
-  }));
-
-  return { data: profilesWithEmail, error: null };
+  // The data returned by the RPC already matches UserProfileWithSubscription structure
+  return { data: data as UserProfileWithSubscription[], error: null };
 }
 
 const updateUserRoleSchema = z.object({

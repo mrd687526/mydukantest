@@ -3,15 +3,21 @@ import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription } from "@/lib/types";
-import { getDailyNewUserCounts } from "@/app/actions/superadmin";
+import { getDailyNewUserCounts, getAllUsersAndProfiles } from "@/app/actions/superadmin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewUsersChartContainer } from "@/components/superadmin/new-users-chart-container";
 import { Users } from "lucide-react";
 import { format, subDays } from "date-fns";
 
-// Define a type for the data passed to the UsersClient, combining Profile and Subscription info
-interface UserProfileWithSubscription extends Profile {
-  subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
+// Define a type for the data passed to the UsersClient, matching the RPC output
+interface UserProfileWithSubscription {
+  id: string;
+  name: string | null;
+  role: 'super_admin' | 'store_admin';
+  created_at: string;
+  email: string;
+  subscription_status: string | null;
+  subscription_end_date: string | null;
 }
 
 export default async function SuperAdminDashboardPage() {
@@ -42,27 +48,16 @@ export default async function SuperAdminDashboardPage() {
   }
 
   // --- Fetch data for User Management ---
-  const { data: users, error: usersError } = await supabase
-    .from("profiles")
-    .select(`
-      id,
-      name,
-      users!id ( email ),
-      role,
-      created_at,
-      subscriptions ( status, current_period_end )
-    `)
-    .order("created_at", { ascending: false });
+  // The getAllUsersAndProfiles function now returns data in the UserProfileWithSubscription format
+  const { data: users, error: usersError } = await getAllUsersAndProfiles();
 
   if (usersError) {
     console.error("Supabase error fetching all profiles for super admin dashboard:", usersError.message);
     return <div>Error loading user data. Please try again later.</div>;
   }
 
-  const profilesWithEmail = users?.map(userProfile => ({
-    ...userProfile,
-    email: userProfile.users?.email || null,
-  })) as UserProfileWithSubscription[] || [];
+  // No need for profilesWithEmail mapping here, as RPC returns flat structure
+  const profilesWithEmail = users || [];
 
   // --- Fetch data for New User Analytics (last 30 days) ---
   const today = new Date();

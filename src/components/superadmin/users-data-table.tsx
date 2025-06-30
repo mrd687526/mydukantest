@@ -39,9 +39,15 @@ import { deleteUserAndProfile } from "@/app/actions/superadmin";
 import { Profile, Subscription } from "@/lib/types";
 import { EditUserRoleDialog } from "./edit-user-role-dialog"; // Import the new dialog
 
-// Define a type for the data passed to the table, combining Profile and Subscription info
-interface UserProfileWithSubscription extends Profile {
-  subscriptions: Pick<Subscription, 'status' | 'current_period_end'>[] | null;
+// Define a type for the data passed to the table, matching the RPC output
+interface UserProfileWithSubscription {
+  id: string;
+  name: string | null;
+  role: 'super_admin' | 'store_admin';
+  created_at: string;
+  email: string;
+  subscription_status: string | null;
+  subscription_end_date: string | null;
 }
 
 async function handleDelete(userId: string) {
@@ -93,15 +99,13 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     },
   },
   {
-    accessorKey: "subscriptions",
+    accessorKey: "subscription_status", // Changed from 'subscriptions'
     header: "Subscription Status",
     cell: ({ row }) => {
-      const subscriptions = row.getValue("subscriptions") as UserProfileWithSubscription['subscriptions'];
-      const activeSubscription = subscriptions?.find(s => s.status === 'active' || s.status === 'trialing');
+      const status = row.original.subscription_status; // Directly access status
+      const endDate = row.original.subscription_end_date ? new Date(row.original.subscription_end_date).toLocaleDateString() : 'N/A';
       
-      if (activeSubscription) {
-        const status = activeSubscription.status;
-        const endDate = activeSubscription.current_period_end ? new Date(activeSubscription.current_period_end).toLocaleDateString() : 'N/A';
+      if (status) {
         let variant: "default" | "secondary" | "outline" | "destructive" = "default";
         if (status === 'trialing') variant = "secondary";
         if (status === 'canceled' || status === 'unpaid' || status === 'past_due') variant = "destructive";
@@ -109,7 +113,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
         return (
           <div className="flex flex-col">
             <Badge variant={variant} className="capitalize">{status.replace('_', ' ')}</Badge>
-            {activeSubscription.current_period_end && (
+            {row.original.subscription_end_date && (
               <span className="text-xs text-muted-foreground mt-1">Ends: {endDate}</span>
             )}
           </div>

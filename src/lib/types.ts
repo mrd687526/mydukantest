@@ -265,7 +265,6 @@ export interface Profile {
   avatar: string | null;
   stripe_customer_id: string | null; // New: Stripe Customer ID
   role: 'super_admin' | 'store_admin'; // Added role
-  email?: string; // Added email for display purposes in superadmin table
 }
 
 export interface Subscription {
@@ -279,4 +278,12 @@ export interface Subscription {
   current_period_end: string;
   created_at: string;
   updated_at: string;
+}
+
+// New interface to represent the combined data from the RPC function
+export interface UserProfileWithSubscription extends Profile {
+  created_at: string; // From auth.users.created_at
+  email: string; // Directly from auth.users
+  subscription_status: string | null; // 'active', 'trialing', 'canceled', etc.
+  subscription_end_date: string | null;
 }
