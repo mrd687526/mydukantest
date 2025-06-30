@@ -10,7 +10,7 @@ interface EditDiscountPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function EditDiscountPage(props: Awaited<EditDiscountPageProps>) {
+export default async function EditDiscountPage(props: EditDiscountPageProps) {
   const { params } = props;
   const { discountId } = params;
   const supabase = createClient();

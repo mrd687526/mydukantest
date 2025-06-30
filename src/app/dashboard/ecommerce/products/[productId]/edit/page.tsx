@@ -8,7 +8,7 @@ interface EditProductPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function EditProductPage(props: Awaited<EditProductPageProps>) {
+export default async function EditProductPage(props: EditProductPageProps) {
   const { params } = props;
   const { productId } = params;
   const supabase = createClient();

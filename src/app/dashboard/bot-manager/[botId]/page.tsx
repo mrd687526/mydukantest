@@ -11,7 +11,7 @@ interface BotEditorPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function BotEditorPage(props: Awaited<BotEditorPageProps>) {
+export default async function BotEditorPage(props: BotEditorPageProps) {
   const { params } = props;
   const supabase = createClient();
   const { botId } = params;

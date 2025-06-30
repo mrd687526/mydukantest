@@ -7,7 +7,7 @@ interface ProductPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function ProductPage(props: Awaited<ProductPageProps>) {
+export default async function ProductPage(props: ProductPageProps) {
   const { params } = props;
   const supabase = createClient();
   const { productId } = params;

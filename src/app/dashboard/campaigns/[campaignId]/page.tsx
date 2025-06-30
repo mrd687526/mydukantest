@@ -23,7 +23,7 @@ interface CampaignPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function Page(props: Awaited<CampaignPageProps>) {
+export default async function Page(props: CampaignPageProps) {
   const { params } = props;
   const supabase = createClient();
   const { campaignId } = params;
