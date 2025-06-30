@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import Stripe from 'stripe'; // Import Stripe namespace
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@/integrations/supabase/server';
 
