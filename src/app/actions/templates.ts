@@ -90,6 +90,56 @@ export async function createReplyTemplate(
   return { error: null };
 }
 
+export async function updateReplyTemplate(
+  templateId: string,
+  values: z.infer<typeof replyTemplateFormSchema>
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be logged in to update a template." };
+  }
+
+  // Verify ownership of the template
+  const { data: existingTemplate, error: fetchError } = await supabase
+    .from("reply_templates")
+    .select("profile_id")
+    .eq("id", templateId)
+    .single();
+
+  if (fetchError || !existingTemplate) {
+    console.error("Supabase error fetching template for update:", fetchError?.message);
+    return { error: "Template not found or you do not have permission to edit it." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile || existingTemplate.profile_id !== profile.id) {
+    return { error: "You are not authorized to update this template." };
+  }
+
+  const { error } = await supabase.from("reply_templates").update({
+    name: values.name,
+    template_text: values.template_text,
+    reply_type: values.reply_type,
+  }).eq("id", templateId);
+
+  if (error) {
+    console.error("Supabase error updating reply template:", error.message);
+    return { error: "Database error: Could not update template." };
+  }
+
+  revalidatePath("/dashboard/templates");
+  return { error: null };
+}
+
 export async function deleteCommentTemplate(templateId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("comment_templates").delete().eq("id", templateId);
