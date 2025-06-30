@@ -1,7 +1,34 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ticket } from "lucide-react";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { DiscountsClient } from "@/components/dashboard/ecommerce/discounts/discounts-client";
+import { getDiscounts } from "@/app/actions/discounts";
 
-export default function DiscountsPage() {
+export default async function DiscountsPage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: discounts, error } = await getDiscounts();
+
+  if (error) {
+    console.error("Error fetching discounts:", error);
+    return <div>Error loading discounts. Please try again later.</div>;
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -10,21 +37,7 @@ export default function DiscountsPage() {
           Create and manage discount codes and automatic promotions.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Discounts</CardTitle>
-          <CardDescription>A list of all your active and expired discounts.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <Ticket className="h-12 w-12 mb-4" />
-            <p className="text-lg font-semibold">No Discounts Yet</p>
-            <p className="mt-2">
-              Get started by creating your first discount code.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <DiscountsClient discounts={discounts || []} />
     </div>
   );
 }

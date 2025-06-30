@@ -177,3 +177,19 @@ export interface CampaignTagAssociation {
   campaign_id: string;
   tag_id: string;
 }
+
+export interface Discount {
+  id: string;
+  profile_id: string;
+  code: string;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  value: number;
+  min_purchase_amount: number | null;
+  usage_limit: number | null;
+  used_count: number;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
