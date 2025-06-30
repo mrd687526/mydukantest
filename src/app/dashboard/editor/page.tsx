@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
-import PaletteItem from "@/components/editor/PaletteItem"; // Updated to default import
+import PaletteItem from "../../../components/editor/PaletteItem"; // Changed to relative import
 import {
   DndContext,
   closestCenter,
