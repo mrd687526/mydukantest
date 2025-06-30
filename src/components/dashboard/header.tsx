@@ -91,6 +91,9 @@ export function DashboardHeader({ user }: { user: User | null }) {
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1" />
+      <Link href="/store">
+        <Button variant="outline" className="mr-2">View Store</Button>
+      </Link>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
