@@ -266,6 +266,7 @@ export interface Profile {
   avatar: string | null;
   stripe_customer_id: string | null; // New: Stripe Customer ID
   role: 'super_admin' | 'store_admin'; // Added role
+  email?: string; // Added email for display purposes in superadmin table
 }
 
 export interface Subscription {

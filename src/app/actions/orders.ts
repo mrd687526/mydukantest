@@ -42,7 +42,6 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     // For now, we'll assume the public storefront is tied to a single profile or we'll need a way to identify it.
     // For simplicity, let's assume the `createOrder` action is always called in the context of a store owner's profile.
     // If this is for a public storefront, the `profile_id` needs to be passed or derived differently.
-    // For now, we'll use the first profile found if no user is logged in, or require a user.
     // Let's adjust this to fetch the profile based on the current user's session, which would be the *customer* user if they are logged in.
     // If no customer user is logged in, it's a guest checkout.
 

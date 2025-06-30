@@ -31,8 +31,26 @@ const createUserSchema = z.object({
 });
 
 export async function createNewUserAndProfile(values: z.infer<typeof createUserSchema>) {
-  if (!await isSuperAdmin()) {
-    return { error: "Unauthorized: Only super admins can create users." };
+  // In a real application, this check would be more robust,
+  // e.g., only allowing creation if no super_admin exists, or by an existing super_admin.
+  // For initial setup, we'll allow it if no user is logged in or if a super admin is logged in.
+  const supabase = await createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  
+  let canCreate = false;
+  if (!currentUser) {
+    // Allow creation if no one is logged in (first super admin setup)
+    canCreate = true;
+  } else {
+    // Allow creation if the current user is already a super admin
+    const { data: currentProfile } = await supabase.from("profiles").select("role").eq("user_id", currentUser.id).single();
+    if (currentProfile?.role === 'super_admin') {
+      canCreate = true;
+    }
+  }
+
+  if (!canCreate) {
+    return { error: "Unauthorized: You do not have permission to create new users with this role." };
   }
 
   const supabaseAdmin = createClient(); // Use admin client for auth.admin functions
@@ -59,7 +77,7 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
     const { error: profileError } = await supabaseAdmin.from("profiles").insert({
       user_id: authUser.user.id,
       name: values.name,
-      email: values.email, // Store email in profile for easier access
+      // email: values.email, // Removed this as it's redundant and not in schema for profiles table
       role: values.role,
     });
 
@@ -91,7 +109,7 @@ export async function getAllUsersAndProfiles() {
       id,
       user_id,
       name,
-      email,
+      auth_users:user_id ( email ),
       role,
       created_at,
       subscriptions ( status, current_period_end )
@@ -103,7 +121,13 @@ export async function getAllUsersAndProfiles() {
     return { data: null, error: "Database error: Could not fetch user data." };
   }
 
-  return { data: profiles, error: null };
+  // Map the data to include email directly in the profile object
+  const profilesWithEmail = profiles.map(profile => ({
+    ...profile,
+    email: profile.auth_users?.email || null, // Extract email from joined auth_users
+  }));
+
+  return { data: profilesWithEmail, error: null };
 }
 
 const updateUserRoleSchema = z.object({

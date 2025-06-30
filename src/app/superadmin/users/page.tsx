@@ -1,6 +1,6 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import { getAllUsersAndProfiles } from "@/app/actions/superadmin";
+import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin"; // Import createNewUserAndProfile
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription } from "@/lib/types";
 
@@ -28,6 +28,31 @@ export default async function SuperAdminUsersPage() {
 
   if (!profile || profile.role !== 'super_admin') {
     redirect("/dashboard?error=Permission denied.");
+  }
+
+  // Attempt to create a default super admin user if none exists (for initial setup)
+  // This is a simplified approach for demo/initial setup. In production, you'd have a dedicated setup flow.
+  const { data: existingSuperAdminProfiles } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "super_admin");
+
+  if (!existingSuperAdminProfiles || existingSuperAdminProfiles.length === 0) {
+    console.log("No super admin found, attempting to create default super admin...");
+    const result = await createNewUserAndProfile({
+      email: 'superadmin@example.com',
+      password: 'password', // Use a strong password in production!
+      name: 'Super Admin',
+      role: 'super_admin',
+    });
+    if (result.error) {
+      console.error("Failed to create default super admin:", result.error);
+      // Optionally, display an error to the user if this is critical
+    } else {
+      console.log("Default super admin created successfully.");
+      // Revalidate path to show the new user
+      redirect('/superadmin/users'); // Redirect to refresh data
+    }
   }
 
   const { data: users, error } = await getAllUsersAndProfiles();

@@ -82,7 +82,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("email")}</div>,
+    cell: ({ row }) => <div>{row.original.email}</div>, // Directly access email from original object
   },
   {
     accessorKey: "role",
