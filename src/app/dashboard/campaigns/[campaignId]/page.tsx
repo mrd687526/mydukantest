@@ -17,11 +17,9 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
+import type { PageProps } from "next/types";
 
-interface CampaignPageProps {
-  params: { campaignId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+interface CampaignPageProps extends PageProps<{ campaignId: string }> {}
 
 export default async function Page(props: CampaignPageProps) {
   const { params } = props;

@@ -1,11 +1,9 @@
 import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
+import type { PageProps } from "next/types";
 
-interface ProductPageProps {
-  params: { productId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+interface ProductPageProps extends PageProps<{ productId: string }> {}
 
 export default async function ProductPage(props: ProductPageProps) {
   const { params } = props;
