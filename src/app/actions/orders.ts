@@ -21,6 +21,13 @@ const orderSchema = z.object({
   ),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending'),
   payment_type: z.string().min(1, "Payment type is required.").default('cash'),
+  shipping_address_line1: z.string().min(1, "Address Line 1 is required."),
+  shipping_address_line2: z.string().optional().nullable(),
+  shipping_city: z.string().min(1, "City is required."),
+  shipping_state: z.string().min(1, "State is required."),
+  shipping_postal_code: z.string().min(1, "Postal Code is required."),
+  shipping_country: z.string().min(1, "Country is required."),
+  shipping_phone: z.string().optional().nullable(),
   items: z.array(orderItemSchema).min(1, "At least one item is required for the order."),
 });
 
@@ -126,6 +133,13 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
       total_amount: values.total_amount, // Use client-provided total for now, or calculatedTotalAmount
       status: values.status,
       payment_type: values.payment_type,
+      shipping_address_line1: values.shipping_address_line1,
+      shipping_address_line2: values.shipping_address_line2,
+      shipping_city: values.shipping_city,
+      shipping_state: values.shipping_state,
+      shipping_postal_code: values.shipping_postal_code,
+      shipping_country: values.shipping_country,
+      shipping_phone: values.shipping_phone,
     })
     .select("id")
     .single();
@@ -155,7 +169,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
   revalidatePath("/dashboard/ecommerce/customers");
   revalidatePath("/dashboard/ecommerce/analytics"); // Analytics might be affected
   revalidatePath("/dashboard/ecommerce/top-sales-reports"); // Top sales reports will be affected
-  return { success: true };
+  return { success: true, orderId: order.id }; // Return the order ID
 }
 
 export async function deleteOrder(orderId: string) {

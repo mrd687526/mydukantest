@@ -171,6 +171,13 @@ export interface Order {
   updated_at: string;
   stripe_payment_intent_id: string | null; // New: Stripe Payment Intent ID
   stripe_charge_id: string | null; // New: Stripe Charge ID
+  shipping_address_line1: string | null; // New: Shipping address line 1
+  shipping_address_line2: string | null; // New: Shipping address line 2
+  shipping_city: string | null; // New: Shipping city
+  shipping_state: string | null; // New: Shipping state
+  shipping_postal_code: string | null; // New: Shipping postal code
+  shipping_country: string | null; // New: Shipping country
+  shipping_phone: string | null; // New: Shipping phone number
   order_items?: OrderItem[]; // Optional: to hold associated items
 }
 

@@ -29,9 +29,9 @@ export default function CartPage() {
             )}
             <div className="flex-1">
               <div className="font-semibold">{item.name}</div>
-              <div className="text-primary font-bold">${item.price}</div>
+              <div className="text-primary font-bold">${item.price.toFixed(2)}</div>
               <div className="flex items-center gap-2 mt-2">
-                <label htmlFor={`qty-${item.id}`}>Qty:</label>
+                <Label htmlFor={`qty-${item.id}`}>Qty:</Label>
                 <input
                   id={`qty-${item.id}`}
                   type="number"
@@ -53,7 +53,9 @@ export default function CartPage() {
         <Button onClick={clearCart} variant="outline">Clear Cart</Button>
       </div>
       <div className="mt-6 text-right">
-        <Button>Checkout</Button>
+        <Button asChild>
+          <Link href="/store/checkout">Proceed to Checkout</Link>
+        </Button>
       </div>
     </div>
   );
