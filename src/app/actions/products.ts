@@ -4,6 +4,7 @@ import { createClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Product } from "@/lib/types";
 
 const productFormSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters."),
@@ -137,4 +138,55 @@ export async function deleteProduct(productId: string) {
 
   revalidatePath("/dashboard/ecommerce/products");
   return { success: true };
+}
+
+type StockStatusFilter = 'all' | 'low_stock' | 'out_of_stock' | 'most_stocked';
+
+export async function getProductsForStockReport(filter: StockStatusFilter): Promise<{ data: Product[] | null; error: string | null }> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: "You must be logged in to view stock reports." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return { data: null, error: "You must have a profile to view stock reports." };
+  }
+
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("profile_id", profile.id);
+
+  switch (filter) {
+    case 'low_stock':
+      query = query.lte("inventory_quantity", 10).gt("inventory_quantity", 0).order("inventory_quantity", { ascending: true });
+      break;
+    case 'out_of_stock':
+      query = query.eq("inventory_quantity", 0).order("name", { ascending: true });
+      break;
+    case 'most_stocked':
+      query = query.order("inventory_quantity", { ascending: false });
+      break;
+    case 'all':
+    default:
+      query = query.order("name", { ascending: true });
+      break;
+  }
+
+  const { data: products, error } = await query;
+
+  if (error) {
+    console.error("Supabase error fetching products for stock report:", error.message);
+    return { data: null, error: "Database error: Could not fetch stock report." };
+  }
+
+  return { data: products as Product[], error: null };
 }
