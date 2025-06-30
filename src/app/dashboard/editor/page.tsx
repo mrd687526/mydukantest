@@ -26,7 +26,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-console.log("PaletteItem imported:", PaletteItem);
+console.log("PaletteItem imported at top of page.tsx:", PaletteItem);
 
 const supabase = createClient();
 
@@ -277,6 +277,9 @@ export default function EditorPage() {
       });
     }
   }
+
+  // This console log will show the value of PaletteItem right before it's used in JSX
+  console.log("PaletteItem value before rendering in JSX:", PaletteItem);
 
   return (
     <DndContext
