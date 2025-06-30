@@ -89,14 +89,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Allow super admins to access /superadmin routes (this check is now after the dev bypass)
-  if (pathname.startsWith('/superadmin')) {
-    if (!isSuperAdmin) {
-      return NextResponse.redirect(new URL('/dashboard?error=Permission denied. Not a super admin.', request.url));
-    }
-    return response;
-  }
-
   // Check subscription status for dashboard access (only for non-super admins)
   if (pathname.startsWith('/dashboard') && !isSuperAdmin) {
     const { data: subscription, error: subscriptionError } = await supabase
@@ -108,9 +100,14 @@ export async function middleware(request: NextRequest) {
     // Define allowed statuses for dashboard access
     const allowedStatuses = ['trialing', 'active'];
 
-    if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
-      // If no active/trialing subscription, redirect to the pricing page
-      if (!pathname.startsWith('/dashboard/pricing')) { // Avoid infinite redirect
+    // Allow access if:
+    // 1. There's no subscription record (implies free plan)
+    // 2. There is a subscription and its status is 'trialing' or 'active'
+    const isAllowedBySubscription = !subscription || allowedStatuses.includes(subscription.status);
+
+    if (!isAllowedBySubscription) {
+      // If not allowed, redirect to pricing page (unless already on it)
+      if (!pathname.startsWith('/dashboard/pricing')) {
         return NextResponse.redirect(new URL('/dashboard/pricing?needsSubscription=true', request.url));
       }
     }

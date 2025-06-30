@@ -36,7 +36,12 @@ export default async function DashboardPage() {
 
     const allowedStatuses = ['trialing', 'active'];
 
-    if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
+    // Allow access if:
+    // 1. There's no subscription record (implies free plan)
+    // 2. There is a subscription and its status is 'trialing' or 'active'
+    const isAllowedBySubscription = !subscription || allowedStatuses.includes(subscription.status);
+
+    if (!isAllowedBySubscription) {
       // If store admin has no active/trialing subscription, redirect to pricing page
       redirect("/dashboard/pricing?needsSubscription=true");
     }

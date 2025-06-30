@@ -10,6 +10,19 @@ import { createCheckoutSession } from "@/app/actions/billing";
 // Dummy pricing data - In a real app, you'd fetch this from Stripe or your database
 const pricingPlans = [
   {
+    name: "Free Plan",
+    price: "$0",
+    interval: "per month",
+    stripePriceId: null, // No Stripe Price ID for free plan
+    features: [
+      "3 Automation Campaigns",
+      "10 Comment Templates",
+      "Basic Reports",
+      "Community Support",
+    ],
+    isRecommended: false,
+  },
+  {
     name: "Basic Plan",
     price: "$19",
     interval: "per month",
@@ -42,7 +55,11 @@ const pricingPlans = [
 export default function PricingPage() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
 
-  const handleSubscribe = async (priceId: string) => {
+  const handleSubscribe = async (priceId: string | null) => {
+    if (!priceId) {
+      toast.info("You are already on the Free Plan!");
+      return;
+    }
     setLoadingPriceId(priceId);
     const result = await createCheckoutSession({ priceId });
 
@@ -65,7 +82,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2 max-w-4xl w-full">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl w-full">
         {pricingPlans.map((plan) => (
           <Card
             key={plan.name}
@@ -98,7 +115,7 @@ export default function PricingPage() {
                 onClick={() => handleSubscribe(plan.stripePriceId)}
                 disabled={loadingPriceId === plan.stripePriceId}
               >
-                {loadingPriceId === plan.stripePriceId ? "Loading..." : "Get Started"}
+                {plan.stripePriceId === null ? "Current Plan" : (loadingPriceId === plan.stripePriceId ? "Loading..." : "Get Started")}
               </Button>
             </CardFooter>
           </Card>
