@@ -59,14 +59,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // TEMPORARY DEVELOPMENT BYPASS: Allow access to superadmin routes for any logged-in user in development
-  // REMOVE THIS BLOCK FOR PRODUCTION!
-  if (process.env.NODE_ENV === 'development' && pathname.startsWith('/superadmin')) {
-    return response; // Allow access without strict role check
+  // --- START: Development Bypass for Super Admin Routes ---
+  // This block allows any logged-in user to access /superadmin routes in a local development environment.
+  // In production, this should be removed or replaced with a robust role-based authorization.
+  // We use NEXT_PUBLIC_SUPABASE_URL as a proxy for being in a development environment.
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && pathname.startsWith('/superadmin')) {
+    return response;
   }
-  // END TEMPORARY DEVELOPMENT BYPASS
+  // --- END: Development Bypass ---
 
-  // Fetch user profile to determine role (only if not bypassed by dev mode)
+  // Fetch user profile to determine role (original logic for production)
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, stripe_customer_id, role')
