@@ -13,6 +13,7 @@ import {
   Users,
   Ticket,
   Palette,
+  DollarSign, // Import DollarSign icon for Plans
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarReportsSection } from "./sidebar-reports-section";
@@ -51,6 +52,7 @@ export async function DashboardSidebar() {
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
     { href: "/dashboard/themes", label: "Themes", icon: Palette },
+    { href: "/dashboard/pricing", label: "Plans", icon: DollarSign }, // Added Plans link
   ];
 
   return (
