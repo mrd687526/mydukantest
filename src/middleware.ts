@@ -43,13 +43,13 @@ export async function middleware(request: NextRequest) {
 
   // Allow access to public pages
   if (
-    pathname.startsWith('/login') || // Main login page now handles both
+    pathname.startsWith('/login') ||
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/data-deletion') ||
     pathname.startsWith('/store') ||
     pathname.startsWith('/api/stripe/webhook') ||
-    pathname.startsWith('/superadmin/signup') // Allow access to super admin signup
+    pathname.startsWith('/superadmin/signup')
   ) {
     return response;
   }
@@ -59,22 +59,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Check user role for super admin access
-  let isSuperAdmin = false;
+  // Fetch user profile to determine role
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, stripe_customer_id, role')
     .eq('user_id', user.id)
     .single();
 
+  let isSuperAdmin = false;
   if (profileError || !profile) {
-    // If no profile, prompt to complete profile (handled by /dashboard page)
-    // For now, let them proceed to dashboard to complete profile/subscribe.
+    // If no profile, let them proceed to dashboard to complete profile.
+    // This is crucial for the CompleteProfilePrompt component to function.
     if (pathname.startsWith('/dashboard')) {
       return response;
     }
   } else {
     isSuperAdmin = profile.role === 'super_admin';
+
+    // If user is a super_admin and tries to access the regular dashboard, redirect to super admin dashboard
+    if (isSuperAdmin && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/pricing')) {
+      return NextResponse.redirect(new URL('/superadmin/dashboard', request.url));
+    }
   }
 
   // Allow super admins to access /superadmin routes
