@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
@@ -13,6 +13,8 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export type Node = {
   id: string;
@@ -101,9 +103,33 @@ function findNodeAndParent(
 export default function EditorPage() {
   const [tree, setTree] = useState<Node>(DEFAULT_TREE);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor));
 
   const selectedNode = selectedId ? findNodeById(tree, selectedId) : null;
+
+  // Load page data on initial render
+  useEffect(() => {
+    const loadPage = async () => {
+      const { data, error } = await supabase
+        .from("editor_pages")
+        .select("content")
+        .eq("slug", "home") // We'll hardcode the page slug for now
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 means no rows found, which is fine on first load
+        console.error("Error loading page:", error);
+        toast.error("Failed to load page data.");
+      }
+
+      if (data?.content) {
+        setTree(data.content as Node);
+      }
+    };
+
+    loadPage();
+  }, []);
 
   const addWidget = (type: string) => {
     const newNode: Node =
@@ -159,7 +185,7 @@ export default function EditorPage() {
 
   const handleDelete = () => {
     if (!selectedId || selectedId === "root") return;
-    setTree(deleteNodeById(tree, selectedI));
+    setTree(deleteNodeById(tree, selectedId));
     setSelectedId(null);
   };
 
@@ -173,6 +199,29 @@ export default function EditorPage() {
         },
       }));
     });
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const saveToast = toast.loading("Saving page...");
+
+    const { error } = await supabase.from("editor_pages").upsert(
+      {
+        slug: "home", // Hardcoding slug for now
+        content: tree,
+      },
+      { onConflict: "slug" }
+    );
+
+    toast.dismiss(saveToast);
+
+    if (error) {
+      console.error("Error saving page:", error);
+      toast.error("Failed to save page.");
+    } else {
+      toast.success("Page saved successfully!");
+    }
+    setIsSaving(false);
   };
 
   function handleDragEnd(event: DragEndEvent) {
@@ -271,8 +320,12 @@ export default function EditorPage() {
             <Button variant="outline" disabled>
               Redo
             </Button>
-            <Button variant="default" disabled>
-              Save
+            <Button
+              variant="default"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </footer>
         </main>
