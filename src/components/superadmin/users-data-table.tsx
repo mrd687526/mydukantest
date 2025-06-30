@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 import { deleteUserAndProfile } from "@/app/actions/superadmin";
 import { Profile, Subscription } from "@/lib/types";
+import { EditUserRoleDialog } from "./edit-user-role-dialog"; // Import the new dialog
 
 // Define a type for the data passed to the table, combining Profile and Subscription info
 interface UserProfileWithSubscription extends Profile {
@@ -137,31 +138,48 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>View Profile</DropdownMenuItem>
-          <DropdownMenuItem>Edit Role</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DeleteConfirmationDialog
-            onConfirm={() => handleDelete(row.original.user_id!)} // Use user_id for auth.admin.deleteUser
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete the user account and all associated data."
-          >
-            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              Delete User
-            </div>
-          </DeleteConfirmationDialog>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = React.useState(false);
+      const userProfile = row.original; // This is the Profile object with subscription info
+
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem>View Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditRoleDialogOpen(true)}>
+                Edit Role
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DeleteConfirmationDialog
+                onConfirm={() => handleDelete(userProfile.user_id!)} // Use user_id for auth.admin.deleteUser
+                title="Are you absolutely sure?"
+                description="This action cannot be undone. This will permanently delete the user account and all associated data."
+              >
+                <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                  Delete User
+                </div>
+              </DeleteConfirmationDialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {isEditRoleDialogOpen && (
+            <EditUserRoleDialog
+              userProfile={userProfile}
+              isOpen={isEditRoleDialogOpen}
+              onClose={() => setIsEditRoleDialogOpen(false)}
+            />
+          )}
+        </>
+      );
+    },
   },
 ];
 

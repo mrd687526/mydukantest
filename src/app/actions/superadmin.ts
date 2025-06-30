@@ -106,6 +106,32 @@ export async function getAllUsersAndProfiles() {
   return { data: profiles, error: null };
 }
 
+const updateUserRoleSchema = z.object({
+  profileId: z.string().uuid("Invalid profile ID."),
+  role: z.enum(['super_admin', 'store_admin']),
+});
+
+export async function updateUserRole(values: z.infer<typeof updateUserRoleSchema>) {
+  if (!await isSuperAdmin()) {
+    return { error: "Unauthorized: Only super admins can update user roles." };
+  }
+
+  const supabaseAdmin = createClient();
+
+  const { error } = await supabaseAdmin
+    .from("profiles")
+    .update({ role: values.role })
+    .eq("id", values.profileId);
+
+  if (error) {
+    console.error("Supabase error updating user role:", error.message);
+    return { error: "Database error: Could not update user role." };
+  }
+
+  revalidatePath("/superadmin/users");
+  return { success: true, message: "User role updated successfully!" };
+}
+
 export async function deleteUserAndProfile(userId: string) {
   if (!await isSuperAdmin()) {
     return { error: "Unauthorized: Only super admins can delete users." };
