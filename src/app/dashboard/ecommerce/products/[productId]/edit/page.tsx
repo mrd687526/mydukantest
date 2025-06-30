@@ -2,13 +2,9 @@ import { createClient } from "@/integrations/supabase/server";
 import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
 
-export default async function EditProductPage({
-  params,
-}: {
-  params: { productId: string };
-}) {
-  const supabase = createClient();
+export default async function EditProductPage({ params }: { params: { productId: string } }) {
   const { productId } = params;
+  const supabase = createClient();
 
   const {
     data: { user },

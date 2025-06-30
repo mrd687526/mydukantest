@@ -5,13 +5,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default async function EditDiscountPage({
-  params,
-}: {
-  params: { discountId: string };
-}) {
-  const supabase = createClient();
+export default async function EditDiscountPage({ params }: { params: { discountId: string } }) {
   const { discountId } = params;
+  const supabase = createClient();
 
   const {
     data: { user },
