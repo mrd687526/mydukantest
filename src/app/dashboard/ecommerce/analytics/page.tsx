@@ -1,7 +1,50 @@
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart } from "lucide-react";
+import { SalesChart } from "@/components/dashboard/ecommerce/analytics/sales-chart";
+import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
 
-export default function AnalyticsPage() {
+// Dynamically import the chart component with SSR disabled
+const DynamicSalesChart = dynamic(
+  () =>
+    import("@/components/dashboard/ecommerce/analytics/sales-chart").then(
+      (mod) => mod.SalesChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[350px] w-full" />,
+  }
+);
+
+export default async function AnalyticsPage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: dailySalesData, error } = await supabase.rpc("get_daily_sales_data", {
+    p_profile_id: profile.id,
+  });
+
+  if (error) {
+    console.error("Error fetching daily sales data:", error);
+    return <div>Error loading analytics data. Please try again later.</div>;
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -12,17 +55,11 @@ export default function AnalyticsPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Store Analytics</CardTitle>
-          <CardDescription>An overview of your store's key metrics.</CardDescription>
+          <CardTitle>Sales Overview (Last 30 Days)</CardTitle>
+          <CardDescription>Total sales amount per day.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <LineChart className="h-12 w-12 mb-4" />
-            <p className="text-lg font-semibold">Analytics Coming Soon</p>
-            <p className="mt-2">
-              Once you have sales data, your analytics dashboard will appear here.
-            </p>
-          </div>
+        <CardContent className="pl-2">
+          <DynamicSalesChart data={dailySalesData || []} />
         </CardContent>
       </Card>
     </div>
