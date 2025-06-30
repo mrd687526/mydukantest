@@ -17,12 +17,12 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
-import type { AppPageProps } from "@/lib/types";
 
-interface CampaignPageProps extends AppPageProps<{ campaignId: string }> {}
-
-export default async function Page(props: CampaignPageProps) {
-  const { params } = props;
+export default async function Page({
+  params,
+}: {
+  params: { campaignId: string };
+}) {
   const supabase = createClient();
   const { campaignId } = params;
 
@@ -112,9 +112,7 @@ export default async function Page(props: CampaignPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Not replied yet
-            </p>
+            <p className="text-xs text-muted-foreground">Not replied yet</p>
           </CardContent>
         </Card>
         <Card>
@@ -126,9 +124,7 @@ export default async function Page(props: CampaignPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Not commented yet
-            </p>
+            <p className="text-xs text-muted-foreground">Not commented yet</p>
           </CardContent>
         </Card>
       </div>
@@ -137,15 +133,16 @@ export default async function Page(props: CampaignPageProps) {
 
       <div className="space-y-4">
         <div className="space-y-1">
-            <h3 className="text-xl font-semibold">Comment & Inbox Reply</h3>
-            <p className="text-sm text-muted-foreground">
-                Set up rules to automatically handle comments and send private messages.
-            </p>
+          <h3 className="text-xl font-semibold">Comment & Inbox Reply</h3>
+          <p className="text-sm text-muted-foreground">
+            Set up rules to automatically handle comments and send private
+            messages.
+          </p>
         </div>
         <CampaignRulesClient
-            campaignId={campaign.id}
-            rules={rulesRes.data || []}
-            replyTemplates={templatesRes.data || []}
+          campaignId={campaign.id}
+          rules={rulesRes.data || []}
+          replyTemplates={templatesRes.data || []}
         />
       </div>
 

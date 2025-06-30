@@ -4,12 +4,12 @@ import { DiscountForm } from "@/components/dashboard/ecommerce/discounts/discoun
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { AppPageProps } from "@/lib/types";
 
-interface EditDiscountPageProps extends AppPageProps<{ discountId: string }> {}
-
-export default async function EditDiscountPage(props: EditDiscountPageProps) {
-  const { params } = props;
+export default async function EditDiscountPage({
+  params,
+}: {
+  params: { discountId: string };
+}) {
   const { discountId } = params;
   const supabase = createClient();
 
@@ -23,11 +23,10 @@ export default async function EditDiscountPage(props: EditDiscountPageProps) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("id", user.id) // Fetch profile by user.id
+    .eq("id", user.id)
     .single();
 
   if (!profile) {
-    // User needs a profile to manage discounts
     redirect("/dashboard");
   }
 
@@ -35,12 +34,12 @@ export default async function EditDiscountPage(props: EditDiscountPageProps) {
     .from("discounts")
     .select("*")
     .eq("id", discountId)
-    .eq("profile_id", profile.id) // Ensure user owns the discount
+    .eq("profile_id", profile.id)
     .single();
 
   if (error || !discount) {
     console.error("Error fetching discount:", error);
-    notFound(); // Or show an error message
+    notFound();
   }
 
   return (

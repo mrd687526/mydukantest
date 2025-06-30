@@ -1,13 +1,12 @@
 import { createClient } from "@/integrations/supabase/server";
-import { ProductForm }
-from "@/components/dashboard/ecommerce/products/product-form";
-import { notFound, redirect } from "next/navigation"; // Import redirect
-import type { AppPageProps } from "@/lib/types";
+import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
+import { notFound, redirect } from "next/navigation";
 
-interface EditProductPageProps extends AppPageProps<{ productId: string }> {}
-
-export default async function EditProductPage(props: EditProductPageProps) {
-  const { params } = props;
+export default async function EditProductPage({
+  params,
+}: {
+  params: { productId: string };
+}) {
   const { productId } = params;
   const supabase = createClient();
 
@@ -15,24 +14,24 @@ export default async function EditProductPage(props: EditProductPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect("/login"); // Redirect if not logged in
+    redirect("/login");
   }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("id", user.id) // Fetch profile by user.id
+    .eq("id", user.id)
     .single();
 
   if (!profile) {
-    redirect("/dashboard"); // Redirect if no profile
+    redirect("/dashboard");
   }
 
-  const { data: product } = await supabase
+  const { data: product, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", productId)
-    .eq("profile_id", profile.id) // Ensure user owns the product
+    .eq("profile_id", profile.id)
     .single();
 
   if (error || !product) {

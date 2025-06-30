@@ -1,16 +1,15 @@
 import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
-import type { AppPageProps } from "@/lib/types";
 
-interface ProductPageProps extends AppPageProps<{ productId: string }> {}
-
-export default async function ProductPage(props: ProductPageProps) {
-  const { params } = props;
+export default async function ProductPage({
+  params,
+}: {
+  params: { productId: string };
+}) {
   const supabase = createClient();
   const { productId } = params;
 
-  // Determine the profile_id for the public storefront (same logic as /store/page.tsx)
   const { data: storeProfile, error: profileError } = await supabase
     .from("profiles")
     .select("id")
@@ -19,8 +18,11 @@ export default async function ProductPage(props: ProductPageProps) {
     .single();
 
   if (profileError || !storeProfile) {
-    console.error("Error fetching store profile for public storefront product page:", profileError?.message);
-    return notFound(); // Or redirect to a generic error page
+    console.error(
+      "Error fetching store profile for public storefront product page:",
+      profileError?.message
+    );
+    return notFound();
   }
 
   const storeProfileId = storeProfile.id;
@@ -29,7 +31,7 @@ export default async function ProductPage(props: ProductPageProps) {
     .from("products")
     .select("*")
     .eq("id", productId)
-    .eq("profile_id", storeProfileId) // Ensure the product belongs to the demo store
+    .eq("profile_id", storeProfileId)
     .single();
 
   if (!product) return notFound();
@@ -44,7 +46,9 @@ export default async function ProductPage(props: ProductPageProps) {
         />
       )}
       <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-      <div className="text-primary font-bold text-xl mb-2">${product.price}</div>
+      <div className="text-primary font-bold text-xl mb-2">
+        ${product.price}
+      </div>
       <div className="mb-4 text-gray-700">{product.description}</div>
       <AddToCartButton product={product} />
     </div>
