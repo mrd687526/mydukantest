@@ -115,7 +115,11 @@ export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps)
               appearance={{ theme: ThemeSupa }}
               providers={["google", "facebook"]}
               theme="light"
-              redirectTo={`${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`}
+              redirectTo={
+                typeof window !== "undefined"
+                  ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+                  : ""
+              }
             />
           </TabsContent>
           <TabsContent value="superadmin" className="mt-6">
