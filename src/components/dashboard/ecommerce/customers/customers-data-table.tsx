@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Customer } from "@/lib/types";
 import { deleteCustomer } from "@/app/actions/customers";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
@@ -55,27 +56,41 @@ export const columns: ColumnDef<Customer>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Customer Info
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="font-medium pl-4">
+        <div>{row.getValue("name")}</div>
+        <div className="text-sm text-muted-foreground">{row.original.email}</div>
+      </div>
+    ),
   },
   {
     accessorKey: "email",
+    header: "Email",
+    enableSorting: false, // Email is part of Customer Info column now, no need to sort separately
+    cell: ({ row }) => null, // Rendered in 'name' column
+  },
+  {
+    accessorKey: "last_active",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Last Active
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("email")}</div>,
+    cell: ({ row }) => {
+      const lastActive = row.getValue("last_active") as string | null;
+      return <div>{lastActive ? new Date(lastActive).toLocaleDateString() : "N/A"}</div>;
+    },
   },
   {
     accessorKey: "created_at",
@@ -85,7 +100,7 @@ export const columns: ColumnDef<Customer>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Joined Date
+          Date Registered
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -93,6 +108,86 @@ export const columns: ColumnDef<Customer>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("created_at"));
       return <div>{date.toLocaleDateString()}</div>;
+    },
+  },
+  {
+    accessorKey: "orders_count",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Orders
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="text-center">{row.getValue("orders_count")}</div>,
+  },
+  {
+    accessorKey: "total_spend",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Total Spend
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("total_spend"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "aov",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          AOV
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("aov"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const status = row.getValue("status") as Customer['status'];
+      let variant: "default" | "secondary" | "outline" | "destructive" = "outline";
+      if (status === "active") variant = "default";
+      if (status === "churned") variant = "destructive";
+      return <Badge variant={variant} className="capitalize">{status}</Badge>;
     },
   },
   {

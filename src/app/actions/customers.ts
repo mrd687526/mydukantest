@@ -2,8 +2,9 @@
 
 import { createClient } from "@/integrations/supabase/server";
 import { revalidatePath } from "next/cache";
+import { Customer } from "@/lib/types"; // Import Customer type
 
-export async function getCustomers() {
+export async function getCustomers(): Promise<{ data: Customer[] | null; error: string | null }> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -21,18 +22,17 @@ export async function getCustomers() {
     return { data: null, error: "You must have a profile to view customers." };
   }
 
-  const { data: customers, error } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("profile_id", profile.id)
-    .order("created_at", { ascending: false });
+  // Use the new RPC function to get customers with aggregated data
+  const { data: customers, error } = await supabase.rpc("get_customer_analytics", {
+    p_profile_id: profile.id,
+  });
 
   if (error) {
     console.error("Supabase error fetching customers:", error.message);
     return { data: null, error: "Database error: Could not fetch customers." };
   }
 
-  return { data: customers, error: null };
+  return { data: customers as Customer[], error: null };
 }
 
 export async function deleteCustomer(customerId: string) {

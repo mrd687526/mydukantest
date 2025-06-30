@@ -134,6 +134,11 @@ export interface Customer {
   email: string;
   created_at: string;
   updated_at: string;
+  last_active: string | null; // New: Timestamp of last activity (e.g., last order)
+  status: 'active' | 'inactive' | 'churned'; // New: Customer status
+  orders_count: number; // Aggregated: Total number of orders
+  total_spend: number; // Aggregated: Total amount spent
+  aov: number; // Aggregated: Average Order Value
 }
 
 export interface Order {
