@@ -127,12 +127,24 @@ export interface Customer {
 export interface Order {
   id: string;
   profile_id: string;
-  customer_id: string | null; // Added customer_id
+  customer_id: string | null;
   order_number: string;
-  customer_name: string; // Kept for display/initial input
-  customer_email: string; // Kept for display/initial input
+  customer_name: string;
+  customer_email: string;
   total_amount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   created_at: string;
   updated_at: string;
+}
+
+export interface CampaignTag {
+  id: string;
+  profile_id: string;
+  tag_name: string;
+  created_at: string;
+}
+
+export interface CampaignTagAssociation {
+  campaign_id: string;
+  tag_id: string;
 }
