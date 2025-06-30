@@ -59,7 +59,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Fetch user profile to determine role
+  // TEMPORARY DEVELOPMENT BYPASS: Allow access to superadmin routes for any logged-in user in development
+  // REMOVE THIS BLOCK FOR PRODUCTION!
+  if (process.env.NODE_ENV === 'development' && pathname.startsWith('/superadmin')) {
+    return response; // Allow access without strict role check
+  }
+  // END TEMPORARY DEVELOPMENT BYPASS
+
+  // Fetch user profile to determine role (only if not bypassed by dev mode)
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, stripe_customer_id, role')
@@ -76,20 +83,13 @@ export async function middleware(request: NextRequest) {
   } else {
     isSuperAdmin = profile.role === 'super_admin';
 
-    // TEMPORARY DEVELOPMENT BYPASS: Allow access to superadmin dashboard for any logged-in user in development
-    // REMOVE THIS BLOCK FOR PRODUCTION!
-    if (process.env.NODE_ENV === 'development' && pathname.startsWith('/superadmin/dashboard')) {
-      return response; // Allow access without strict role check
-    }
-    // END TEMPORARY DEVELOPMENT BYPASS
-
     // If user is a super_admin and tries to access the regular dashboard, redirect to super admin dashboard
     if (isSuperAdmin && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/pricing')) {
       return NextResponse.redirect(new URL('/superadmin/dashboard', request.url));
     }
   }
 
-  // Allow super admins to access /superadmin routes
+  // Allow super admins to access /superadmin routes (this check is now after the dev bypass)
   if (pathname.startsWith('/superadmin')) {
     if (!isSuperAdmin) {
       return NextResponse.redirect(new URL('/dashboard?error=Permission denied. Not a super admin.', request.url));
