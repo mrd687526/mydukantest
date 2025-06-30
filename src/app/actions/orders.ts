@@ -216,6 +216,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     revalidatePath("/store/account"); // Revalidate customer's account page
     return { success: true, orderId: order.id }; // Return the order ID
   }
+}
 
 export async function deleteOrder(orderId: string) {
   const supabase = await createClient();
