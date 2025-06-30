@@ -9,7 +9,7 @@ const tagSchema = z.object({
 });
 
 export async function createCampaignTag(values: z.infer<typeof tagSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -41,7 +41,7 @@ export async function createCampaignTag(values: z.infer<typeof tagSchema>) {
 }
 
 export async function deleteCampaignTag(tagId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.from("campaign_tags").delete().eq("id", tagId);
 
   if (error) {

@@ -33,7 +33,7 @@ const orderSchema = z.object({
 });
 
 export async function createOrder(values: z.infer<typeof orderSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // The profile_id for the order is now explicitly passed in `values`.
   const profileIdForOrder = values.profile_id;
@@ -163,7 +163,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
 }
 
 export async function deleteOrder(orderId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.from("orders").delete().eq("id", orderId);
 
   if (error) {
@@ -180,7 +180,7 @@ export async function deleteOrder(orderId: string) {
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled') {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("orders")
     .update({ status: newStatus })

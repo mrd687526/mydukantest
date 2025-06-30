@@ -4,7 +4,7 @@ import { ConnectAccountsClient } from "@/components/dashboard/accounts/connect-a
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
 export default async function AccountsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

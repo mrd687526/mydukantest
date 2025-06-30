@@ -5,7 +5,7 @@ import { PostsClient } from "@/components/dashboard/facebook-posts/posts-client"
 import type { ConnectedAccount, AutomationCampaign } from "@/lib/types";
 
 export default async function FacebookPostsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

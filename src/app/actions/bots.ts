@@ -10,7 +10,7 @@ const botSchema = z.object({
 });
 
 export async function createBot(values: z.infer<typeof botSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -44,7 +44,7 @@ export async function createBot(values: z.infer<typeof botSchema>) {
 }
 
 export async function updateBotFlow(botId: string, flowData: any) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -66,7 +66,7 @@ export async function updateBotFlow(botId: string, flowData: any) {
 }
 
 export async function updateBotStatus(botId: string, currentStatus: 'active' | 'inactive') {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

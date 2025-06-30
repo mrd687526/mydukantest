@@ -7,7 +7,7 @@ import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-p
 import { CampaignTagsClient } from "@/components/dashboard/campaign-tags/campaign-tags-client";
 
 export default async function CampaignTagsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

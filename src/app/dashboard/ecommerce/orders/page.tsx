@@ -4,7 +4,7 @@ import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-p
 import { OrdersClient } from "@/components/dashboard/ecommerce/orders/orders-client";
 
 export default async function OrdersPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

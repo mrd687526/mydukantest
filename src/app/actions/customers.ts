@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Customer } from "@/lib/types"; // Import Customer type
 
 export async function getCustomers(): Promise<{ data: Customer[] | null; error: string | null }> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -36,7 +36,7 @@ export async function getCustomers(): Promise<{ data: Customer[] | null; error: 
 }
 
 export async function deleteCustomer(customerId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.from("customers").delete().eq("id", customerId);
 
   if (error) {

@@ -14,7 +14,7 @@ const updateRefundRequestStatusSchema = z.object({
 });
 
 export async function createRefundRequest(values: z.infer<typeof createRefundRequestSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -49,7 +49,7 @@ export async function createRefundRequest(values: z.infer<typeof createRefundReq
 }
 
 export async function updateRefundRequestStatus(refundId: string, newStatus: z.infer<typeof updateRefundRequestStatusSchema>['status']) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -82,7 +82,7 @@ export async function updateRefundRequestStatus(refundId: string, newStatus: z.i
 }
 
 export async function deleteRefundRequest(refundId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -115,7 +115,7 @@ export async function deleteRefundRequest(refundId: string) {
 }
 
 export async function getRefundRequests() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

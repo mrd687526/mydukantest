@@ -15,7 +15,7 @@ export async function postFacebookComment(values: z.infer<typeof commentSchema>)
   }
   const { postId, message } = validatedFields.data;
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Authentication required." };

@@ -9,7 +9,7 @@ const campaignFormSchema = z.object({
 });
 
 export async function createCampaign(values: z.infer<typeof campaignFormSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },
@@ -44,7 +44,7 @@ export async function createCampaign(values: z.infer<typeof campaignFormSchema>)
 }
 
 export async function toggleCampaignStatus(campaignId: string, currentState: boolean) {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { error } = await supabase
         .from("automation_campaigns")
         .update({ is_active: !currentState })
@@ -61,7 +61,7 @@ export async function toggleCampaignStatus(campaignId: string, currentState: boo
 }
 
 export async function deleteCampaign(campaignId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("automation_campaigns")
     .delete()
@@ -77,7 +77,7 @@ export async function deleteCampaign(campaignId: string) {
 }
 
 export async function assignCampaignToPost(campaignId: string, postId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in to assign a campaign." };
 
@@ -118,7 +118,7 @@ export async function assignCampaignToPost(campaignId: string, postId: string) {
 }
 
 export async function unassignCampaignFromPost(campaignId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in to unassign a campaign." };
 

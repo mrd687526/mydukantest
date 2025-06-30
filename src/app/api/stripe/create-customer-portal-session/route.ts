@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe';
 import { createClient } from '@/integrations/supabase/server';
 
 export async function POST(req: Request) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

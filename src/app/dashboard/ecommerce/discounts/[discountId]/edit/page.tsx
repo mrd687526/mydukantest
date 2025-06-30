@@ -10,7 +10,7 @@ export default async function EditDiscountPage({
 }: {
   params: { discountId: string };
 }) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { discountId } = params;
 
   const {

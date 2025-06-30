@@ -6,12 +6,12 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const handleSignOut = async () => {
     "use server";
-    const supabaseAdmin = await createClient(); // Use admin client if needed, or regular client
+    const supabaseAdmin = createClient(); // Use regular client
     await supabaseAdmin.auth.signOut();
     redirect("/store/login");
   };

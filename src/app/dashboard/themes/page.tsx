@@ -5,7 +5,7 @@ import { ThemesClient } from "@/components/dashboard/themes/themes-client";
 import { getAllThemeManifests } from "@/lib/theme-utils";
 
 export default async function ThemesPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

@@ -5,7 +5,7 @@ import { RefundsClient } from "@/components/dashboard/ecommerce/refunds/refunds-
 import { getRefundRequests } from "@/app/actions/refunds";
 
 export default async function RefundsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

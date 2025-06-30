@@ -4,7 +4,7 @@ import { createClient } from '@/integrations/supabase/server';
 import { createNewUserAndProfile } from '@/app/actions/superadmin';
 
 export default async function LoginPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Check if a super admin already exists.
   const { data: superAdmin, error } = await supabase

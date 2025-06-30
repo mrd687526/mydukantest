@@ -11,7 +11,7 @@ const credentialsSchema = z.object({
 });
 
 export async function saveCredentials(values: z.infer<typeof credentialsSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

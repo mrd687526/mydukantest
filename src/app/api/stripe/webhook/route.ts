@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
   if (relevantEvents.has(event.type)) {
     try {
-      const supabase = await createClient();
+      const supabase = createClient();
       switch (event.type) {
         case 'payment_intent.succeeded':
           const paymentIntentSucceeded = event.data.object as Stripe.PaymentIntent;

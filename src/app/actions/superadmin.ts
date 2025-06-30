@@ -14,7 +14,7 @@ async function isSuperAdmin() {
     return true;
   }
 
-  const supabase = await createServerSupabaseClient(); // Use regular client for current user check
+  const supabase = createServerSupabaseClient(); // Use regular client for current user check
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   if (!currentUser) return false;
 
@@ -42,7 +42,7 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
   // In a real application, this check would be more robust,
   // e.g., only allowing creation if no super_admin exists, or by an existing super_admin.
   // For initial setup, we'll allow it if no user is logged in or if a super admin is logged in.
-  const supabase = await createServerSupabaseClient(); // Use regular client for current user check
+  const supabase = createServerSupabaseClient(); // Use regular client for current user check
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   
   let canCreate = false;

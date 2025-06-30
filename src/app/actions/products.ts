@@ -42,7 +42,7 @@ const productFormSchema = z.object({
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export async function createProduct(values: ProductFormValues) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -80,7 +80,7 @@ export async function updateProduct(
   productId: string,
   values: ProductFormValues
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -128,7 +128,7 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.from("products").delete().eq("id", productId);
 
   if (error) {
@@ -143,7 +143,7 @@ export async function deleteProduct(productId: string) {
 type StockStatusFilter = 'all' | 'low_stock' | 'out_of_stock' | 'most_stocked';
 
 export async function getProductsForStockReport(filter: StockStatusFilter): Promise<{ data: Product[] | null; error: string | null }> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

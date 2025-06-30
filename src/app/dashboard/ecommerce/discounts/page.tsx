@@ -5,7 +5,7 @@ import { DiscountsClient } from "@/components/dashboard/ecommerce/discounts/disc
 import { getDiscounts } from "@/app/actions/discounts";
 
 export default async function DiscountsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function SuperAdminPlansPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

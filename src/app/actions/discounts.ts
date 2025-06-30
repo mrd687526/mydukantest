@@ -25,7 +25,7 @@ const discountSchema = z.object({
 });
 
 export async function createDiscount(values: z.infer<typeof discountSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -60,7 +60,7 @@ export async function createDiscount(values: z.infer<typeof discountSchema>) {
 }
 
 export async function updateDiscount(discountId: string, values: z.infer<typeof discountSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -96,7 +96,7 @@ export async function updateDiscount(discountId: string, values: z.infer<typeof 
 }
 
 export async function deleteDiscount(discountId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -129,7 +129,7 @@ export async function deleteDiscount(discountId: string) {
 }
 
 export async function getDiscounts() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

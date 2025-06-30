@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicSalesChartWrapper } from "@/components/dashboard/ecommerce/analytics/dynamic-sales-chart-wrapper"; // Import the new wrapper
 
 export default async function AnalyticsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

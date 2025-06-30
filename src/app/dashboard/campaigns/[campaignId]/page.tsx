@@ -19,7 +19,7 @@ import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-r
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 
 export default async function Page({ params }: any) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { campaignId } = params;
 
   const {

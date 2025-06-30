@@ -8,7 +8,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 export default async function CustomerAccountPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

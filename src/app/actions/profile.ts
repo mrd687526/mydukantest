@@ -9,7 +9,7 @@ const profileUpdateSchema = z.object({
 });
 
 export async function updateProfile(values: z.infer<typeof profileUpdateSchema>) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

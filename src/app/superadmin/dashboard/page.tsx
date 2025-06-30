@@ -21,7 +21,7 @@ interface UserProfileWithSubscription {
 }
 
 export default async function SuperAdminDashboardPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

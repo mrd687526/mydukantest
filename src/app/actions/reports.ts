@@ -17,7 +17,7 @@ const dateRangeSchema = z.object({
 });
 
 export async function getCustomerOrderReports(values: z.infer<typeof dateRangeSchema>): Promise<{ data: CustomerOrderReportData[] | null; error: string | null }> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -55,7 +55,7 @@ export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>
   topSellingBrands: TopSellingBrandReportData[] | null;
   error: string | null;
 }> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

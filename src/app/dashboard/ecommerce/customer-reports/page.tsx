@@ -6,7 +6,7 @@ import { getCustomerOrderReports } from "@/app/actions/reports";
 import { format, subMonths, endOfDay } from "date-fns";
 
 export default async function CustomerReportsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

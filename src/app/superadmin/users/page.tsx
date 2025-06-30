@@ -11,7 +11,7 @@ interface UserProfileWithSubscription extends Profile {
 }
 
 export default async function SuperAdminUsersPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

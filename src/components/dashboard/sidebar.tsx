@@ -20,7 +20,7 @@ import { SidebarReportsSection } from "./sidebar-reports-section";
 import { createClient } from "@/integrations/supabase/server"; // Import server client to check user role
 
 export async function DashboardSidebar() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
   let isSuperAdmin = false;

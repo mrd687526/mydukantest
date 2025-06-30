@@ -5,7 +5,7 @@ import { SuperAdminHeader } from "@/components/superadmin/super-admin-header"; /
 import { SuperAdminSidebar } from "@/components/superadmin/super-admin-sidebar"; // Import new sidebar
 
 export default async function SuperAdminLayout({ children }: PropsWithChildren) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

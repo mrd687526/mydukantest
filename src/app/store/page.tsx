@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/storefront/product-card";
 import { Product } from "@/lib/types";
 
 export default async function StoreHomePage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // For multi-tenancy in the public storefront, we need to determine which store's data to show.
   // In a real application, this would typically be derived from a subdomain (e.g., storename.myapp.com)

@@ -5,7 +5,7 @@ import { StockReportsClient } from "@/components/dashboard/ecommerce/stock-repor
 import { getProductsForStockReport } from "@/app/actions/products";
 
 export default async function StockReportsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

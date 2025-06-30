@@ -5,7 +5,7 @@ import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-p
 import type { ConnectedAccount } from "@/lib/types";
 
 export default async function BotManagerPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
