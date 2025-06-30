@@ -10,7 +10,7 @@ import { UserProfileWithSubscription } from "@/lib/types"; // Import the new int
 async function isSuperAdmin() {
   // In development, bypass the super admin role check for convenience.
   // This allows any logged-in user to access super admin features locally.
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) { // Using NEXT_PUBLIC_SUPABASE_URL as a proxy for development environment
+  if (process.env.NODE_ENV === 'development') { // Using NODE_ENV as a proxy for development environment
     return true;
   }
 
@@ -21,7 +21,7 @@ async function isSuperAdmin() {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", currentUser.id) // Use 'id' as it's now the user_id
+    .eq("id", currentUser.id)
     .single();
 
   if (error || !profile) {
@@ -69,11 +69,12 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
 
   try {
     // Create user in Supabase Auth
+    // Pass name and role in user_metadata so the trigger can pick them up
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: values.email,
       password: values.password,
       email_confirm: true, // Automatically confirm email for admin-created users
-      user_metadata: { name: values.name },
+      user_metadata: { name: values.name, role: values.role }, // Pass name and role here
     });
 
     if (authError) {
@@ -85,19 +86,9 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
       return { error: "Failed to create user in authentication system." };
     }
 
-    // Create profile in public.profiles table, using authUser.user.id as the profile's id
-    const { error: profileError } = await supabaseAdmin.from("profiles").insert({
-      id: authUser.user.id, // Set profile ID to auth user ID
-      name: values.name,
-      role: values.role,
-    });
-
-    if (profileError) {
-      console.error("Supabase error creating profile:", profileError.message);
-      // Attempt to delete the auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-      return { error: "Database error: Could not create user profile." };
-    }
+    // The profile will be automatically created by the 'handle_new_user' trigger
+    // which now reads 'name' and 'role' from user_metadata.
+    // No need for explicit profile insertion here.
 
     revalidatePath("/superadmin/users");
     return { success: true, message: "User and profile created successfully!" };
