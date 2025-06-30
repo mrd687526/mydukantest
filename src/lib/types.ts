@@ -260,8 +260,7 @@ export interface TopSellingBrandReportData {
 }
 
 export interface Profile {
-  id: string;
-  user_id: string | null;
+  id: string; // This is now the user_id from auth.users
   name: string | null;
   avatar: string | null;
   stripe_customer_id: string | null; // New: Stripe Customer ID

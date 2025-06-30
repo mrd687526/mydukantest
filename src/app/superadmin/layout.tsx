@@ -39,7 +39,7 @@ export default async function SuperAdminLayout({ children }: PropsWithChildren) 
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (error || !profile || profile.role !== 'super_admin') {

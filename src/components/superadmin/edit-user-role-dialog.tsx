@@ -54,7 +54,7 @@ export function EditUserRoleDialog({ userProfile, isOpen, onClose }: EditUserRol
   });
 
   const onSubmit = async (data: FormValues) => {
-    const result = await updateUserRole({ profileId: userProfile.id, role: data.role });
+    const result = await updateUserRole({ profileId: userProfile.id, role: data.role }); // Use userProfile.id
 
     if (result.error) {
       toast.error("Failed to update role", {

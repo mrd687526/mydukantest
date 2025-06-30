@@ -14,7 +14,7 @@ async function isSuperAdmin() {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Use 'id' as it's now the user_id
     .single();
 
   if (error || !profile) {
@@ -44,7 +44,7 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
     canCreate = true;
   } else {
     // Allow creation if the current user is already a super admin
-    const { data: currentProfile } = await supabase.from("profiles").select("role").eq("user_id", currentUser.id).single();
+    const { data: currentProfile } = await supabase.from("profiles").select("role").eq("id", currentUser.id).single(); // Use 'id'
     if (currentProfile?.role === 'super_admin') {
       canCreate = true;
     }
@@ -78,9 +78,9 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
       return { error: "Failed to create user in authentication system." };
     }
 
-    // Create profile in public.profiles table
+    // Create profile in public.profiles table, using authUser.user.id as the profile's id
     const { error: profileError } = await supabaseAdmin.from("profiles").insert({
-      user_id: authUser.user.id,
+      id: authUser.user.id, // Set profile ID to auth user ID
       name: values.name,
       role: values.role,
     });
@@ -105,7 +105,7 @@ export async function getAllUsersAndProfiles() {
     return { data: null, error: "Unauthorized: Only super admins can view all users." };
   }
 
-  // Initialize an admin client for privileged data fetching
+  -- Initialize an admin client for privileged data fetching
   const supabaseAdmin = createAdminSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -115,9 +115,8 @@ export async function getAllUsersAndProfiles() {
     .from("profiles")
     .select(`
       id,
-      user_id,
       name,
-      auth_users:user_id ( email ),
+      auth_users:id ( email ), -- Join on 'id' which is now the user_id
       role,
       created_at,
       subscriptions ( status, current_period_end )
@@ -157,7 +156,7 @@ export async function updateUserRole(values: z.infer<typeof updateUserRoleSchema
   const { error } = await supabaseAdmin
     .from("profiles")
     .update({ role: values.role })
-    .eq("id", values.profileId);
+    .eq("id", values.profileId); // Use 'id' for the update
 
   if (error) {
     console.error("Supabase error updating user role:", error.message);
@@ -180,7 +179,7 @@ export async function deleteUserAndProfile(userId: string) {
   );
 
   try {
-    // Delete the user from auth.users, which should cascade delete the profile due to RLS policy
+    -- Delete the user from auth.users, which should cascade delete the profile due to RLS policy
     const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authError) {

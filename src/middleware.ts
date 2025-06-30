@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, stripe_customer_id, role')
-    .eq('user_id', user.id)
+    .eq('id', user.id) // Fetch profile by user.id
     .single();
 
   let isSuperAdmin = false;

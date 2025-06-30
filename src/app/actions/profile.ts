@@ -16,21 +16,13 @@ export async function updateProfile(values: z.infer<typeof profileUpdateSchema>)
     return { error: "You must be logged in to update your profile." };
   }
 
-  const { data: profile, error: fetchProfileError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (fetchProfileError || !profile) {
-    console.error("Supabase error fetching profile for update:", fetchProfileError?.message);
-    return { error: "User profile not found." };
-  }
+  // The profile ID is now the user's ID
+  const profileId = user.id;
 
   const { error: updateError } = await supabase
     .from("profiles")
     .update({ name: values.name })
-    .eq("id", profile.id);
+    .eq("id", profileId); // Use 'id' directly
 
   if (updateError) {
     console.error("Supabase error updating profile:", updateError.message);

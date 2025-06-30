@@ -16,8 +16,8 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
+    .select("id, role") // Select role as well
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (!profile) {
@@ -25,13 +25,7 @@ export default async function DashboardPage() {
   }
 
   // Check subscription status for store_admin users
-  const { data: userProfileWithRole } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", user.id)
-    .single();
-
-  const isStoreAdmin = userProfileWithRole?.role === 'store_admin';
+  const isStoreAdmin = profile.role === 'store_admin';
 
   if (isStoreAdmin) {
     const { data: subscription, error: subscriptionError } = await supabase

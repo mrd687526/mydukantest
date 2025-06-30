@@ -28,7 +28,7 @@ export async function DashboardSidebar() {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("user_id", user.id)
+      .eq("id", user.id) // Fetch profile by user.id
       .single();
     if (profile && profile.role === 'super_admin') {
       isSuperAdmin = true;

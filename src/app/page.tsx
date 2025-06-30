@@ -12,7 +12,7 @@ export default async function HomePage() {
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("user_id", session.user.id)
+      .eq("id", session.user.id) // Fetch profile by user.id
       .single();
     if (error || !profile) {
       console.error("Error fetching profile for redirection:", error);

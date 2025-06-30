@@ -52,13 +52,14 @@ export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
   });
 
   const onSubmit = async (data: ProfileFormValues) => {
+    // Use upsert to create or update the profile based on user.id
     const { error } = await supabase
       .from("profiles")
-      .insert({ user_id: user.id, name: data.name });
+      .upsert({ id: user.id, name: data.name }, { onConflict: 'id' }); // Conflict on 'id' to update if exists
 
     if (error) {
-      toast.error("Failed to create profile. Please try again.");
-      console.error("Profile creation error:", error);
+      toast.error("Failed to create/update profile. Please try again.");
+      console.error("Profile creation/update error:", error);
     } else {
       toast.success("Profile created successfully!");
       setIsOpen(false);

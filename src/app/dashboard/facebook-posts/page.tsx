@@ -17,7 +17,7 @@ export default async function FacebookPostsPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (!profile) {
@@ -38,7 +38,7 @@ export default async function FacebookPostsPage() {
 
   if (accountsRes.error) {
     console.error("Error fetching connected accounts:", accountsRes.error);
-    return <div>Error loading account data. Please try again later.</div>;
+    // We can still render the page, just show an empty list.
   }
   
   if (campaignsRes.error) {

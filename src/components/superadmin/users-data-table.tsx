@@ -159,7 +159,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DeleteConfirmationDialog
-                onConfirm={() => handleDelete(userProfile.user_id!)} // Use user_id for auth.admin.deleteUser
+                onConfirm={() => handleDelete(userProfile.id)} // Use userProfile.id (which is auth.uid())
                 title="Are you absolutely sure?"
                 description="This action cannot be undone. This will permanently delete the user account and all associated data."
               >
