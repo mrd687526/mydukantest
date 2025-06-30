@@ -178,16 +178,15 @@ export default function EditorPage() {
 
   useEffect(() => {
     const loadPage = async () => {
-      const { data, error } = await supabase
-        .from("editor_pages")
-        .select("content")
-        .eq("slug", "home")
-        .single();
-      if (error && error.code !== "PGRST116") {
+      const res = await fetch("/api/store-page?slug=home");
+      if (res.ok) {
+        const { data } = await res.json();
+        if (data) setTree(data as Node);
+      } else {
+        const { error } = await res.json();
         console.error("Error loading page:", error);
         toast.error("Failed to load page data.");
       }
-      if (data?.content) setTree(data.content as Node);
     };
     loadPage();
   }, []);
@@ -212,12 +211,15 @@ export default function EditorPage() {
   const handleSave = async () => {
     setIsSaving(true);
     const saveToast = toast.loading("Saving page...");
-    const { error } = await supabase
-      .from("editor_pages")
-      .upsert({ slug: "home", content: tree }, { onConflict: "slug" });
+    const res = await fetch("/api/store-page", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: "home", data: tree }),
+    });
     toast.dismiss(saveToast);
-    if (error) {
-      toast.error("Failed to save page.");
+    if (!res.ok) {
+      const { error } = await res.json();
+      toast.error("Failed to save page.", { description: error });
     } else {
       toast.success("Page saved successfully!");
     }
