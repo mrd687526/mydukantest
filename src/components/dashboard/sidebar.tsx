@@ -13,12 +13,9 @@ import {
   Users,
   Ticket,
   Palette,
-  ReceiptText,
-  BarChart3,
-  TrendingUp,
-  Warehouse, // New import for stock reports icon
-} from "lucide-react";
+} from "lucide-react"; // Removed specific report icons from here
 import { SidebarNav } from "./sidebar-nav";
+import { SidebarReportsSection } from "./sidebar-reports-section"; // New import
 
 export function DashboardSidebar() {
   const marketingNavItems = [
@@ -27,7 +24,7 @@ export function DashboardSidebar() {
     { href: "/dashboard/facebook-posts", label: "Facebook Posts", icon: Newspaper },
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
     { href: "/dashboard/bot-manager", label: "Bot Manager", icon: BotMessageSquare },
-    { href: "/dashboard/reports", label: "Reports", icon: LineChart },
+    { href: "/dashboard/reports", label: "Reports", icon: LineChart }, // This is the main "Reports" page, not the e-commerce ones
     { href: "/dashboard/editor", label: "Drag and Drop Editor", icon: LayoutGrid },
   ];
 
@@ -37,10 +34,6 @@ export function DashboardSidebar() {
     { href: "/dashboard/ecommerce/customers", label: "Customers", icon: Users },
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
-    { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText },
-    { href: "/dashboard/ecommerce/customer-reports", label: "Customer Reports", icon: BarChart3 },
-    { href: "/dashboard/ecommerce/top-sales-reports", label: "Top Sales Reports", icon: TrendingUp },
-    { href: "/dashboard/ecommerce/stock-reports", label: "Stock Reports", icon: Warehouse }, // New Stock Reports link
     { href: "/dashboard/themes", label: "Themes", icon: Palette },
   ];
 
@@ -65,6 +58,8 @@ export function DashboardSidebar() {
               E-Commerce
             </h3>
             <SidebarNav items={ecommerceNavItems} />
+            {/* Add the new Reports section here */}
+            <SidebarReportsSection />
           </div>
         </div>
         <div className="mt-auto p-4 border-t">
