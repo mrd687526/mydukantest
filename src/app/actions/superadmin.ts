@@ -1,12 +1,13 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createClient as createServerSupabaseClient } from "@/integrations/supabase/server";
+import { createClient as createAdminSupabaseClient } from '@supabase/supabase-js'; // Import directly for admin client
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-// Helper to check if the current user is a super admin
+// Helper to check if the current user is a super admin (uses regular client as it checks current user's session)
 async function isSuperAdmin() {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
@@ -34,7 +35,7 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
   // In a real application, this check would be more robust,
   // e.g., only allowing creation if no super_admin exists, or by an existing super_admin.
   // For initial setup, we'll allow it if no user is logged in or if a super admin is logged in.
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient(); // Use regular client for current user check
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   
   let canCreate = false;
@@ -53,7 +54,11 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
     return { error: "Unauthorized: You do not have permission to create new users with this role." };
   }
 
-  const supabaseAdmin = createClient(); // Use admin client for auth.admin functions
+  // Initialize an admin client with the service role key for privileged operations
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   try {
     // Create user in Supabase Auth
@@ -77,7 +82,6 @@ export async function createNewUserAndProfile(values: z.infer<typeof createUserS
     const { error: profileError } = await supabaseAdmin.from("profiles").insert({
       user_id: authUser.user.id,
       name: values.name,
-      // email: values.email, // Removed this as it's redundant and not in schema for profiles table
       role: values.role,
     });
 
@@ -101,7 +105,11 @@ export async function getAllUsersAndProfiles() {
     return { data: null, error: "Unauthorized: Only super admins can view all users." };
   }
 
-  const supabaseAdmin = createClient(); // Use admin client for direct table access
+  // Initialize an admin client for privileged data fetching
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   const { data: profiles, error } = await supabaseAdmin
     .from("profiles")
@@ -140,7 +148,11 @@ export async function updateUserRole(values: z.infer<typeof updateUserRoleSchema
     return { error: "Unauthorized: Only super admins can update user roles." };
   }
 
-  const supabaseAdmin = createClient();
+  // Initialize an admin client for privileged updates
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   const { error } = await supabaseAdmin
     .from("profiles")
@@ -161,7 +173,11 @@ export async function deleteUserAndProfile(userId: string) {
     return { error: "Unauthorized: Only super admins can delete users." };
   }
 
-  const supabaseAdmin = createClient();
+  // Initialize an admin client for privileged deletion
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   try {
     // Delete the user from auth.users, which should cascade delete the profile due to RLS policy
