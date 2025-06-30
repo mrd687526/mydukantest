@@ -21,7 +21,7 @@ import {
   Heading1,
   Type,
   Image as ImageIcon,
-  MousePointerSquare,
+  Pointer,
   Container,
   Trash2,
 } from "lucide-react";
@@ -81,7 +81,7 @@ const WIDGETS = [
   {
     type: "button",
     label: "Button",
-    icon: <MousePointerSquare className="h-8 w-8 text-gray-600" />,
+    icon: <Pointer className="h-8 w-8 text-gray-600" />,
   },
   {
     type: "container",
