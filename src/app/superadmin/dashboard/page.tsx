@@ -2,23 +2,12 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { UsersClient } from "@/components/superadmin/users-client";
-import { Profile, Subscription } from "@/lib/types";
+import { Profile, Subscription, UserProfileWithSubscription } from "@/lib/types"; // Import UserProfileWithSubscription
 import { getDailyNewUserCounts, getAllUsersAndProfiles } from "@/app/actions/superadmin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewUsersChartContainer } from "@/components/superadmin/new-users-chart-container";
 import { Users } from "lucide-react";
 import { format, subDays } from "date-fns";
-
-// Define a type for the data passed to the UsersClient, matching the RPC output
-interface UserProfileWithSubscription {
-  id: string;
-  name: string | null;
-  role: 'super_admin' | 'store_admin';
-  created_at: string;
-  email: string;
-  subscription_status: string | null;
-  subscription_end_date: string | null;
-}
 
 export default async function SuperAdminDashboardPage() {
   const supabase = createClient();
@@ -63,7 +52,7 @@ export default async function SuperAdminDashboardPage() {
   const today = new Date();
   const thirtyDaysAgo = subDays(today, 29); // Get data for the last 30 days including today
   const startDate = format(thirtyDaysAgo, 'yyyy-MM-dd');
-  const endDate = format(today, 'yyyy-MM-MM');
+  const endDate = format(today, 'yyyy-MM-dd'); // Corrected format
 
   const { data: dailyNewUserCounts, error: dailyCountsError } = await getDailyNewUserCounts(startDate, endDate);
 
