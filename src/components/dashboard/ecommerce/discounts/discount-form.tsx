@@ -32,13 +32,7 @@ import { Discount } from "@/lib/types";
 const discountFormSchema = z.object({
   code: z.string().min(1, "Discount code is required."),
   type: z.enum(['percentage', 'fixed_amount', 'free_shipping']),
-  value: z.preprocess(
-    (val) => {
-      const processedVal = typeof val === 'string' && val.trim() !== '' ? parseFloat(val) : (typeof val === 'number' ? val : NaN);
-      return isNaN(processedVal) ? 0 : processedVal;
-    },
-    z.number().min(0, "Value must be a non-negative number.")
-  ),
+  value: z.coerce.number().min(0, "Value must be a non-negative number."),
   min_purchase_amount: z.preprocess(
     (val) => val && String(val).trim() !== '' ? parseFloat(String(val)) : null,
     z.number().min(0).optional().nullable()
