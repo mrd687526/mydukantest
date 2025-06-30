@@ -41,15 +41,19 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  // Allow access to login, auth callback, privacy policy, data deletion, and storefront pages
+  // Explicitly allow access to the superadmin login page first
+  if (pathname.startsWith('/superadmin/login')) {
+    return response;
+  }
+
+  // Allow access to other public pages
   if (
     pathname.startsWith('/login') ||
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/data-deletion') ||
     pathname.startsWith('/store') ||
-    pathname.startsWith('/api/stripe/webhook') ||
-    pathname.startsWith('/superadmin/login') // Allow access to superadmin login page
+    pathname.startsWith('/api/stripe/webhook')
   ) {
     return response;
   }
