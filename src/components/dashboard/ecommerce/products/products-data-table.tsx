@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Product } from "@/lib/types";
 import { deleteProduct } from "@/app/actions/products";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
@@ -49,18 +50,6 @@ async function handleDelete(productId: string) {
 
 export const columns: ColumnDef<Product>[] = [
   {
-    accessorKey: "image_url",
-    header: "Image",
-    cell: ({ row }) => {
-      const imageUrl = row.getValue("image_url") as string;
-      return imageUrl ? (
-        <Image src={imageUrl} alt="Product Image" width={48} height={48} className="rounded-md object-cover" />
-      ) : (
-        <div className="h-12 w-12 bg-muted flex items-center justify-center rounded-md text-muted-foreground text-xs">No Image</div>
-      );
-    },
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -74,6 +63,38 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
     cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("name")}</div>,
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => <div>{row.getValue("category") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "brand",
+    header: "Brand",
+    cell: ({ row }) => <div>{row.getValue("brand") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "label",
+    header: "Label",
+    cell: ({ row }) => <div>{row.getValue("label") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "image_url",
+    header: "Cover Image",
+    cell: ({ row }) => {
+      const imageUrl = row.getValue("image_url") as string;
+      return imageUrl ? (
+        <Image src={imageUrl} alt="Product Image" width={48} height={48} className="rounded-md object-cover" />
+      ) : (
+        <div className="h-12 w-12 bg-muted flex items-center justify-center rounded-md text-muted-foreground text-xs text-center">No Image</div>
+      );
+    },
+  },
+  {
+    accessorKey: "variant",
+    header: "Variant",
+    cell: ({ row }) => <div>{row.getValue("variant") || "N/A"}</div>,
   },
   {
     accessorKey: "price",
@@ -105,7 +126,7 @@ export const columns: ColumnDef<Product>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Inventory
+          Stock Quantity
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -113,16 +134,13 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => <div>{row.getValue("inventory_quantity")}</div>,
   },
   {
-    accessorKey: "sku",
-    header: "SKU",
-    cell: ({ row }) => <div>{row.getValue("sku") || "N/A"}</div>,
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
+    id: "stock_status",
+    header: "Stock Status",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("created_at"));
-      return <div>{date.toLocaleDateString()}</div>;
+      const quantity = row.getValue("inventory_quantity") as number;
+      const status = quantity > 0 ? "In Stock" : "Out of Stock";
+      const variant = quantity > 0 ? "default" : "destructive";
+      return <Badge variant={variant}>{status}</Badge>;
     },
   },
   {

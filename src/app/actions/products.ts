@@ -17,6 +17,10 @@ const productSchema = z.object({
     z.number().int().min(0, "Inventory must be a non-negative integer.")
   ),
   image_url: z.string().url("Invalid URL format.").optional().nullable(),
+  category: z.string().optional().nullable(),
+  brand: z.string().optional().nullable(),
+  label: z.string().optional().nullable(),
+  variant: z.string().optional().nullable(),
 });
 
 export async function createProduct(values: z.infer<typeof productSchema>) {
@@ -45,6 +49,10 @@ export async function createProduct(values: z.infer<typeof productSchema>) {
     sku: values.sku,
     inventory_quantity: values.inventory_quantity,
     image_url: values.image_url,
+    category: values.category,
+    brand: values.brand,
+    label: values.label,
+    variant: values.variant,
   });
 
   if (error) {

@@ -111,6 +111,10 @@ export interface Product {
   sku: string | null;
   inventory_quantity: number;
   image_url: string | null;
+  category: string | null;
+  brand: string | null;
+  label: string | null;
+  variant: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -42,6 +42,10 @@ const productFormSchema = z.object({
     z.number().int().min(0, "Inventory must be a non-negative integer.")
   ),
   image_url: z.string().url("Invalid URL format.").optional().nullable(),
+  category: z.string().optional().nullable(),
+  brand: z.string().optional().nullable(),
+  label: z.string().optional().nullable(),
+  variant: z.string().optional().nullable(),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -58,6 +62,10 @@ export function CreateProductDialog() {
       sku: "",
       inventory_quantity: 0,
       image_url: "",
+      category: "",
+      brand: "",
+      label: "",
+      variant: "",
     },
   });
 
@@ -149,12 +157,12 @@ export function CreateProductDialog() {
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="sku"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SKU (Optional)</FormLabel>
+                    <FormLabel>Category (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 'VT-S-BLK-001'" {...field} />
+                      <Input placeholder="e.g., 'Apparel'" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -162,18 +170,59 @@ export function CreateProductDialog() {
               />
               <FormField
                 control={form.control}
-                name="image_url"
+                name="brand"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL (Optional)</FormLabel>
+                    <FormLabel>Brand (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Input placeholder="e.g., 'RetroWear'" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="label"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Label (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 'New Arrival'" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="variant"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Variant (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 'Red, Large'" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
