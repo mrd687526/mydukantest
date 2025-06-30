@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, name") // Select name as well
     .eq("user_id", user.id)
     .single();
 
@@ -35,7 +35,7 @@ export default async function SettingsPage() {
           Manage your application settings and credentials.
         </p>
       </div>
-      <SettingsForm credentials={credentials} />
+      <SettingsForm credentials={credentials} userProfile={profile} />
     </div>
   );
 }
