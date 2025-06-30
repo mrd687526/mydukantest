@@ -7,13 +7,13 @@ export default async function LoginPage() {
   const supabase = createClient();
 
   // Check if a super admin already exists.
-  const { data: superAdmin, error } = await supabase
+  const { count: superAdminCount, error } = await supabase
     .from('profiles')
-    .select('id', { count: 'exact', head: true })
+    .select('id', { count: 'exact', head: true }) // `count` is returned directly on the result object
     .eq('role', 'super_admin');
 
   // If no super admin exists (count is 0), create one.
-  if (superAdmin?.count === 0) {
+  if (superAdminCount === 0) {
     console.log("No super admin found. Creating default super admin...");
     await createNewUserAndProfile({
       email: 'superadmin@example.com',
