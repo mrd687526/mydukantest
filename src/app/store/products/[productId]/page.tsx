@@ -2,10 +2,12 @@ import { createClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
-export default async function ProductPage(props: {
+interface ProductPageProps {
   params: { productId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default async function ProductPage(props: Awaited<ProductPageProps>) {
   const { params } = props;
   const supabase = createClient();
   const { productId } = params;

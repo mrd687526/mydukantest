@@ -6,10 +6,12 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function BotEditorPage(props: {
+interface BotEditorPageProps {
   params: { botId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default async function BotEditorPage(props: Awaited<BotEditorPageProps>) {
   const { params } = props;
   const supabase = createClient();
   const { botId } = params;

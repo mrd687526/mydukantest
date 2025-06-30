@@ -3,10 +3,12 @@ import { ProductForm }
 from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
 
-export default async function EditProductPage(props: {
+interface EditProductPageProps {
   params: { productId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default async function EditProductPage(props: Awaited<EditProductPageProps>) {
   const { params } = props;
   const { productId } = params;
   const supabase = createClient();
