@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 export function SortableItem({
   id,
@@ -11,21 +9,11 @@ export function SortableItem({
   id: string;
   children: React.ReactNode;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  // All dnd-kit related code has been removed for debugging purposes.
+  // This component will now render as a static div.
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div>
       {children}
     </div>
   );

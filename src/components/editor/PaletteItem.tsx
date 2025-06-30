@@ -11,19 +11,11 @@ export function PaletteItem({
   label: string;
   icon: React.ReactNode;
 }) {
-  // Temporarily remove dnd-kit related code to isolate the issue
-  // const { attributes, listeners, setNodeRef } = useDraggable({
-  //   id: `palette-${type}`,
-  //   data: { type },
-  // });
-
-  console.log(`Rendering simplified PaletteItem: ${label}`);
+  // All dnd-kit related code has been removed for debugging purposes.
+  // This component will now render as a static div.
 
   return (
     <div
-      // ref={setNodeRef}
-      // {...listeners}
-      // {...attributes}
       className="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-400 cursor-grab transition-colors aspect-square"
     >
       {icon}

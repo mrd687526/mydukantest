@@ -6,11 +6,8 @@ import { TextWidget } from "./widgets/TextWidget";
 import { ImageWidget } from "./widgets/ImageWidget";
 import { ButtonWidget } from "./widgets/ButtonWidget";
 import { ContainerWidget } from "./widgets/ContainerWidget";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { SortableItem } from "./SortableItem";
+
+// Removed SortableContext and SortableItem imports and usage for debugging.
 
 export function RenderEngine({
   node,
@@ -28,6 +25,21 @@ export function RenderEngine({
 
   let widgetContent = null;
 
+  // Children are now passed directly to ContainerWidget without SortableContext
+  const children =
+    node.type === "container" && node.children ? (
+      <div className="flex flex-col">
+        {node.children.map((child: any) => (
+          <RenderEngine
+            key={child.id} // Use key directly here
+            node={child}
+            selectedId={selectedId}
+            onSelect={onSelect}
+          />
+        ))}
+      </div>
+    ) : null;
+
   switch (node.type) {
     case "heading":
       widgetContent = <HeadingWidget {...widgetProps} />;
@@ -42,28 +54,7 @@ export function RenderEngine({
       widgetContent = <ButtonWidget {...widgetProps} />;
       break;
     case "container":
-      widgetContent = (
-        <ContainerWidget {...widgetProps}>
-          {node.children && (
-            <SortableContext
-              items={node.children.map((c: any) => c.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="flex flex-col">
-                {node.children.map((child: any) => (
-                  <SortableItem key={child.id} id={child.id}>
-                    <RenderEngine
-                      node={child}
-                      selectedId={selectedId}
-                      onSelect={onSelect}
-                    />
-                  </SortableItem>
-                ))}
-              </div>
-            </SortableContext>
-          )}
-        </ContainerWidget>
-      );
+      widgetContent = <ContainerWidget {...widgetProps}>{children}</ContainerWidget>;
       break;
     default:
       return null;
