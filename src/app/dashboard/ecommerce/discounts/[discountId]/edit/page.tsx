@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type PageProps from "next/types"; // Corrected import
 
-interface EditDiscountPageProps extends PageProps<{ discountId: string }> {}
+interface EditDiscountPageProps extends PageProps<typeof PageProps, { discountId: string }> {}
 
 export default async function EditDiscountPage(props: EditDiscountPageProps) {
   const { params } = props;

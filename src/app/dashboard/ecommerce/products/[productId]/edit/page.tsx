@@ -4,7 +4,7 @@ from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
 import type PageProps from "next/types"; // Corrected import
 
-interface EditProductPageProps extends PageProps<{ productId: string }> {}
+interface EditProductPageProps extends PageProps<typeof PageProps, { productId: string }> {}
 
 export default async function EditProductPage(props: EditProductPageProps) {
   const { params } = props;

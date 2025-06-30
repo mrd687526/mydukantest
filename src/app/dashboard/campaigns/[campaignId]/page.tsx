@@ -19,7 +19,7 @@ import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-r
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
 import type PageProps from "next/types"; // Corrected import
 
-interface CampaignPageProps extends PageProps<{ campaignId: string }> {}
+interface CampaignPageProps extends PageProps<typeof PageProps, { campaignId: string }> {}
 
 export default async function Page(props: CampaignPageProps) {
   const { params } = props;
