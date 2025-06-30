@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
+import { PaletteItem } from "@/components/editor/PaletteItem";
 import {
   DndContext,
   closestCenter,
@@ -48,6 +49,29 @@ const WIDGETS = [
   { type: "button", label: "Button" },
   { type: "container", label: "Container" },
 ];
+
+// Helper: Create a new node of a given type
+function createNewNode(type: string): Node {
+  const baseNode = { id: `${type}-${Date.now()}`, type };
+  switch (type) {
+    case "container":
+      return {
+        ...baseNode,
+        props: { direction: "vertical", gap: 16 },
+        children: [],
+      };
+    case "heading":
+      return { ...baseNode, props: { text: "New Heading", align: "left" } };
+    case "text":
+      return { ...baseNode, props: { content: "New text block." } };
+    case "image":
+      return { ...baseNode, props: { src: "", alt: "" } };
+    case "button":
+      return { ...baseNode, props: { label: "Click Me" } };
+    default:
+      return { ...baseNode, props: {} };
+  }
+}
 
 // Helper: Recursively find a node by id
 function findNodeById(node: Node, id: string): Node | null {
@@ -108,78 +132,21 @@ export default function EditorPage() {
 
   const selectedNode = selectedId ? findNodeById(tree, selectedId) : null;
 
-  // Load page data on initial render
   useEffect(() => {
     const loadPage = async () => {
       const { data, error } = await supabase
         .from("editor_pages")
         .select("content")
-        .eq("slug", "home") // We'll hardcode the page slug for now
+        .eq("slug", "home")
         .single();
-
       if (error && error.code !== "PGRST116") {
-        // PGRST116 means no rows found, which is fine on first load
         console.error("Error loading page:", error);
         toast.error("Failed to load page data.");
       }
-
-      if (data?.content) {
-        setTree(data.content as Node);
-      }
+      if (data?.content) setTree(data.content as Node);
     };
-
     loadPage();
   }, []);
-
-  const addWidget = (type: string) => {
-    const newNode: Node =
-      type === "container"
-        ? {
-            id: `container-${Date.now()}`,
-            type: "container",
-            props: { direction: "vertical", gap: 16 },
-            children: [],
-          }
-        : type === "heading"
-        ? {
-            id: `heading-${Date.now()}`,
-            type: "heading",
-            props: { text: "New Heading", align: "left" },
-          }
-        : type === "text"
-        ? {
-            id: `text-${Date.now()}`,
-            type: "text",
-            props: { content: "New text block." },
-          }
-        : type === "image"
-        ? {
-            id: `image-${Date.now()}`,
-            type: "image",
-            props: { src: "", alt: "" },
-          }
-        : type === "button"
-        ? {
-            id: `button-${Date.now()}`,
-            type: "button",
-            props: { label: "Click Me" },
-          }
-        : {
-            id: `unknown-${Date.now()}`,
-            type,
-            props: {},
-          };
-
-    const targetId =
-      selectedNode?.type === "container" ? selectedId : "root";
-
-    setTree(
-      updateNodeById(tree, targetId!, (n) => ({
-        ...n,
-        children: [...(n.children || []), newNode],
-      }))
-    );
-  };
 
   const handleSelect = (id: string) => setSelectedId(id);
 
@@ -190,33 +157,22 @@ export default function EditorPage() {
   };
 
   const handleUpdateProperty = (id: string, propName: string, value: any) => {
-    setTree((prevTree) => {
-      return updateNodeById(prevTree, id, (node) => ({
+    setTree((prevTree) =>
+      updateNodeById(prevTree, id, (node) => ({
         ...node,
-        props: {
-          ...node.props,
-          [propName]: value,
-        },
-      }));
-    });
+        props: { ...node.props, [propName]: value },
+      }))
+    );
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     const saveToast = toast.loading("Saving page...");
-
-    const { error } = await supabase.from("editor_pages").upsert(
-      {
-        slug: "home", // Hardcoding slug for now
-        content: tree,
-      },
-      { onConflict: "slug" }
-    );
-
+    const { error } = await supabase
+      .from("editor_pages")
+      .upsert({ slug: "home", content: tree }, { onConflict: "slug" });
     toast.dismiss(saveToast);
-
     if (error) {
-      console.error("Error saving page:", error);
       toast.error("Failed to save page.");
     } else {
       toast.success("Page saved successfully!");
@@ -226,32 +182,59 @@ export default function EditorPage() {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
-    setTree((prevTree) => {
-      const activeNodeInfo = findNodeAndParent(prevTree, active.id as string);
-      const overNodeInfo = findNodeAndParent(prevTree, over.id as string);
+    const activeId = active.id as string;
+    const overId = over.id as string;
 
-      if (
-        !activeNodeInfo ||
-        !overNodeInfo ||
-        !activeNodeInfo.parent ||
-        !overNodeInfo.parent ||
-        activeNodeInfo.parent.id !== overNodeInfo.parent.id
-      ) {
-        return prevTree;
-      }
+    // Scenario 1: Dragging a new widget from the palette
+    if (activeId.startsWith("palette-")) {
+      const widgetType = active.data.current?.type;
+      if (!widgetType) return;
 
-      const parentNode = activeNodeInfo.parent;
-      const oldIndex = parentNode.children!.findIndex((c) => c.id === active.id);
-      const newIndex = parentNode.children!.findIndex((c) => c.id === over.id);
-      const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
+      const newNode = createNewNode(widgetType);
 
-      return updateNodeById(prevTree, parentNode.id, (n) => ({
-        ...n,
-        children: newChildren,
-      }));
-    });
+      setTree((prevTree) => {
+        const overNodeInfo = findNodeAndParent(prevTree, overId);
+        if (!overNodeInfo) return prevTree;
+
+        const overNode = overNodeInfo.node;
+        const targetContainerId =
+          overNode.type === "container" ? overNode.id : overNodeInfo.parent!.id;
+
+        return updateNodeById(prevTree, targetContainerId, (container) => ({
+          ...container,
+          children: [...(container.children || []), newNode],
+        }));
+      });
+      return;
+    }
+
+    // Scenario 2: Reordering an existing widget
+    if (activeId !== overId) {
+      setTree((prevTree) => {
+        const activeNodeInfo = findNodeAndParent(prevTree, activeId);
+        const overNodeInfo = findNodeAndParent(prevTree, overId);
+
+        if (
+          !activeNodeInfo?.parent ||
+          !overNodeInfo?.parent ||
+          activeNodeInfo.parent.id !== overNodeInfo.parent.id
+        ) {
+          return prevTree; // Only allow reordering within the same container for now
+        }
+
+        const parentNode = activeNodeInfo.parent;
+        const oldIndex = parentNode.children!.findIndex((c) => c.id === activeId);
+        const newIndex = parentNode.children!.findIndex((c) => c.id === overId);
+        const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
+
+        return updateNodeById(prevTree, parentNode.id, (n) => ({
+          ...n,
+          children: newChildren,
+        }));
+      });
+    }
   }
 
   return (
@@ -261,7 +244,6 @@ export default function EditorPage() {
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-screen">
-        {/* Palette / Properties Panel */}
         <aside className="w-64 bg-gray-50 border-r flex flex-col">
           {selectedNode && selectedId !== "root" ? (
             <PropertiesPanel
@@ -274,14 +256,7 @@ export default function EditorPage() {
               <h2 className="font-bold mb-4">Widgets</h2>
               <div className="space-y-2">
                 {WIDGETS.map((w) => (
-                  <Button
-                    key={w.type}
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => addWidget(w.type)}
-                  >
-                    {w.label}
-                  </Button>
+                  <PaletteItem key={w.type} type={w.type} label={w.label} />
                 ))}
               </div>
             </div>
@@ -301,7 +276,6 @@ export default function EditorPage() {
           </div>
         </aside>
 
-        {/* Canvas */}
         <main className="flex-1 flex flex-col bg-gray-100">
           <div className="flex-1 flex items-center justify-center overflow-auto">
             <div className="bg-white rounded shadow p-8 min-w-[600px] max-w-2xl w-full">
@@ -312,19 +286,10 @@ export default function EditorPage() {
               />
             </div>
           </div>
-          {/* Control Bar */}
           <footer className="border-t bg-white p-3 flex gap-2 justify-end">
-            <Button variant="outline" disabled>
-              Undo
-            </Button>
-            <Button variant="outline" disabled>
-              Redo
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
+            <Button variant="outline" disabled>Undo</Button>
+            <Button variant="outline" disabled>Redo</Button>
+            <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save"}
             </Button>
           </footer>

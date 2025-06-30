@@ -44,7 +44,7 @@ export function RenderEngine({
         onSelect?.(node.id);
       }}
     >
-      <Widget {...node.props}>
+      <Widget {...node.props} id={node.id}>
         {node.children && isContainer && (
           <SortableContext
             items={node.children.map((c: any) => c.id)}
