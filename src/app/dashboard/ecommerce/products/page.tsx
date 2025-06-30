@@ -1,7 +1,37 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { ProductsClient } from "@/components/dashboard/ecommerce/products/products-client";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching products:", error);
+    return <div>Error loading products. Please try again later.</div>;
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -10,21 +40,7 @@ export default function ProductsPage() {
           Create, edit, and manage your products and inventory.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Products</CardTitle>
-          <CardDescription>A list of all products in your store.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <Package className="h-12 w-12 mb-4" />
-            <p className="text-lg font-semibold">No Products Yet</p>
-            <p className="mt-2">
-              Get started by creating your first product.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <ProductsClient products={products || []} />
     </div>
   );
 }

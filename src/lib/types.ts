@@ -101,3 +101,16 @@ export interface FacebookPost {
   full_picture?: string;
   permalink_url: string;
 }
+
+export interface Product {
+  id: string;
+  profile_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  sku: string | null;
+  inventory_quantity: number;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
