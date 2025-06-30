@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'scontent-*.xx.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'dash.mydukan.app', // Added this hostname
       }
     ],
   },
