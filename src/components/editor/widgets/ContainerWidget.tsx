@@ -7,11 +7,13 @@ export const ContainerWidget = ({
   id,
   direction = "vertical",
   gap = 16,
+  padding = 16,
   children,
 }: {
   id: string;
   direction?: "vertical" | "horizontal";
   gap?: number;
+  padding?: number;
   children?: React.ReactNode;
 }) => {
   const { setNodeRef } = useDroppable({ id });
@@ -20,7 +22,7 @@ export const ContainerWidget = ({
     display: "flex",
     flexDirection: direction === "vertical" ? "column" : "row",
     gap: `${gap}px`,
-    padding: "1rem",
+    padding: `${padding}px`,
     border: "1px dashed #ccc",
     borderRadius: "4px",
     minHeight: "50px",

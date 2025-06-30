@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { RenderEngine } from "@/components/editor/RenderEngine";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
 import { PaletteItem } from "@/components/editor/PaletteItem";
@@ -16,6 +17,14 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { createClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Heading1,
+  Type,
+  Image as ImageIcon,
+  MousePointerSquare,
+  Container,
+  Trash2,
+} from "lucide-react";
 
 const supabase = createClient();
 
@@ -29,53 +38,89 @@ export type Node = {
 const DEFAULT_TREE: Node = {
   id: "root",
   type: "container",
-  props: { direction: "vertical", gap: 24 },
+  props: { direction: "vertical", gap: 24, padding: 32 },
   children: [
     {
       id: "heading-1",
       type: "heading",
-      props: { text: "Welcome to your site!", align: "center" },
+      props: {
+        text: "Welcome to Your Visually-Edited Site!",
+        align: "center",
+        fontSize: 36,
+      },
     },
     {
       id: "text-1",
       type: "text",
-      props: { content: "Drag widgets from the left to build your page." },
+      props: {
+        content:
+          "You can now drag widgets from the left panel, drop them here, and style them to create your perfect page.",
+        align: "center",
+        fontSize: 18,
+      },
     },
   ],
 };
 
 const WIDGETS = [
-  { type: "heading", label: "Heading" },
-  { type: "text", label: "Text" },
-  { type: "image", label: "Image" },
-  { type: "button", label: "Button" },
-  { type: "container", label: "Container" },
+  {
+    type: "heading",
+    label: "Heading",
+    icon: <Heading1 className="h-8 w-8 text-gray-600" />,
+  },
+  {
+    type: "text",
+    label: "Text",
+    icon: <Type className="h-8 w-8 text-gray-600" />,
+  },
+  {
+    type: "image",
+    label: "Image",
+    icon: <ImageIcon className="h-8 w-8 text-gray-600" />,
+  },
+  {
+    type: "button",
+    label: "Button",
+    icon: <MousePointerSquare className="h-8 w-8 text-gray-600" />,
+  },
+  {
+    type: "container",
+    label: "Container",
+    icon: <Container className="h-8 w-8 text-gray-600" />,
+  },
 ];
 
-// Helper: Create a new node of a given type
 function createNewNode(type: string): Node {
   const baseNode = { id: `${type}-${Date.now()}`, type };
   switch (type) {
     case "container":
       return {
         ...baseNode,
-        props: { direction: "vertical", gap: 16 },
+        props: { direction: "vertical", gap: 16, padding: 16 },
         children: [],
       };
     case "heading":
-      return { ...baseNode, props: { text: "New Heading", align: "left" } };
+      return {
+        ...baseNode,
+        props: { text: "New Heading", align: "left", fontSize: 24 },
+      };
     case "text":
-      return { ...baseNode, props: { content: "New text block." } };
+      return {
+        ...baseNode,
+        props: { content: "New text block.", align: "left", fontSize: 16 },
+      };
     case "image":
-      return { ...baseNode, props: { src: "", alt: "" } };
+      return { ...baseNode, props: { src: "", alt: "", href: "" } };
     case "button":
-      return { ...baseNode, props: { label: "Click Me" } };
+      return {
+        ...baseNode,
+        props: { label: "Click Me", variant: "default", href: "" },
+      };
     default:
       return { ...baseNode, props: {} };
   }
 }
 
-// Helper: Recursively find a node by id
 function findNodeById(node: Node, id: string): Node | null {
   if (node.id === id) return node;
   if (!node.children) return null;
@@ -86,7 +131,6 @@ function findNodeById(node: Node, id: string): Node | null {
   return null;
 }
 
-// Helper: Recursively update a node by id
 function updateNodeById(
   node: Node,
   id: string,
@@ -100,7 +144,6 @@ function updateNodeById(
   };
 }
 
-// Helper: Recursively delete a node by id (except root)
 function deleteNodeById(node: Node, id: string): Node {
   if (!node.children) return node;
   return {
@@ -111,7 +154,6 @@ function deleteNodeById(node: Node, id: string): Node {
   };
 }
 
-// Helper: Find a node and its parent
 function findNodeAndParent(
   node: Node,
   id: string,
@@ -189,21 +231,16 @@ export default function EditorPage() {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    // Scenario 1: Dragging a new widget from the palette
     if (activeId.startsWith("palette-")) {
       const widgetType = active.data.current?.type;
       if (!widgetType) return;
-
       const newNode = createNewNode(widgetType);
-
       setTree((prevTree) => {
         const overNodeInfo = findNodeAndParent(prevTree, overId);
         if (!overNodeInfo) return prevTree;
-
-        const overNode = overNodeInfo.node;
+        const { node: overNode, parent: overParent } = overNodeInfo;
         const targetContainerId =
-          overNode.type === "container" ? overNode.id : overNodeInfo.parent!.id;
-
+          overNode.type === "container" ? overNode.id : overParent!.id;
         return updateNodeById(prevTree, targetContainerId, (container) => ({
           ...container,
           children: [...(container.children || []), newNode],
@@ -212,25 +249,25 @@ export default function EditorPage() {
       return;
     }
 
-    // Scenario 2: Reordering an existing widget
     if (activeId !== overId) {
       setTree((prevTree) => {
         const activeNodeInfo = findNodeAndParent(prevTree, activeId);
         const overNodeInfo = findNodeAndParent(prevTree, overId);
-
         if (
           !activeNodeInfo?.parent ||
           !overNodeInfo?.parent ||
           activeNodeInfo.parent.id !== overNodeInfo.parent.id
         ) {
-          return prevTree; // Only allow reordering within the same container for now
+          return prevTree;
         }
-
         const parentNode = activeNodeInfo.parent;
-        const oldIndex = parentNode.children!.findIndex((c) => c.id === activeId);
-        const newIndex = parentNode.children!.findIndex((c) => c.id === overId);
+        const oldIndex = parentNode.children!.findIndex(
+          (c) => c.id === activeId
+        );
+        const newIndex = parentNode.children!.findIndex(
+          (c) => c.id === overId
+        );
         const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
-
         return updateNodeById(prevTree, parentNode.id, (n) => ({
           ...n,
           children: newChildren,
@@ -245,42 +282,65 @@ export default function EditorPage() {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-screen">
-        <aside className="w-64 bg-gray-50 border-r flex flex-col">
-          {selectedNode && selectedId !== "root" ? (
-            <PropertiesPanel
-              node={selectedNode}
-              onUpdate={handleUpdateProperty}
-              onBack={() => setSelectedId(null)}
-            />
-          ) : (
-            <div className="p-4">
-              <h2 className="font-bold mb-4">Widgets</h2>
-              <div className="space-y-2">
-                {WIDGETS.map((w) => (
-                  <PaletteItem key={w.type} type={w.type} label={w.label} />
-                ))}
+      <div className="flex h-screen bg-gray-200 font-sans">
+        <aside className="w-[350px] bg-white border-r flex flex-col shadow-lg">
+          <div className="p-4 border-b flex justify-between items-center">
+            <h1 className="text-lg font-semibold">Elements</h1>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {selectedNode && selectedId !== "root" ? (
+              <PropertiesPanel
+                node={selectedNode}
+                onUpdate={handleUpdateProperty}
+                onBack={() => setSelectedId(null)}
+              />
+            ) : (
+              <div className="p-4">
+                <Input
+                  placeholder="Search widgets..."
+                  className="mb-4 bg-gray-50"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  {WIDGETS.map((w) => (
+                    <PaletteItem
+                      key={w.type}
+                      type={w.type}
+                      label={w.label}
+                      icon={w.icon}
+                    />
+                  ))}
+                </div>
               </div>
+            )}
+          </div>
+
+          {selectedId && selectedId !== "root" && (
+            <div className="p-4 mt-auto border-t">
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Selected
+              </Button>
             </div>
           )}
-          <div className="p-4 mt-auto border-t space-y-2">
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleDelete}
-              disabled={!selectedId || selectedId === "root"}
-            >
-              Delete Selected
-            </Button>
-            <Button variant="secondary" className="w-full" disabled>
-              Site Settings
-            </Button>
-          </div>
         </aside>
 
-        <main className="flex-1 flex flex-col bg-gray-100">
-          <div className="flex-1 flex items-center justify-center overflow-auto">
-            <div className="bg-white rounded shadow p-8 min-w-[600px] max-w-2xl w-full">
+        <main className="flex-1 flex flex-col">
+          <header className="bg-white border-b p-3 flex gap-2 justify-end items-center shadow-sm">
+            <Button variant="outline" disabled>
+              Preview
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </header>
+
+          <div className="flex-1 overflow-auto p-8">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 max-w-4xl mx-auto min-h-full">
               <RenderEngine
                 node={tree}
                 selectedId={selectedId}
@@ -288,13 +348,6 @@ export default function EditorPage() {
               />
             </div>
           </div>
-          <footer className="border-t bg-white p-3 flex gap-2 justify-end">
-            <Button variant="outline" disabled>Undo</Button>
-            <Button variant="outline" disabled>Redo</Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </footer>
         </main>
       </div>
     </DndContext>

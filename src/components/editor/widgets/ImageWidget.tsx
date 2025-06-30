@@ -5,10 +5,12 @@ import React from "react";
 export const ImageWidget = ({
   src,
   alt,
+  href,
   children,
 }: {
   src: string;
   alt: string;
+  href?: string;
   children?: React.ReactNode;
 }) => {
   if (!src) {
@@ -18,9 +20,27 @@ export const ImageWidget = ({
       </div>
     );
   }
+
+  const image = <img src={src} alt={alt} className="max-w-full rounded" />;
+
+  if (href) {
+    return (
+      // In editor, prevent navigation
+      <a
+        href={href}
+        onClick={(e) => e.preventDefault()}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {image}
+        {children}
+      </a>
+    );
+  }
+
   return (
     <div>
-      <img src={src} alt={alt} className="max-w-full rounded" />
+      {image}
       {children}
     </div>
   );
