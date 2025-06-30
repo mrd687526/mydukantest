@@ -37,7 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 import { deleteUserAndProfile } from "@/app/actions/superadmin";
 import { Profile, Subscription } from "@/lib/types";
-import { EditUserRoleDialog } from "./edit-user-role-dialog"; // Import the new dialog
+import { EditUserRoleDialog } from "./edit-user-role-dialog";
 
 // Define a type for the data passed to the table, matching the RPC output
 interface UserProfileWithSubscription {
@@ -88,7 +88,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.original.email}</div>, // Directly access email from original object
+    cell: ({ row }) => <div>{row.original.email}</div>,
   },
   {
     accessorKey: "role",
@@ -99,10 +99,10 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     },
   },
   {
-    accessorKey: "subscription_status", // Changed from 'subscriptions'
+    accessorKey: "subscription_status",
     header: "Subscription Status",
     cell: ({ row }) => {
-      const status = row.original.subscription_status; // Directly access status
+      const status = row.original.subscription_status;
       const endDate = row.original.subscription_end_date ? new Date(row.original.subscription_end_date).toLocaleDateString() : 'N/A';
       
       if (status) {
@@ -144,7 +144,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     id: "actions",
     cell: ({ row }) => {
       const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = React.useState(false);
-      const userProfile = row.original; // This is the Profile object with subscription info
+      const userProfile = row.original;
 
       return (
         <>
@@ -163,7 +163,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DeleteConfirmationDialog
-                onConfirm={() => handleDelete(userProfile.id)} // Use userProfile.id (which is auth.uid())
+                onConfirm={() => handleDelete(userProfile.id)}
                 title="Are you absolutely sure?"
                 description="This action cannot be undone. This will permanently delete the user account and all associated data."
               >
@@ -190,6 +190,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
 export function UsersDataTable({ data }: { data: UserProfileWithSubscription[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data,
@@ -200,7 +201,8 @@ export function UsersDataTable({ data }: { data: UserProfileWithSubscription[] }
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    state: { sorting, columnFilters },
+    onGlobalFilterChange: setGlobalFilter,
+    state: { sorting, columnFilters, globalFilter },
   });
 
   return (
@@ -208,9 +210,9 @@ export function UsersDataTable({ data }: { data: UserProfileWithSubscription[] }
         <div className="flex items-center py-4">
             <Input
             placeholder="Filter by name or email..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            value={globalFilter ?? ""}
             onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
+                setGlobalFilter(event.target.value)
             }
             className="max-w-sm"
             />
