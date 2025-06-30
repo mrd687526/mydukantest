@@ -287,3 +287,17 @@ export interface UserProfileWithSubscription extends Profile {
   subscription_status: string | null; // 'active', 'trialing', 'canceled', etc.
   subscription_end_date: string | null;
 }
+
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  interval: 'month' | 'year' | 'lifetime'; // Assuming these intervals
+  stripe_price_id: string | null;
+  features: string[] | null; // Array of strings for features
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

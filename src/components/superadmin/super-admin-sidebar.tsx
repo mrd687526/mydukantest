@@ -5,6 +5,7 @@ import {
   Users,
   Settings,
   ShieldCheck,
+  DollarSign, // Import DollarSign icon
 } from "lucide-react";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"; // Re-using SidebarNav for list rendering
 
@@ -12,7 +13,7 @@ export async function SuperAdminSidebar() {
   const superAdminNavItems = [
     { href: "/superadmin/dashboard", label: "Dashboard", icon: LayoutGrid },
     { href: "/superadmin/users", label: "Users", icon: Users },
-    // Add other super admin specific links here
+    { href: "/superadmin/plans", label: "Plans", icon: DollarSign }, // New: Plans link
   ];
 
   return (
