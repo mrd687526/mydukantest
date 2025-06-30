@@ -1,9 +1,20 @@
+"use client";
+
 import React from "react";
-export function HeadingWidget({ text, align = "left", children }: any) {
+
+export const HeadingWidget = ({
+  text,
+  align = "left",
+  children,
+}: {
+  text: string;
+  align?: "left" | "center" | "right";
+  children?: React.ReactNode;
+}) => {
   return (
-    <h2 style={{ textAlign: align }} className="text-2xl font-bold mb-2">
+    <h2 style={{ textAlign: align }} className="text-2xl font-bold">
       {text}
       {children}
     </h2>
   );
-}
+};

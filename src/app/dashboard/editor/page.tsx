@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RenderEngine } from "@/components/editor/RenderEngine";
+import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
 import {
   DndContext,
   closestCenter,
@@ -13,7 +14,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
-type Node = {
+export type Node = {
   id: string;
   type: string;
   props: Record<string, any>;
@@ -99,8 +100,10 @@ function findNodeAndParent(
 
 export default function EditorPage() {
   const [tree, setTree] = useState<Node>(DEFAULT_TREE);
-  const [selectedId, setSelectedId] = useState<string>("root");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor));
+
+  const selectedNode = selectedId ? findNodeById(tree, selectedId) : null;
 
   const addWidget = (type: string) => {
     const newNode: Node =
@@ -141,36 +144,40 @@ export default function EditorPage() {
             props: {},
           };
 
-    const selectedNode = findNodeById(tree, selectedId);
-    if (selectedNode && selectedNode.type === "container") {
-      setTree(
-        updateNodeById(tree, selectedId, (n) => ({
-          ...n,
-          children: [...(n.children || []), newNode],
-        }))
-      );
-    } else {
-      setTree({
-        ...tree,
-        children: [...(tree.children || []), newNode],
-      });
-    }
+    const targetId =
+      selectedNode?.type === "container" ? selectedId : "root";
+
+    setTree(
+      updateNodeById(tree, targetId!, (n) => ({
+        ...n,
+        children: [...(n.children || []), newNode],
+      }))
+    );
   };
 
   const handleSelect = (id: string) => setSelectedId(id);
 
   const handleDelete = () => {
-    if (selectedId === "root") return;
-    setTree(deleteNodeById(tree, selectedId));
-    setSelectedId("root");
+    if (!selectedId || selectedId === "root") return;
+    setTree(deleteNodeById(tree, selectedI));
+    setSelectedId(null);
+  };
+
+  const handleUpdateProperty = (id: string, propName: string, value: any) => {
+    setTree((prevTree) => {
+      return updateNodeById(prevTree, id, (node) => ({
+        ...node,
+        props: {
+          ...node.props,
+          [propName]: value,
+        },
+      }));
+    });
   };
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      return;
-    }
+    if (!over || active.id === over.id) return;
 
     setTree((prevTree) => {
       const activeNodeInfo = findNodeAndParent(prevTree, active.id as string);
@@ -180,32 +187,21 @@ export default function EditorPage() {
         !activeNodeInfo ||
         !overNodeInfo ||
         !activeNodeInfo.parent ||
-        !overNodeInfo.parent
+        !overNodeInfo.parent ||
+        activeNodeInfo.parent.id !== overNodeInfo.parent.id
       ) {
         return prevTree;
       }
 
-      // Handle reordering within the same container
-      if (activeNodeInfo.parent.id === overNodeInfo.parent.id) {
-        const parentNode = activeNodeInfo.parent;
-        const oldIndex = parentNode.children!.findIndex(
-          (child) => child.id === active.id
-        );
-        const newIndex = parentNode.children!.findIndex(
-          (child) => child.id === over.id
-        );
+      const parentNode = activeNodeInfo.parent;
+      const oldIndex = parentNode.children!.findIndex((c) => c.id === active.id);
+      const newIndex = parentNode.children!.findIndex((c) => c.id === over.id);
+      const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
 
-        const newChildren = arrayMove(parentNode.children!, oldIndex, newIndex);
-
-        return updateNodeById(prevTree, parentNode.id, (n) => ({
-          ...n,
-          children: newChildren,
-        }));
-      }
-
-      // Note: Moving between containers would be handled here in the future.
-
-      return prevTree;
+      return updateNodeById(prevTree, parentNode.id, (n) => ({
+        ...n,
+        children: newChildren,
+      }));
     });
   }
 
@@ -216,27 +212,37 @@ export default function EditorPage() {
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-screen">
-        {/* Palette */}
-        <aside className="w-64 bg-gray-50 border-r p-4 flex flex-col">
-          <h2 className="font-bold mb-4">Widgets</h2>
-          <div className="space-y-2 mb-8">
-            {WIDGETS.map((w) => (
-              <Button
-                key={w.type}
-                variant="outline"
-                className="w-full"
-                onClick={() => addWidget(w.type)}
-              >
-                {w.label}
-              </Button>
-            ))}
-          </div>
-          <div className="mt-auto space-y-2">
+        {/* Palette / Properties Panel */}
+        <aside className="w-64 bg-gray-50 border-r flex flex-col">
+          {selectedNode && selectedId !== "root" ? (
+            <PropertiesPanel
+              node={selectedNode}
+              onUpdate={handleUpdateProperty}
+              onBack={() => setSelectedId(null)}
+            />
+          ) : (
+            <div className="p-4">
+              <h2 className="font-bold mb-4">Widgets</h2>
+              <div className="space-y-2">
+                {WIDGETS.map((w) => (
+                  <Button
+                    key={w.type}
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => addWidget(w.type)}
+                  >
+                    {w.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="p-4 mt-auto border-t space-y-2">
             <Button
               variant="destructive"
               className="w-full"
               onClick={handleDelete}
-              disabled={selectedId === "root"}
+              disabled={!selectedId || selectedId === "root"}
             >
               Delete Selected
             </Button>
