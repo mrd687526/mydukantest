@@ -205,3 +205,28 @@ export interface CustomerOrderReportData {
   guest_orders: number;
   total_orders: number;
 }
+
+export interface TopPaymentMethodReportData {
+  payment_method: string;
+  total_orders: number;
+  total_amount: number;
+}
+
+// Placeholders for other reports (since schema doesn't support them directly yet)
+export interface TopSellingProductReportData {
+  product_name: string;
+  total_sales_amount: number;
+  total_quantity_sold: number;
+}
+
+export interface TopSellingCategoryReportData {
+  category_name: string;
+  total_sales_amount: number;
+  total_quantity_sold: number;
+}
+
+export interface TopSellingBrandReportData {
+  brand_name: string;
+  total_sales_amount: number;
+  total_quantity_sold: number;
+}

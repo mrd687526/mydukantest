@@ -3,7 +3,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { CustomerOrderReportData } from "@/lib/types";
+import { CustomerOrderReportData, TopPaymentMethodReportData } from "@/lib/types";
 
 const dateRangeSchema = z.object({
   startDate: z.string().datetime({ message: "Invalid start date format." }),
@@ -40,4 +40,39 @@ export async function getCustomerOrderReports(values: z.infer<typeof dateRangeSc
   }
 
   return { data: data as CustomerOrderReportData[], error: null };
+}
+
+export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>): Promise<{
+  topPaymentMethods: TopPaymentMethodReportData[] | null;
+  error: string | null;
+}> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { topPaymentMethods: null, error: "You must be logged in to view reports." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return { topPaymentMethods: null, error: "You must have a profile to view reports." };
+  }
+
+  const { data: topPaymentMethods, error } = await supabase.rpc("get_top_payment_methods", {
+    p_profile_id: profile.id,
+    p_start_date: values.startDate,
+    p_end_date: values.endDate,
+  });
+
+  if (error) {
+    console.error("Supabase error fetching top payment methods:", error.message);
+    return { topPaymentMethods: null, error: "Database error: Could not fetch top payment methods." };
+  }
+
+  return { topPaymentMethods: topPaymentMethods as TopPaymentMethodReportData[], error: null };
 }
