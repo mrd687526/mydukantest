@@ -115,12 +115,22 @@ export interface Product {
   updated_at: string;
 }
 
+export interface Customer {
+  id: string;
+  profile_id: string;
+  name: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Order {
   id: string;
   profile_id: string;
+  customer_id: string | null; // Added customer_id
   order_number: string;
-  customer_name: string;
-  customer_email: string;
+  customer_name: string; // Kept for display/initial input
+  customer_email: string; // Kept for display/initial input
   total_amount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   created_at: string;

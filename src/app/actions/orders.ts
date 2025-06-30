@@ -34,8 +34,45 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     return { error: "You must have a profile to create an order." };
   }
 
+  let customerId: string | null = null;
+
+  // Check if customer already exists for this profile
+  const { data: existingCustomer, error: customerFetchError } = await supabase
+    .from("customers")
+    .select("id")
+    .eq("profile_id", profile.id)
+    .eq("email", values.customer_email)
+    .single();
+
+  if (customerFetchError && customerFetchError.code !== "PGRST116") { // PGRST116 means no rows found
+    console.error("Supabase error checking for existing customer:", customerFetchError.message);
+    return { error: "Database error: Could not check customer existence." };
+  }
+
+  if (existingCustomer) {
+    customerId = existingCustomer.id;
+  } else {
+    // Create new customer if not found
+    const { data: newCustomer, error: newCustomerError } = await supabase
+      .from("customers")
+      .insert({
+        profile_id: profile.id,
+        name: values.customer_name,
+        email: values.customer_email,
+      })
+      .select("id")
+      .single();
+
+    if (newCustomerError) {
+      console.error("Supabase error creating new customer:", newCustomerError.message);
+      return { error: "Database error: Could not create new customer." };
+    }
+    customerId = newCustomer.id;
+  }
+
   const { error } = await supabase.from("orders").insert({
     profile_id: profile.id,
+    customer_id: customerId, // Assign the customer ID
     order_number: values.order_number,
     customer_name: values.customer_name,
     customer_email: values.customer_email,
@@ -49,6 +86,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
   }
 
   revalidatePath("/dashboard/ecommerce/orders");
+  revalidatePath("/dashboard/ecommerce/customers"); // Revalidate customers page too
   return { success: true };
 }
 
@@ -62,6 +100,7 @@ export async function deleteOrder(orderId: string) {
   }
 
   revalidatePath("/dashboard/ecommerce/orders");
+  revalidatePath("/dashboard/ecommerce/customers"); // Revalidate customers page too
   return { success: true };
 }
 

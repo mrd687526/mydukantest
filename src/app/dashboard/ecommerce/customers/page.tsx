@@ -1,7 +1,34 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
+import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { CustomersClient } from "@/components/dashboard/ecommerce/customers/customers-client";
+import { getCustomers } from "@/app/actions/customers"; // Import the new action
 
-export default function CustomersPage() {
+export default async function CustomersPage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) {
+    return <CompleteProfilePrompt user={user} />;
+  }
+
+  const { data: customers, error } = await getCustomers();
+
+  if (error) {
+    console.error("Error fetching customers:", error);
+    return <div>Error loading customers. Please try again later.</div>;
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -10,21 +37,7 @@ export default function CustomersPage() {
           View and manage your customer list.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Customers</CardTitle>
-          <CardDescription>A list of all your customers.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <Users className="h-12 w-12 mb-4" />
-            <p className="text-lg font-semibold">No Customers Yet</p>
-            <p className="mt-2">
-              When customers make a purchase or create an account, they will appear here.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <CustomersClient customers={customers || []} />
     </div>
   );
 }
