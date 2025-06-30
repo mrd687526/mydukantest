@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { XCircle, PlusCircle, MinusCircle } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +34,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createOrder } from "@/app/actions/orders";
+import { createClient } from "@/integrations/supabase/client";
+import { Product } from "@/lib/types";
+
+const orderItemSchema = z.object({
+  product_id: z.string().uuid("Invalid product ID."),
+  quantity: z.number().int().min(1, "Quantity must be at least 1."),
+});
 
 const orderFormSchema = z.object({
   order_number: z.string().min(1, "Order number is required."),
@@ -42,7 +51,8 @@ const orderFormSchema = z.object({
     z.number().min(0.01, "Total amount must be greater than 0.")
   ),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
-  payment_type: z.string().min(1, "Payment type is required."), // Added payment_type
+  payment_type: z.string().min(1, "Payment type is required."),
+  items: z.array(orderItemSchema).min(1, "At least one product must be added to the order."),
 });
 
 type OrderFormValues = z.infer<typeof orderFormSchema>;
@@ -52,6 +62,13 @@ interface CreateOrderDialogProps {
 }
 
 export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
+  const supabase = createClient();
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<
+    Array<{ product: Product; quantity: number }>
+  >([]);
+  const [selectedProductIdToAdd, setSelectedProductIdToAdd] = useState<string>("");
+
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
@@ -60,9 +77,78 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
       customer_email: "",
       total_amount: 0.01,
       status: "pending",
-      payment_type: "cash", // Default payment type
+      payment_type: "cash",
+      items: [],
     },
   });
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from("products").select("*");
+      if (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to load products.");
+      } else {
+        setAvailableProducts(data || []);
+      }
+    };
+    fetchProducts();
+  }, [supabase]);
+
+  useEffect(() => {
+    const calculatedTotal = selectedProducts.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    );
+    form.setValue("total_amount", parseFloat(calculatedTotal.toFixed(2)));
+    form.setValue(
+      "items",
+      selectedProducts.map((item) => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+      }))
+    );
+  }, [selectedProducts, form]);
+
+  const handleAddProduct = () => {
+    const productToAdd = availableProducts.find(
+      (p) => p.id === selectedProductIdToAdd
+    );
+    if (productToAdd) {
+      setSelectedProducts((prev) => {
+        const existingItem = prev.find(
+          (item) => item.product.id === productToAdd.id
+        );
+        if (existingItem) {
+          return prev.map((item) =>
+            item.product.id === productToAdd.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...prev, { product: productToAdd, quantity: 1 }];
+      });
+      setSelectedProductIdToAdd(""); // Reset select
+    }
+  };
+
+  const handleUpdateQuantity = (productId: string, delta: number) => {
+    setSelectedProducts((prev) =>
+      prev
+        .map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const handleRemoveProduct = (productId: string) => {
+    setSelectedProducts((prev) =>
+      prev.filter((item) => item.product.id !== productId)
+    );
+  };
 
   const onSubmit = async (data: OrderFormValues) => {
     const result = await createOrder(data);
@@ -74,13 +160,14 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
     } else {
       toast.success("Order created successfully!");
       form.reset();
+      setSelectedProducts([]);
       onClose();
     }
   };
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Order</DialogTitle>
           <DialogDescription>
@@ -128,6 +215,103 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
                 </FormItem>
               )}
             />
+
+            {/* Product Selection Section */}
+            <div className="space-y-2">
+              <FormLabel>Order Items</FormLabel>
+              <div className="flex gap-2">
+                <Select
+                  value={selectedProductIdToAdd}
+                  onValueChange={setSelectedProductIdToAdd}
+                >
+                  <SelectTrigger className="flex-grow">
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProducts.length > 0 ? (
+                      availableProducts.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.name} (${product.price.toFixed(2)})
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-center text-sm text-muted-foreground">
+                        No products available.
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={handleAddProduct}
+                  disabled={!selectedProductIdToAdd || availableProducts.length === 0}
+                >
+                  Add
+                </Button>
+              </div>
+              {selectedProducts.length > 0 && (
+                <div className="border rounded-md p-2 mt-2 space-y-2">
+                  {selectedProducts.map((item) => (
+                    <div
+                      key={item.product.id}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        {item.product.image_url && (
+                          <Image
+                            src={item.product.image_url}
+                            alt={item.product.name}
+                            width={32}
+                            height={32}
+                            className="rounded object-cover"
+                          />
+                        )}
+                        <span>
+                          {item.product.name} (${item.product.price.toFixed(2)})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleUpdateQuantity(item.product.id, -1)}
+                        >
+                          <MinusCircle className="h-4 w-4" />
+                        </Button>
+                        <span>{item.quantity}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleUpdateQuantity(item.product.id, 1)}
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveProduct(item.product.id)}
+                        >
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <FormField
+                control={form.control}
+                name="items"
+                render={() => (
+                  <FormItem>
+                    <FormMessage /> {/* Display error if no items */}
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="total_amount"
@@ -135,8 +319,9 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
                 <FormItem>
                   <FormLabel>Total Amount</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" placeholder="99.99" {...field} />
+                    <Input type="number" step="0.01" readOnly {...field} />
                   </FormControl>
+                  <FormDescription>Automatically calculated from selected items.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

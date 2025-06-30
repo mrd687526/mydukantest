@@ -27,7 +27,13 @@ export default async function TopSalesReportsPage() {
   const defaultStartDate = format(subMonths(new Date(), 1), 'yyyy-MM-dd');
   const defaultEndDate = format(endOfDay(new Date()), 'yyyy-MM-dd'); // End of today
 
-  const { topPaymentMethods, error } = await getTopSalesReports({
+  const {
+    topPaymentMethods,
+    topSellingProducts,
+    topSellingCategories,
+    topSellingBrands,
+    error
+  } = await getTopSalesReports({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
@@ -45,7 +51,12 @@ export default async function TopSalesReportsPage() {
           Analyze your top-performing products, categories, brands, and payment methods.
         </p>
       </div>
-      <TopSalesReportsClient initialTopPaymentMethods={topPaymentMethods || []} />
+      <TopSalesReportsClient
+        initialTopPaymentMethods={topPaymentMethods || []}
+        initialTopSellingProducts={topSellingProducts || []}
+        initialTopSellingCategories={topSellingCategories || []}
+        initialTopSellingBrands={topSellingBrands || []}
+      />
     </div>
   );
 }

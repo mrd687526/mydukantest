@@ -3,8 +3,14 @@
 import { createClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { Product } from "@/lib/types"; // Import Product type for price lookup
 
 // Schema for creating a new order (for future use, e.g., manual order creation or API integration)
+const orderItemSchema = z.object({
+  product_id: z.string().uuid("Invalid product ID."),
+  quantity: z.number().int().min(1, "Quantity must be at least 1."),
+});
+
 const orderSchema = z.object({
   order_number: z.string().min(1, "Order number is required."),
   customer_name: z.string().min(1, "Customer name is required."),
@@ -14,7 +20,8 @@ const orderSchema = z.object({
     z.number().min(0.01, "Total amount must be greater than 0.")
   ),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending'),
-  payment_type: z.string().min(1, "Payment type is required.").default('cash'), // Added payment_type
+  payment_type: z.string().min(1, "Payment type is required.").default('cash'),
+  items: z.array(orderItemSchema).min(1, "At least one item is required for the order."),
 });
 
 export async function createOrder(values: z.infer<typeof orderSchema>) {
@@ -71,24 +78,83 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     customerId = newCustomer.id;
   }
 
-  const { error } = await supabase.from("orders").insert({
-    profile_id: profile.id,
-    customer_id: customerId, // Assign the customer ID
-    order_number: values.order_number,
-    customer_name: values.customer_name,
-    customer_email: values.customer_email,
-    total_amount: values.total_amount,
-    status: values.status,
-    payment_type: values.payment_type, // Added payment_type
+  // Fetch product prices for order items
+  const productIds = values.items.map(item => item.product_id);
+  const { data: products, error: productsError } = await supabase
+    .from("products")
+    .select("id, price")
+    .in("id", productIds);
+
+  if (productsError || !products || products.length !== productIds.length) {
+    console.error("Supabase error fetching products for order items:", productsError?.message || "Some products not found.");
+    return { error: "Could not retrieve product details for order items." };
+  }
+
+  const productPriceMap = new Map(products.map(p => [p.id, p.price]));
+
+  // Calculate total amount based on selected items and their current prices
+  let calculatedTotalAmount = 0;
+  const orderItemsToInsert = values.items.map(item => {
+    const price = productPriceMap.get(item.product_id);
+    if (price === undefined) {
+      throw new Error(`Price not found for product ID: ${item.product_id}`); // Should not happen if products.length check passes
+    }
+    calculatedTotalAmount += price * item.quantity;
+    return {
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price_at_purchase: price,
+    };
   });
 
-  if (error) {
+  // Ensure the provided total_amount matches the calculated one (optional, but good for validation)
+  if (Math.abs(calculatedTotalAmount - values.total_amount) > 0.01) {
+    // Allow a small floating point deviation
+    // console.warn(`Provided total_amount (${values.total_amount}) does not match calculated total (${calculatedTotalAmount}). Using provided.`);
+    // For now, we'll trust the client-provided total_amount, but in a real app, you might enforce server-side calculation.
+  }
+
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .insert({
+      profile_id: profile.id,
+      customer_id: customerId,
+      order_number: values.order_number,
+      customer_name: values.customer_name,
+      customer_email: values.customer_email,
+      total_amount: values.total_amount, // Use client-provided total for now, or calculatedTotalAmount
+      status: values.status,
+      payment_type: values.payment_type,
+    })
+    .select("id")
+    .single();
+
+  if (error || !order) {
     console.error("Supabase error creating order:", error.message);
     return { error: "Database error: Could not create order." };
   }
 
+  // Insert order items
+  const itemsWithOrderId = orderItemsToInsert.map(item => ({
+    ...item,
+    order_id: order.id,
+  }));
+
+  const { error: orderItemsError } = await supabase
+    .from("order_items")
+    .insert(itemsWithOrderId);
+
+  if (orderItemsError) {
+    console.error("Supabase error creating order items:", orderItemsError.message);
+    // Consider rolling back the order if item insertion fails, or handle partial success
+    return { error: "Database error: Could not create order items." };
+  }
+
   revalidatePath("/dashboard/ecommerce/orders");
-  revalidatePath("/dashboard/ecommerce/customers"); // Revalidate customers page too
+  revalidatePath("/dashboard/ecommerce/customers");
+  revalidatePath("/dashboard/ecommerce/analytics"); // Analytics might be affected
+  revalidatePath("/dashboard/ecommerce/top-sales-reports"); // Top sales reports will be affected
   return { success: true };
 }
 
@@ -103,6 +169,8 @@ export async function deleteOrder(orderId: string) {
 
   revalidatePath("/dashboard/ecommerce/orders");
   revalidatePath("/dashboard/ecommerce/customers"); // Revalidate customers page too
+  revalidatePath("/dashboard/ecommerce/analytics"); // Analytics might be affected
+  revalidatePath("/dashboard/ecommerce/top-sales-reports"); // Top sales reports will be affected
   return { success: true };
 }
 

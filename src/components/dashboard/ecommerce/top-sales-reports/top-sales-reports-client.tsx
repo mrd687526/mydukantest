@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { format, subDays, subMonths, subYears, startOfYear, endOfYear, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,58 +12,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTopSalesReports } from "@/app/actions/reports";
-import { TopPaymentMethodReportData } from "@/lib/types";
+import { TopPaymentMethodReportData, TopSellingProductReportData, TopSellingCategoryReportData, TopSellingBrandReportData } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-// Placeholder components for reports not yet supported by schema
-function TopSellingProductsCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Selling Products</CardTitle>
-        <CardDescription>Top products by sales volume.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center text-muted-foreground py-8">
-        No Data Found. Requires an 'order_items' table to track individual product sales.
-      </CardContent>
-    </Card>
-  );
-}
-
-function TopSellingCategoryCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Selling Category</CardTitle>
-        <CardDescription>Top categories by sales volume.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center text-muted-foreground py-8">
-        No Data Found. Requires an 'order_items' table to track individual product sales.
-      </CardContent>
-    </Card>
-  );
-}
-
-function TopSellingBrandCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Selling Brand</CardTitle>
-        <CardDescription>Top brands by sales volume.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center text-muted-foreground py-8">
-        No Data Found. Requires an 'order_items' table to track individual product sales.
-      </CardContent>
-    </Card>
-  );
-}
 
 interface TopSalesReportsClientProps {
   initialTopPaymentMethods: TopPaymentMethodReportData[];
+  initialTopSellingProducts: TopSellingProductReportData[];
+  initialTopSellingCategories: TopSellingCategoryReportData[];
+  initialTopSellingBrands: TopSellingBrandReportData[];
 }
 
-export function TopSalesReportsClient({ initialTopPaymentMethods }: TopSalesReportsClientProps) {
+export function TopSalesReportsClient({
+  initialTopPaymentMethods,
+  initialTopSellingProducts,
+  initialTopSellingCategories,
+  initialTopSellingBrands,
+}: TopSalesReportsClientProps) {
   const [topPaymentMethods, setTopPaymentMethods] = useState<TopPaymentMethodReportData[]>(initialTopPaymentMethods);
+  const [topSellingProducts, setTopSellingProducts] = useState<TopSellingProductReportData[]>(initialTopSellingProducts);
+  const [topSellingCategories, setTopSellingCategories] = useState<TopSellingCategoryReportData[]>(initialTopSellingCategories);
+  const [topSellingBrands, setTopSellingBrands] = useState<TopSellingBrandReportData[]>(initialTopSellingBrands);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<string>(format(subMonths(new Date(), 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
@@ -74,8 +43,14 @@ export function TopSalesReportsClient({ initialTopPaymentMethods }: TopSalesRepo
     if (result.error) {
       toast.error("Failed to fetch reports", { description: result.error });
       setTopPaymentMethods([]);
+      setTopSellingProducts([]);
+      setTopSellingCategories([]);
+      setTopSellingBrands([]);
     } else {
       setTopPaymentMethods(result.topPaymentMethods || []);
+      setTopSellingProducts(result.topSellingProducts || []);
+      setTopSellingCategories(result.topSellingCategories || []);
+      setTopSellingBrands(result.topSellingBrands || []);
     }
     setLoading(false);
   };
@@ -175,9 +150,137 @@ export function TopSalesReportsClient({ initialTopPaymentMethods }: TopSalesRepo
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        <TopSellingProductsCard />
-        <TopSellingCategoryCard />
-        <TopSellingBrandCard />
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Selling Products</CardTitle>
+            <CardDescription>Top products by sales volume.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : topSellingProducts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead className="text-right">Total Sales</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topSellingProducts.map((item, index) => (
+                    <TableRow key={item.product_id}>
+                      <TableCell className="font-medium flex items-center gap-2">
+                        {item.product_image_url && (
+                          <Image
+                            src={item.product_image_url}
+                            alt={item.product_name}
+                            width={32}
+                            height={32}
+                            className="rounded object-cover"
+                          />
+                        )}
+                        {item.product_name}
+                      </TableCell>
+                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
+                      <TableCell className="text-right">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(item.total_sales_amount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                No Data Found.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Selling Categories</CardTitle>
+            <CardDescription>Top categories by sales volume.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : topSellingCategories.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead className="text-right">Total Sales</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topSellingCategories.map((item, index) => (
+                    <TableRow key={item.category_name || index}>
+                      <TableCell className="font-medium capitalize">{item.category_name || "Uncategorized"}</TableCell>
+                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
+                      <TableCell className="text-right">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(item.total_sales_amount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                No Data Found.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Selling Brands</CardTitle>
+            <CardDescription>Top brands by sales volume.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : topSellingBrands.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Brand</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead className="text-right">Total Sales</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topSellingBrands.map((item, index) => (
+                    <TableRow key={item.brand_name || index}>
+                      <TableCell className="font-medium capitalize">{item.brand_name || "Unbranded"}</TableCell>
+                      <TableCell className="text-right">{item.total_quantity_sold}</TableCell>
+                      <TableCell className="text-right">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(item.total_sales_amount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                No Data Found.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Top Payment Method</CardTitle>

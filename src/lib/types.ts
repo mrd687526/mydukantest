@@ -141,6 +141,22 @@ export interface Customer {
   aov: number; // Aggregated: Average Order Value
 }
 
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price_at_purchase: number;
+  created_at: string;
+  // Optionally, include product details if needed for display without another join
+  products?: {
+    name: string;
+    image_url: string | null;
+    category: string | null;
+    brand: string | null;
+  } | null;
+}
+
 export interface Order {
   id: string;
   profile_id: string;
@@ -153,6 +169,7 @@ export interface Order {
   payment_type: string | null; // Added payment_type
   created_at: string;
   updated_at: string;
+  order_items?: OrderItem[]; // Optional: to hold associated items
 }
 
 export interface OrderRefundRequest {
@@ -214,9 +231,11 @@ export interface TopPaymentMethodReportData {
 
 // Placeholders for other reports (since schema doesn't support them directly yet)
 export interface TopSellingProductReportData {
+  product_id: string;
   product_name: string;
   total_sales_amount: number;
   total_quantity_sold: number;
+  product_image_url: string | null;
 }
 
 export interface TopSellingCategoryReportData {
