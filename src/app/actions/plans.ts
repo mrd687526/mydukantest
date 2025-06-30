@@ -167,3 +167,26 @@ export async function getPlans(): Promise<{ data: Plan[] | null; error: string |
 
   return { data: plansWithParsedFeatures as Plan[], error: null };
 }
+
+export async function getPublicPlans(): Promise<{ data: Plan[] | null; error: string | null }> {
+  const supabase = await createServerSupabaseClient(); // Use regular client
+
+  const { data, error } = await supabase
+    .from("plans")
+    .select("*")
+    .eq("is_active", true) // Only fetch active plans
+    .order("price", { ascending: true });
+
+  if (error) {
+    console.error("Supabase error fetching public plans:", error.message);
+    return { data: null, error: "Database error: Could not fetch plans." };
+  }
+
+  // Ensure features are parsed as arrays if they are stored as JSONB
+  const plansWithParsedFeatures = data.map(plan => ({
+    ...plan,
+    features: Array.isArray(plan.features) ? plan.features : (plan.features ? JSON.parse(plan.features) : null)
+  }));
+
+  return { data: plansWithParsedFeatures as Plan[], error: null };
+}
