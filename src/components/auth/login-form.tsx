@@ -78,6 +78,15 @@ export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps)
         >
           {isDemoLoading ? "Logging in..." : "Quick Access (Demo)"}
         </Button>
+        <Button
+          variant="secondary"
+          className="w-full"
+          asChild
+        >
+          <Link href="/superadmin/login">
+            Super Admin Login
+          </Link>
+        </Button>
       </div>
       <div className="text-center text-sm text-gray-600">
         <p>
