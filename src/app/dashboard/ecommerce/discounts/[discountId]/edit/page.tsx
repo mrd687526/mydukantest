@@ -4,9 +4,9 @@ import { DiscountForm } from "@/components/dashboard/ecommerce/discounts/discoun
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type PageProps from "next/types";
+import type { AppPageProps } from "@/lib/types"; // Updated import
 
-interface EditDiscountPageProps extends PageProps<{ discountId: string }> {}
+interface EditDiscountPageProps extends AppPageProps<{ discountId: string }> {}
 
 export default async function EditDiscountPage(props: EditDiscountPageProps) {
   const { params } = props;

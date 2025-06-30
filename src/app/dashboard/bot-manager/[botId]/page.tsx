@@ -1,13 +1,12 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { BotEditorClient } from "@/components/dashboard/bot-manager/bot-editor-client";
-import type { Bot } from "@/lib/types";
+import type { Bot, AppPageProps } from "@/lib/types"; // Updated import
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type PageProps from "next/types";
 
-interface BotEditorPageProps extends PageProps<{ botId: string }> {}
+interface BotEditorPageProps extends AppPageProps<{ botId: string }> {}
 
 export default async function BotEditorPage(props: BotEditorPageProps) {
   const { params } = props;

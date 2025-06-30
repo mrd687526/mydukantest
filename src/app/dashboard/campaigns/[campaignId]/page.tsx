@@ -17,9 +17,9 @@ import { Button } from "@/components/ui/button";
 import { CampaignStatusToggle } from "@/components/dashboard/campaigns/campaign-status-toggle";
 import { CampaignRulesClient } from "@/components/dashboard/campaigns/campaign-rules-client";
 import { CampaignAdvancedSettings } from "@/components/dashboard/campaigns/campaign-advanced-settings";
-import type PageProps from "next/types";
+import type { AppPageProps } from "@/lib/types"; // Updated import
 
-interface CampaignPageProps extends PageProps<{ campaignId: string }> {}
+interface CampaignPageProps extends AppPageProps<{ campaignId: string }> {}
 
 export default async function Page(props: CampaignPageProps) {
   const { params } = props;
@@ -121,7 +121,7 @@ export default async function Page(props: CampaignPageProps) {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Auto Comments Posted
-            </CardTitle>
+            </Card_Title>
             <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
