@@ -182,6 +182,13 @@ export type Plan = {
   updated_at: string;
 };
 
+export type CampaignTag = {
+  id: string;
+  profile_id: string | null;
+  tag_name: string;
+  created_at: string | null;
+};
+
 export type UserProfileWithSubscription = Profile & {
   email: string;
   created_at: string;
