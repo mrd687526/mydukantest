@@ -13,11 +13,28 @@ import {
   Users,
   Ticket,
   Palette,
-} from "lucide-react"; // Removed specific report icons from here
+  ShieldCheck, // New icon for Super Admin
+} from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
-import { SidebarReportsSection } from "./sidebar-reports-section"; // New import
+import { SidebarReportsSection } from "./sidebar-reports-section";
+import { createClient } from "@/integrations/supabase/server"; // Import server client to check user role
 
-export function DashboardSidebar() {
+export async function DashboardSidebar() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let isSuperAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+    if (profile && profile.role === 'super_admin') {
+      isSuperAdmin = true;
+    }
+  }
+
   const marketingNavItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
     { href: "/dashboard/accounts", label: "Connect Accounts", icon: Facebook },
@@ -37,6 +54,11 @@ export function DashboardSidebar() {
     { href: "/dashboard/themes", label: "Themes", icon: Palette },
   ];
 
+  const superAdminNavItems = [
+    { href: "/superadmin/users", label: "Users", icon: Users },
+    // Add other super admin links here
+  ];
+
   return (
     <div className="hidden border-r bg-white md:block dark:bg-gray-950">
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -53,14 +75,21 @@ export function DashboardSidebar() {
             </h3>
             <SidebarNav items={marketingNavItems} />
           </div>
-          <div className="px-4 lg:px-6">
+          <div className="px-4 lg:px-6 mb-4">
             <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
               E-Commerce
             </h3>
             <SidebarNav items={ecommerceNavItems} />
-            {/* Add the new Reports section here */}
             <SidebarReportsSection />
           </div>
+          {isSuperAdmin && (
+            <div className="px-4 lg:px-6">
+              <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                Super Admin
+              </h3>
+              <SidebarNav items={superAdminNavItems} />
+            </div>
+          )}
         </div>
         <div className="mt-auto p-4 border-t">
            <Link

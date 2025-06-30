@@ -58,36 +58,44 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Check subscription status for dashboard access
-  if (pathname.startsWith('/dashboard')) {
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, stripe_customer_id')
-      .eq('user_id', user.id)
-      .single();
+  // Check user role for super admin access
+  let isSuperAdmin = false;
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, stripe_customer_id, role')
+    .eq('user_id', user.id)
+    .single();
 
-    if (profileError || !profile) {
-      // If no profile, prompt to complete profile (handled by /dashboard page)
-      // Or if profile exists but no stripe_customer_id, it means it's a new user
-      // who hasn't gone through subscription flow yet.
-      // For now, let them proceed to dashboard to complete profile/subscribe.
+  if (profileError || !profile) {
+    // If no profile, prompt to complete profile (handled by /dashboard page)
+    // For now, let them proceed to dashboard to complete profile/subscribe.
+    if (pathname.startsWith('/dashboard')) {
       return response;
     }
+  } else {
+    isSuperAdmin = profile.role === 'super_admin';
+  }
 
-    // Fetch subscription status
+  // Allow super admins to access /superadmin routes
+  if (pathname.startsWith('/superadmin')) {
+    if (!isSuperAdmin) {
+      return NextResponse.redirect(new URL('/dashboard?error=Permission denied. Not a super admin.', request.url));
+    }
+    return response;
+  }
+
+  // Check subscription status for dashboard access (only for non-super admins)
+  if (pathname.startsWith('/dashboard') && !isSuperAdmin) {
     const { data: subscription, error: subscriptionError } = await supabase
       .from('subscriptions')
       .select('status')
-      .eq('profile_id', profile.id)
+      .eq('profile_id', profile?.id) // Use profile.id if it exists
       .single();
 
     // Define allowed statuses for dashboard access
     const allowedStatuses = ['trialing', 'active'];
 
     if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
-      // If no active/trialing subscription, redirect to a billing/subscription page
-      // For now, we'll redirect to settings, where they can manage subscription.
-      // In a real app, you'd have a dedicated /dashboard/billing or /dashboard/subscribe page.
       if (!pathname.startsWith('/dashboard/settings')) { // Avoid infinite redirect
         return NextResponse.redirect(new URL('/dashboard/settings?needsSubscription=true', request.url));
       }
