@@ -8,10 +8,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 // This interface is designed to explicitly match the erroneous type
-// that the Next.js compiler seems to be expecting for `params`.
+// that the Next.js compiler seems to be expecting for `params` and `searchParams`.
 interface BotEditorPageProps {
   params: Promise<{ botId: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function BotEditorPage(props: BotEditorPageProps) {
