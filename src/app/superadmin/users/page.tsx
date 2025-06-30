@@ -26,7 +26,9 @@ export default async function SuperAdminUsersPage() {
     .eq("id", user.id) // Fetch profile by user.id
     .single();
 
-  if (!profile || profile.role !== 'super_admin') {
+  // In development, the middleware bypasses this role check.
+  // In production, this ensures only super admins can access this page.
+  if (process.env.NODE_ENV !== 'development' && (!profile || profile.role !== 'super_admin')) {
     redirect("/dashboard?error=Permission denied.");
   }
 
