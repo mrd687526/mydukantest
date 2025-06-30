@@ -14,8 +14,10 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { supabase } from "@/integrations/supabase/client";
+import { createClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const supabase = createClient();
 
 export type Node = {
   id: string;
