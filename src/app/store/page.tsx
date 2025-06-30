@@ -1,9 +1,4 @@
-import Link from "next/link";
-
-const demoBlocks = [
-  { id: "1", type: "heading", content: "Welcome to your page!" },
-  { id: "2", type: "text", content: "Drag and drop blocks to build your page." },
-];
+import { createClient } from "@/integrations/supabase/server";
 
 function RenderBlock({ block }: { block: any }) {
   if (block.type === "heading") {
@@ -15,10 +10,22 @@ function RenderBlock({ block }: { block: any }) {
   return null;
 }
 
-export default function StoreHomePage() {
+export default async function StoreHomePage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("store_pages")
+    .select("data")
+    .eq("slug", "home")
+    .single();
+
+  const blocks = data?.data?.blocks || [
+    { id: "1", type: "heading", content: "Welcome to your page!" },
+    { id: "2", type: "text", content: "Drag and drop blocks to build your page." },
+  ];
+
   return (
     <div>
-      {demoBlocks.map(block => (
+      {blocks.map((block: any) => (
         <RenderBlock key={block.id} block={block} />
       ))}
       <div className="mt-8">
