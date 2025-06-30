@@ -76,6 +76,11 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => <div>{row.getValue("brand") || "N/A"}</div>,
   },
   {
+    accessorKey: "label",
+    header: "Label",
+    cell: ({ row }) => <div>{row.getValue("label") || "N/A"}</div>,
+  },
+  {
     accessorKey: "image_url",
     header: "Cover Image",
     cell: ({ row }) => {
@@ -86,6 +91,16 @@ export const columns: ColumnDef<Product>[] = [
         <div className="h-12 w-12 bg-muted flex items-center justify-center rounded-md text-muted-foreground text-xs text-center">No Image</div>
       );
     },
+  },
+  {
+    accessorKey: "variant",
+    header: "Variant",
+    cell: ({ row }) => <div>{row.getValue("variant") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "sku",
+    header: "SKU",
+    cell: ({ row }) => <div>{row.getValue("sku") || "N/A"}</div>,
   },
   {
     accessorKey: "price",
@@ -111,7 +126,7 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "inventory_quantity",
-    header: "Stock",
+    header: "Stock Quantity",
     cell: ({ row }) => <div>{row.getValue("inventory_quantity")}</div>,
   },
   {
@@ -181,7 +196,7 @@ export function ProductsDataTable({ data }: { data: Product[] }) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: getCoreRowodel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
