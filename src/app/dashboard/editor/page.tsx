@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
+import { RenderEngine } from "@/components/render-engine";
 
 type Block = { id: string; type: string; content: string; imageUrl?: string; buttonLabel?: string };
 
@@ -17,6 +18,7 @@ export default function DragDropEditorPage() {
   const [saving, setSaving] = useState(false);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Load blocks from Supabase
   useEffect(() => {
@@ -95,6 +97,25 @@ export default function DragDropEditorPage() {
       toast.error("Failed to save page.");
     }
   };
+
+  const handleSelect = (id: string | null) => {
+    setSelectedId(id);
+  };
+
+  const tree = blocks.map(block => {
+    switch (block.type) {
+      case "heading":
+        return { id: block.id, type: "heading", content: block.content };
+      case "text":
+        return { id: block.id, type: "text", content: block.content };
+      case "image":
+        return { id: block.id, type: "image", content: block.imageUrl || "" };
+      case "button":
+        return { id: block.id, type: "button", content: block.buttonLabel || "" };
+      default:
+        return null;
+    }
+  }).filter(Boolean);
 
   return (
     <div className="max-w-3xl mx-auto py-8">
@@ -179,24 +200,7 @@ export default function DragDropEditorPage() {
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
         <div className="border rounded bg-white p-4">
-          {blocks.map(block =>
-            block.type === "heading" ? (
-              <h2 key={block.id} className="text-2xl font-bold mb-2">{block.content}</h2>
-            ) : block.type === "text" ? (
-              <p key={block.id} className="mb-4">{block.content}</p>
-            ) : block.type === "image" ? (
-              block.imageUrl ? (
-                <img key={block.id} src={block.imageUrl} alt="Block" className="max-h-40 rounded mb-4" />
-              ) : null
-            ) : block.type === "button" ? (
-              <button
-                key={block.id}
-                className="px-4 py-2 bg-blue-600 text-white rounded font-semibold mb-4"
-              >
-                {block.buttonLabel || "Click Me"}
-              </button>
-            ) : null
-          )}
+          <RenderEngine node={tree} selectedId={selectedId} onSelect={handleSelect} />
         </div>
       </div>
     </div>

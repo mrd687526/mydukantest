@@ -13,15 +13,44 @@ const componentMap: Record<string, React.FC<any>> = {
   container: ContainerWidget,
 };
 
-export function RenderEngine({ node }: { node: any }) {
+export function RenderEngine({
+  node,
+  selectedId,
+  onSelect,
+}: {
+  node: any;
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+}) {
   const Widget = componentMap[node.type];
   if (!Widget) return null;
+
+  const isSelected = selectedId === node.id;
+
   return (
-    <Widget {...node.props}>
-      {node.children &&
-        node.children.map((child: any) => (
-          <RenderEngine key={child.id} node={child} />
-        ))}
-    </Widget>
+    <div
+      style={{
+        outline: isSelected ? "2px solid #2563eb" : undefined,
+        borderRadius: 4,
+        marginBottom: 4,
+        cursor: "pointer",
+      }}
+      onClick={e => {
+        e.stopPropagation();
+        onSelect?.(node.id);
+      }}
+    >
+      <Widget {...node.props}>
+        {node.children &&
+          node.children.map((child: any) => (
+            <RenderEngine
+              key={child.id}
+              node={child}
+              selectedId={selectedId}
+              onSelect={onSelect}
+            />
+          ))}
+      </Widget>
+    </div>
   );
 }
