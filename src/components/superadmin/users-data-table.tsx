@@ -37,19 +37,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 import { deleteUserAndProfile } from "@/app/actions/superadmin";
-import { Profile, Subscription } from "@/lib/types";
+import { UserProfileWithSubscription } from "@/lib/types"; // Import from shared types
 import { EditUserRoleDialog } from "./edit-user-role-dialog";
-
-// Define a type for the data passed to the table, matching the RPC output
-interface UserProfileWithSubscription {
-  id: string;
-  name: string | null;
-  role: 'super_admin' | 'store_admin';
-  created_at: string;
-  email: string;
-  subscription_status: string | null;
-  subscription_end_date: string | null;
-}
 
 async function handleDelete(userId: string) {
   const result = await deleteUserAndProfile(userId);
