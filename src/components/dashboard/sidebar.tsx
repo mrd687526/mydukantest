@@ -12,7 +12,8 @@ import {
   Package,
   Users,
   Ticket,
-  Palette, // New import for the theme icon
+  Palette,
+  ReceiptText, // New import for the refund requests icon
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -24,7 +25,7 @@ export function DashboardSidebar() {
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
     { href: "/dashboard/bot-manager", label: "Bot Manager", icon: BotMessageSquare },
     { href: "/dashboard/reports", label: "Reports", icon: LineChart },
-    { href: "/dashboard/editor", label: "Drag and Drop Editor", icon: LayoutGrid }, // NEW
+    { href: "/dashboard/editor", label: "Drag and Drop Editor", icon: LayoutGrid },
   ];
 
   const ecommerceNavItems = [
@@ -33,7 +34,8 @@ export function DashboardSidebar() {
     { href: "/dashboard/ecommerce/customers", label: "Customers", icon: Users },
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
-    { href: "/dashboard/themes", label: "Themes", icon: Palette }, // New Themes link
+    { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText }, // New Refunds link
+    { href: "/dashboard/themes", label: "Themes", icon: Palette },
   ];
 
   return (

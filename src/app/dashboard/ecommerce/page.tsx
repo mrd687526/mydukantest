@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Package, Users, LineChart, Ticket } from "lucide-react";
+import { ShoppingCart, Package, Users, LineChart, Ticket, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 
 const tools = [
   {
@@ -39,6 +39,12 @@ const tools = [
     description: "Create and manage discount codes.",
     href: "/dashboard/ecommerce/discounts",
     icon: Ticket,
+  },
+  {
+    title: "Refund Requests", // New tool
+    description: "Manage customer refund requests.",
+    href: "/dashboard/ecommerce/refunds",
+    icon: ReceiptText, // Using ReceiptText icon
   },
 ];
 

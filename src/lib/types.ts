@@ -145,8 +145,25 @@ export interface Order {
   customer_email: string;
   total_amount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  payment_type: string | null; // Added payment_type
   created_at: string;
   updated_at: string;
+}
+
+export interface OrderRefundRequest {
+  id: string;
+  order_id: string;
+  profile_id: string;
+  request_date: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
+  created_at: string;
+  updated_at: string;
+  orders: { // Joined order details for display
+    order_number: string;
+    customer_name: string;
+    total_amount: number;
+  } | null;
 }
 
 export interface CampaignTag {

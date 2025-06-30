@@ -37,6 +37,18 @@ import { Badge } from "@/components/ui/badge";
 import { Order } from "@/lib/types";
 import { deleteOrder, updateOrderStatus } from "@/app/actions/orders";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
+import { createRefundRequest } from "@/app/actions/refunds"; // Import refund action
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 async function handleDelete(orderId: string) {
   const result = await deleteOrder(orderId);
@@ -53,6 +65,16 @@ async function handleUpdateStatus(orderId: string, newStatus: Order['status']) {
     toast.error("Failed to update order status", { description: result.error });
   } else {
     toast.success(`Order status updated to ${newStatus}.`);
+  }
+}
+
+async function handleRefundRequest(orderId: string, reason: string, onClose: () => void) {
+  const result = await createRefundRequest({ order_id: orderId, reason });
+  if (result.error) {
+    toast.error("Failed to create refund request", { description: result.error });
+  } else {
+    toast.success(result.message);
+    onClose();
   }
 }
 
@@ -105,6 +127,14 @@ export const columns: ColumnDef<Order>[] = [
     },
   },
   {
+    accessorKey: "payment_type",
+    header: "Payment Type",
+    cell: ({ row }) => {
+      const paymentType = row.getValue("payment_type") as string;
+      return <Badge variant="secondary" className="capitalize">{paymentType || "N/A"}</Badge>;
+    },
+  },
+  {
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -145,44 +175,84 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>View Details</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Update Status</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'processing')}>
-            Mark as Processing
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'shipped')}>
-            Mark as Shipped
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'delivered')}>
-            Mark as Delivered
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'cancelled')}>
-            Mark as Cancelled
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DeleteConfirmationDialog
-            onConfirm={() => handleDelete(row.original.id)}
-            title="Are you absolutely sure?"
-            description="This action cannot be undone. This will permanently delete this order record."
-          >
-            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              Delete
-            </div>
-          </DeleteConfirmationDialog>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
+      const [refundReason, setRefundReason] = React.useState("");
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem>View Details</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'processing')}>
+              Mark as Processing
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'shipped')}>
+              Mark as Shipped
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'delivered')}>
+              Mark as Delivered
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'cancelled')}>
+              Mark as Cancelled
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <Dialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  Request Refund
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Request Refund for Order {row.original.order_number}</DialogTitle>
+                  <DialogDescription>
+                    Provide a reason for the refund request.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="reason" className="text-right">
+                      Reason
+                    </Label>
+                    <Textarea
+                      id="reason"
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      className="col-span-3"
+                      placeholder="e.g., Item damaged, customer changed mind"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setIsRefundDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={() => handleRefundRequest(row.original.id, refundReason, () => setIsRefundDialogOpen(false))}>
+                    Submit Request
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <DeleteConfirmationDialog
+              onConfirm={() => handleDelete(row.original.id)}
+              title="Are you absolutely sure?"
+              description="This action cannot be undone. This will permanently delete this order record."
+            >
+              <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                Delete
+              </div>
+            </DeleteConfirmationDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
 

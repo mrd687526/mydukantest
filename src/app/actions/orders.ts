@@ -14,6 +14,7 @@ const orderSchema = z.object({
     z.number().min(0.01, "Total amount must be greater than 0.")
   ),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending'),
+  payment_type: z.string().min(1, "Payment type is required.").default('cash'), // Added payment_type
 });
 
 export async function createOrder(values: z.infer<typeof orderSchema>) {
@@ -78,6 +79,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     customer_email: values.customer_email,
     total_amount: values.total_amount,
     status: values.status,
+    payment_type: values.payment_type, // Added payment_type
   });
 
   if (error) {

@@ -42,6 +42,7 @@ const orderFormSchema = z.object({
     z.number().min(0.01, "Total amount must be greater than 0.")
   ),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  payment_type: z.string().min(1, "Payment type is required."), // Added payment_type
 });
 
 type OrderFormValues = z.infer<typeof orderFormSchema>;
@@ -59,6 +60,7 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
       customer_email: "",
       total_amount: 0.01,
       status: "pending",
+      payment_type: "cash", // Default payment type
     },
   });
 
@@ -135,6 +137,30 @@ export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
                   <FormControl>
                     <Input type="number" step="0.01" placeholder="99.99" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="payment_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="card">Card</SelectItem>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                      <SelectItem value="stripe">Stripe</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
