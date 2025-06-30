@@ -1,7 +1,6 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
-import { DashboardOverviewClient } from "@/components/dashboard/dashboard-overview-client";
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription } from "@/lib/types";
 
@@ -31,57 +30,11 @@ export default async function SuperAdminDashboardPage() {
     return <CompleteProfilePrompt user={user} />;
   }
 
-  if (profile.role !== 'super_admin') {
+  // In development, the middleware bypasses this role check.
+  // In production, this ensures only super admins can access this page.
+  if (process.env.NODE_ENV !== 'development' && profile.role !== 'super_admin') {
     redirect("/dashboard?error=Permission denied. Not a super admin.");
   }
-
-  const profileId = profile.id;
-
-  // --- Fetch data for Dashboard Overview ---
-  const { data: campaigns } = await supabase
-    .from("automation_campaigns")
-    .select("id")
-    .eq("profile_id", profileId);
-
-  const campaignIds = campaigns?.map((c) => c.id) || [];
-
-  const [
-    actionCountRes,
-    campaignCountRes,
-    accountCountRes,
-    recentActionsRes,
-    dailyCountsDataRes,
-  ] = await Promise.all([
-    campaignIds.length > 0
-      ? supabase
-          .from("campaign_reports")
-          .select("id", { count: "exact", head: true })
-          .in("campaign_id", campaignIds)
-      : Promise.resolve({ count: 0, error: null }),
-    supabase
-      .from("automation_campaigns")
-      .select("id", { count: "exact", head: true })
-      .eq("profile_id", profileId),
-    supabase
-      .from("connected_accounts")
-      .select("id", { count: "exact", head: true })
-      .eq("profile_id", profileId),
-    campaignIds.length > 0
-      ? supabase
-          .from("campaign_reports")
-          .select("action_taken, associated_keyword, sent_at")
-          .in("campaign_id", campaignIds)
-          .order("sent_at", { ascending: false })
-          .limit(5)
-      : Promise.resolve({ data: [], error: null }),
-    supabase.rpc("get_daily_action_counts", { p_profile_id: profileId }),
-  ]);
-
-  const actionCount = actionCountRes.count;
-  const campaignCount = campaignCountRes.count;
-  const accountCount = accountCountRes.count;
-  const recentActions = recentActionsRes.data;
-  const dailyCountsData = dailyCountsDataRes.data;
 
   // --- Fetch data for User Management ---
   const { data: users, error: usersError } = await supabase
@@ -99,7 +52,7 @@ export default async function SuperAdminDashboardPage() {
 
   if (usersError) {
     console.error("Supabase error fetching all profiles for super admin dashboard:", usersError.message);
-    // Handle error gracefully, perhaps show a partial dashboard or an error message
+    return <div>Error loading user data. Please try again later.</div>;
   }
 
   const profilesWithEmail = users?.map(userProfile => ({
@@ -107,21 +60,12 @@ export default async function SuperAdminDashboardPage() {
     email: userProfile.auth_users?.email || null,
   })) as UserProfileWithSubscription[] || [];
 
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Super Admin Dashboard</h1>
       <p className="text-muted-foreground">
-        Overview of the application and user management.
+        Manage all user accounts and their profiles across the application.
       </p>
-
-      <DashboardOverviewClient
-        actionCount={actionCount}
-        campaignCount={campaignCount}
-        accountCount={accountCount}
-        recentActions={recentActions}
-        dailyCountsData={dailyCountsData}
-      />
 
       <div className="mt-8">
         <UsersClient users={profilesWithEmail} />
