@@ -2,21 +2,8 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SalesChart } from "@/components/dashboard/ecommerce/analytics/sales-chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import dynamic from "next/dynamic";
-
-// Dynamically import the chart component with SSR disabled
-const DynamicSalesChart = dynamic(
-  () =>
-    import("@/components/dashboard/ecommerce/analytics/sales-chart").then(
-      (mod) => mod.SalesChart
-    ),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-[350px] w-full" />,
-  }
-);
+import { DynamicSalesChartWrapper } from "@/components/dashboard/ecommerce/analytics/dynamic-sales-chart-wrapper"; // Import the new wrapper
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
@@ -59,7 +46,7 @@ export default async function AnalyticsPage() {
           <CardDescription>Total sales amount per day.</CardDescription>
         </CardHeader>
         <CardContent className="pl-2">
-          <DynamicSalesChart data={dailySalesData || []} />
+          <DynamicSalesChartWrapper data={dailySalesData || []} />
         </CardContent>
       </Card>
     </div>
