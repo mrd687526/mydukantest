@@ -2,15 +2,17 @@ import { createClient } from "@/integrations/supabase/server";
 import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation"; // Import redirect
 
-interface PageProps {
+export default async function EditProductPage({
+  params,
+}: {
   params: { productId: string };
-}
-
-export default async function EditProductPage({ params }: PageProps) {
+}) {
   const supabase = createClient();
   const { productId } = params;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     redirect("/login"); // Redirect if not logged in
   }

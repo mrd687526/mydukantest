@@ -5,15 +5,17 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface PageProps {
+export default async function EditDiscountPage({
+  params,
+}: {
   params: { discountId: string };
-}
-
-export default async function EditDiscountPage({ params }: PageProps) {
+}) {
   const supabase = await createClient();
   const { discountId } = params;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     redirect("/login");
   }
@@ -51,7 +53,9 @@ export default async function EditDiscountPage({ params }: PageProps) {
         Back to Discounts
       </Link>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edit Discount: {discount.code}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Edit Discount: {discount.code}
+        </h1>
         <p className="text-muted-foreground">
           Update the details for this discount code.
         </p>
