@@ -17,23 +17,16 @@ export function SortableItem({
     setNodeRef,
     transform,
     transition,
-    isDragging,
   } = useSortable({ id });
 
-  const style: React.CSSProperties = {
+  const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: "relative",
-    zIndex: isDragging ? 1 : "auto",
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      {/* The div below gets the drag handle attributes */}
-      <div {...attributes} {...listeners}>
-        {children}
-      </div>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
     </div>
   );
 }
