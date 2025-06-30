@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { saveCredentials } from "@/app/actions/settings";
 import type { ProfileCredentials } from "@/lib/types";
+import { useState } from "react";
 
 // Make fb_app_secret optional. It's only required if the user wants to update it.
 const credentialsSchema = z.object({
@@ -24,6 +25,7 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ credentials }: SettingsFormProps) {
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
   const form = useForm<CredentialsFormValues>({
     resolver: zodResolver(credentialsSchema),
     defaultValues: {
@@ -43,6 +45,28 @@ export function SettingsForm({ credentials }: SettingsFormProps) {
         ...data,
         fb_app_secret: "",
       });
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setIsPortalLoading(true);
+    try {
+      const res = await fetch('/api/stripe/create-customer-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create customer portal session.');
+      }
+
+      window.location.href = data.url; // Redirect to Stripe Customer Portal
+    } catch (error: any) {
+      toast.error('Failed to open subscription portal', { description: error.message });
+      console.error('Error opening customer portal:', error);
+    } finally {
+      setIsPortalLoading(false);
     }
   };
 
@@ -91,6 +115,15 @@ export function SettingsForm({ credentials }: SettingsFormProps) {
             </Button>
           </form>
         </Form>
+        <div className="mt-8 pt-6 border-t">
+          <h3 className="text-lg font-semibold mb-2">Subscription & Billing</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Manage your subscription, update payment methods, and view billing history.
+          </p>
+          <Button onClick={handleManageSubscription} disabled={isPortalLoading}>
+            {isPortalLoading ? "Loading..." : "Manage Subscription"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

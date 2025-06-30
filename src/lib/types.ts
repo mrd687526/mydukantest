@@ -258,3 +258,24 @@ export interface TopSellingBrandReportData {
   total_sales_amount: number;
   total_quantity_sold: number;
 }
+
+export interface Profile {
+  id: string;
+  user_id: string | null;
+  name: string | null;
+  avatar: string | null;
+  stripe_customer_id: string | null; // New: Stripe Customer ID
+}
+
+export interface Subscription {
+  id: string;
+  profile_id: string;
+  stripe_customer_id: string;
+  stripe_subscription_id: string;
+  stripe_price_id: string;
+  status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired';
+  current_period_start: string;
+  current_period_end: string;
+  created_at: string;
+  updated_at: string;
+}
