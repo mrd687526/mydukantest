@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +104,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     header: "Subscription Status",
     cell: ({ row }) => {
       const status = row.original.subscription_status;
-      const endDate = row.original.subscription_end_date ? new Date(row.original.subscription_end_date).toLocaleDateString() : 'N/A';
+      const endDate = row.original.subscription_end_date ? format(new Date(row.original.subscription_end_date), 'yyyy-MM-dd') : 'N/A';
       
       if (status) {
         let variant: "default" | "secondary" | "outline" | "destructive" = "default";
@@ -137,7 +138,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue("created_at"));
-      return <div>{date.toLocaleDateString()}</div>;
+      return <div>{format(date, 'yyyy-MM-dd')}</div>;
     },
   },
   {

@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,7 +106,7 @@ export const columns: ColumnDef<Discount>[] = [
     header: "Start Date",
     cell: ({ row }) => {
       const date = new Date(row.getValue("start_date"));
-      return <div>{date.toLocaleDateString()}</div>;
+      return <div>{format(date, 'yyyy-MM-dd')}</div>;
     },
   },
   {
@@ -113,7 +114,7 @@ export const columns: ColumnDef<Discount>[] = [
     header: "End Date",
     cell: ({ row }) => {
       const date = row.getValue("end_date") ? new Date(row.getValue("end_date") as string) : null;
-      return <div>{date ? date.toLocaleDateString() : "Never"}</div>;
+      return <div>{date ? format(date, 'yyyy-MM-dd') : "Never"}</div>;
     },
   },
   {

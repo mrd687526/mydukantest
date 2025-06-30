@@ -9,6 +9,7 @@ import {
   SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -59,7 +60,7 @@ export const columns: ColumnDef<CampaignReport>[] = [
     header: "Date",
     cell: ({ row }) => {
       const date = new Date(row.getValue("sent_at"));
-      return <div className="text-sm text-muted-foreground">{date.toLocaleString()}</div>;
+      return <div className="text-sm text-muted-foreground">{format(date, 'yyyy-MM-dd HH:mm')}</div>;
     },
   },
 ];

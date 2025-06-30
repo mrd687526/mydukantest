@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -77,7 +78,7 @@ export const columns: ColumnDef<AutomationCampaign>[] = [
     header: "Created At",
     cell: ({ row }) => {
       const date = new Date(row.getValue("created_at"));
-      return <div>{date.toLocaleDateString()}</div>;
+      return <div>{format(date, 'yyyy-MM-dd')}</div>;
     },
   },
   {

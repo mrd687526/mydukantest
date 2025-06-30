@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { format } from "date-fns";
 
 export default async function CustomerAccountPage() {
   const supabase = await createClient();
@@ -124,7 +125,7 @@ export default async function CustomerAccountPage() {
                 {orders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.order_number}</TableCell>
-                    <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{format(new Date(order.created_at), 'yyyy-MM-dd')}</TableCell>
                     <TableCell>${order.total_amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">{order.status}</Badge>
