@@ -52,7 +52,7 @@ export default async function SuperAdminDashboardPage() {
   const { data: users, error: usersError } = await getAllUsersAndProfiles();
 
   if (usersError) {
-    console.error("Supabase error fetching all profiles for super admin dashboard:", usersError.message);
+    console.error("Supabase error fetching all profiles for super admin dashboard:", usersError);
     return <div>Error loading user data. Please try again later.</div>;
   }
 
