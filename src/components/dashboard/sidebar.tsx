@@ -12,6 +12,7 @@ import {
   Package,
   Users,
   Ticket,
+  Palette, // New import for the theme icon
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -32,6 +33,7 @@ export function DashboardSidebar() {
     { href: "/dashboard/ecommerce/customers", label: "Customers", icon: Users },
     { href: "/dashboard/ecommerce/analytics", label: "Analytics", icon: LineChart },
     { href: "/dashboard/ecommerce/discounts", label: "Discounts", icon: Ticket },
+    { href: "/dashboard/themes", label: "Themes", icon: Palette }, // New Themes link
   ];
 
   return (
