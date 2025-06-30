@@ -1,37 +1,43 @@
 import { createClient } from "@/integrations/supabase/server";
-import { StorefrontRenderEngine } from "@/components/storefront/StorefrontRenderEngine";
+import { ProductCard } from "@/components/storefront/product-card";
+import { Product } from "@/lib/types";
 
 export default async function StoreHomePage() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("editor_pages")
-    .select("content")
-    .eq("slug", "home")
-    .single();
+  const supabase = createClient();
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const pageContent = data?.content;
+  if (error) {
+    console.error("Error fetching products:", error);
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-bold mb-2">Error loading products</h2>
+        <p className="text-muted-foreground">
+          Please try again later or contact support.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8">
-      {pageContent ? (
-        <StorefrontRenderEngine node={pageContent} />
+      <h1 className="text-3xl font-bold text-center mb-8">Our Products</h1>
+      {products && products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product: Product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       ) : (
         <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">Welcome to your store!</h2>
+          <h2 className="text-2xl font-bold mb-2">No products found</h2>
           <p className="text-muted-foreground">
-            It looks like you haven&apos;t published a page yet.
-            <br />
-            Go to the editor in your dashboard to design your homepage.
+            It looks like there are no products in your store yet.
           </p>
         </div>
       )}
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold mb-2">Featured Products</h3>
-        {/* You can add your product grid logic here later */}
-        <div className="text-center text-muted-foreground py-8">
-          <p>(Product display will go here)</p>
-        </div>
-      </div>
     </div>
   );
 }
