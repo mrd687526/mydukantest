@@ -96,8 +96,9 @@ export async function middleware(request: NextRequest) {
     const allowedStatuses = ['trialing', 'active'];
 
     if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
-      if (!pathname.startsWith('/dashboard/settings')) { // Avoid infinite redirect
-        return NextResponse.redirect(new URL('/dashboard/settings?needsSubscription=true', request.url));
+      // If no active/trialing subscription, redirect to the pricing page
+      if (!pathname.startsWith('/dashboard/pricing')) { // Avoid infinite redirect
+        return NextResponse.redirect(new URL('/dashboard/pricing?needsSubscription=true', request.url));
       }
     }
   }

@@ -1,3 +1,5 @@
+import { createClient } from "@/integrations/supabase/server";
+import { redirect } from "next/navigation";
 import { BookUser, FileCog, BotMessageSquare } from "lucide-react";
 import {
   Card,
@@ -14,8 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createClient } from "@/integrations/supabase/server";
-import { redirect } from "next/navigation";
 import { DashboardChartContainer } from "@/components/dashboard/dashboard-chart-container";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
@@ -38,6 +38,30 @@ export default async function DashboardPage() {
 
   if (!profile) {
     return <CompleteProfilePrompt user={user} />;
+  }
+
+  // Check subscription status for store_admin users
+  const { data: userProfileWithRole } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  const isStoreAdmin = userProfileWithRole?.role === 'store_admin';
+
+  if (isStoreAdmin) {
+    const { data: subscription, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('profile_id', profile.id)
+      .single();
+
+    const allowedStatuses = ['trialing', 'active'];
+
+    if (subscriptionError || !subscription || !allowedStatuses.includes(subscription.status)) {
+      // If store admin has no active/trialing subscription, redirect to pricing page
+      redirect("/dashboard/pricing?needsSubscription=true");
+    }
   }
 
   const profileId = profile.id;
