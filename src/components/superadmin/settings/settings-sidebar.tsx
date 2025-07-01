@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Brush, Mail, HardDrive, Cookie, Globe } from "lucide-react";
+import { Brush, Mail, HardDrive, Cookie, Globe, BarChart2 } from "lucide-react"; // Import BarChart2
 
 const settingsNavItems = [
   { href: "/superadmin/settings/brand", label: "Brand", icon: Brush },
@@ -11,6 +11,7 @@ const settingsNavItems = [
   { href: "/superadmin/settings/storage", label: "Storage", icon: HardDrive },
   { href: "/superadmin/settings/cookie", label: "Cookie", icon: Cookie },
   { href: "/superadmin/settings/geography", label: "Geography", icon: Globe },
+  { href: "/superadmin/settings/analytics", label: "Analytics", icon: BarChart2 }, // New item
 ];
 
 export function SettingsSidebar() {

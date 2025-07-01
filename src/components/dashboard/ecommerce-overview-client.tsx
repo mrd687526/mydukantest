@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CustomerVsGuestChart } from "./customer-vs-guest-chart";
 import { TopSellingProductsList } from "./top-selling-products-list";
+import { StoreAnalyticsClient } from "./analytics/store-analytics-client"; // Import new component
 
 // Dynamically import the chart component with SSR disabled
 const OrderTrendChart = dynamic(
@@ -36,6 +37,7 @@ interface EcommerceOverviewClientProps {
   dailyOrderCounts: DailyOrderCountData[] | null;
   customerOrderReports: CustomerOrderReportData[] | null;
   topSellingProducts: (TopSellingProductReportData & { stock_status?: Product['stock_status'] })[] | null;
+  profileId: string; // Add profileId prop
 }
 
 export function EcommerceOverviewClient({
@@ -48,6 +50,7 @@ export function EcommerceOverviewClient({
   dailyOrderCounts,
   customerOrderReports,
   topSellingProducts,
+  profileId, // Destructure profileId
 }: EcommerceOverviewClientProps) {
   const totalCustomerOrders = customerOrderReports?.reduce((sum, item) => sum + item.customer_orders, 0) ?? 0;
   const totalGuestOrders = customerOrderReports?.reduce((sum, item) => sum + item.guest_orders, 0) ?? 0;
@@ -180,6 +183,9 @@ export function EcommerceOverviewClient({
           </CardContent>
         </Card>
       </div>
+
+      {/* New Analytics Section */}
+      <StoreAnalyticsClient profileId={profileId} />
     </div>
   );
 }

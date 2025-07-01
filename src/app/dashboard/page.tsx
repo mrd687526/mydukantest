@@ -163,6 +163,7 @@ export default async function DashboardPage() {
     <DashboardTabsClient
       marketingData={marketingData}
       ecommerceData={ecommerceData}
+      profileId={profileId} // Pass profileId here
     />
   );
 }

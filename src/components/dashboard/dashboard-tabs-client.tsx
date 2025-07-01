@@ -28,9 +28,10 @@ interface DashboardTabsClientProps {
     customerOrderReports: CustomerOrderReportData[] | null;
     topSellingProducts: (TopSellingProductReportData & { stock_status?: Product['stock_status'] })[] | null;
   };
+  profileId: string; // Add profileId prop
 }
 
-export function DashboardTabsClient({ marketingData, ecommerceData }: DashboardTabsClientProps) {
+export function DashboardTabsClient({ marketingData, ecommerceData, profileId }: DashboardTabsClientProps) {
   return (
     <Tabs defaultValue="ecommerce" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -38,7 +39,7 @@ export function DashboardTabsClient({ marketingData, ecommerceData }: DashboardT
         <TabsTrigger value="marketing">Marketing Overview</TabsTrigger>
       </TabsList>
       <TabsContent value="ecommerce" className="mt-4">
-        <EcommerceOverviewClient {...ecommerceData} />
+        <EcommerceOverviewClient {...ecommerceData} profileId={profileId} />
       </TabsContent>
       <TabsContent value="marketing" className="mt-4">
         <MarketingOverviewClient {...marketingData} />

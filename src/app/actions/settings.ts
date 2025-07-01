@@ -146,3 +146,18 @@ export async function updateEmailSettings(values: z.infer<typeof emailSettingsSc
   revalidatePath("/superadmin/settings/email");
   return { success: true, message: "Email settings updated successfully!" };
 }
+
+// Analytics Settings
+const analyticsSettingsSchema = z.object({
+  ANALYTICS_URL: z.string().url("Please enter a valid URL.").optional().nullable(),
+  ANALYTICS_WEBSITE_ID: z.string().optional().nullable(),
+});
+export async function updateAnalyticsSettings(values: z.infer<typeof analyticsSettingsSchema>) {
+  if (!await isSuperAdmin()) return { error: "Unauthorized" };
+  const supabase = createClient();
+  const settingsToUpsert = Object.entries(values).map(([key, value]) => ({ key, value: value || null }));
+  const { error } = await supabase.from("settings").upsert(settingsToUpsert);
+  if (error) return { error: "Failed to update analytics settings." };
+  revalidatePath("/superadmin/settings/analytics");
+  return { success: true, message: "Analytics settings updated successfully!" };
+}
