@@ -63,6 +63,7 @@ export type Product = {
   product_specification: string | null;
   product_details: string | null;
   is_trending: boolean;
+  is_downloadable: boolean; // New
 };
 
 export type AutomationCampaign = { // Renamed from Campaign to AutomationCampaign for clarity and consistency
@@ -447,4 +448,21 @@ export type TopCustomerData = {
 export type DailyOrderCountData = {
   day: string;
   count: number;
+};
+
+export type SalesSummaryReportData = {
+  total_gross_sales: number;
+  total_net_sales: number;
+  total_orders: number;
+  total_items_sold: number;
+  total_shipping_charges: number;
+  total_coupons_used: number;
+};
+
+export type DownloadableProductSalesData = {
+  product_id: string;
+  product_name: string;
+  total_sales_amount: number;
+  total_quantity_sold: number;
+  product_image_url: string | null;
 };

@@ -9,6 +9,8 @@ import {
   TopSellingProductReportData,
   TopSellingCategoryReportData,
   TopSellingBrandReportData,
+  SalesSummaryReportData, // New
+  DownloadableProductSalesData, // New
 } from "@/lib/types";
 
 const dateRangeSchema = z.object({
@@ -27,7 +29,7 @@ export async function getCustomerOrderReports(values: z.infer<typeof dateRangeSc
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (!profile) {
@@ -71,7 +73,7 @@ export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (!profile) {
@@ -160,4 +162,68 @@ export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>
     topSellingBrands: topSellingBrandsRes.data as TopSellingBrandReportData[],
     error: null
   };
+}
+
+export async function getSalesSummaryReport(values: z.infer<typeof dateRangeSchema>): Promise<{ data: SalesSummaryReportData | null; error: string | null }> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: "You must be logged in to view sales summary." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { data: null, error: "You must have a profile to view sales summary." };
+  }
+
+  const { data, error } = await supabase.rpc("get_sales_summary", {
+    p_profile_id: profile.id,
+    p_start_date: values.startDate,
+    p_end_date: values.endDate,
+  }).single(); // Use .single() as it returns one row
+
+  if (error) {
+    console.error("Supabase error fetching sales summary:", error.message);
+    return { data: null, error: "Database error: Could not fetch sales summary." };
+  }
+
+  return { data: data as SalesSummaryReportData, error: null };
+}
+
+export async function getDownloadableProductsSales(values: z.infer<typeof dateRangeSchema>): Promise<{ data: DownloadableProductSalesData[] | null; error: string | null }> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: "You must be logged in to view downloadable product sales." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { data: null, error: "You must have a profile to view downloadable product sales." };
+  }
+
+  const { data, error } = await supabase.rpc("get_downloadable_products_sales", {
+    p_profile_id: profile.id,
+    p_start_date: values.startDate,
+    p_end_date: values.endDate,
+  });
+
+  if (error) {
+    console.error("Supabase error fetching downloadable product sales:", error.message);
+    return { data: null, error: "Database error: Could not fetch downloadable product sales." };
+  }
+
+  return { data: data as DownloadableProductSalesData[], error: null };
 }

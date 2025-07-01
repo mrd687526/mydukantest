@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { Product } from "@/lib/types"; // Import Product type for price lookup
 import { logCustomerEvent } from "./customer-events"; // Import the new action
 import { updateCustomerLastActive } from "./customers"; // Import the new action
+import { Order } from "@/lib/types"; // Import Order type for export
 
 // Schema for creating a new order (for future use, e.g., manual order creation or API integration)
 const orderItemSchema = z.object({
@@ -245,4 +246,136 @@ export async function updateOrderTracking(orderId: string, trackingNumber: strin
   revalidatePath("/dashboard/ecommerce/orders");
   revalidatePath("/store/account"); // Revalidate customer's account page
   return { success: true, message: "Tracking information updated successfully!" };
+}
+
+export async function exportOrdersToCsv(): Promise<{ data: string | null; error: string | null }> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: "You must be logged in to export data." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { data: null, error: "You must have a profile to export data." };
+  }
+
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      profile_id,
+      order_number,
+      customer_name,
+      customer_email,
+      total_amount,
+      status,
+      created_at,
+      updated_at,
+      customer_id,
+      payment_type,
+      shipping_address_line1,
+      shipping_address_line2,
+      shipping_city,
+      shipping_state,
+      shipping_postal_code,
+      shipping_country,
+      shipping_phone,
+      tracking_number,
+      shipping_label_url,
+      order_items (
+        product_id,
+        quantity,
+        price_at_purchase,
+        products ( name )
+      )
+    `)
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Supabase error fetching orders for export:", error.message);
+    return { data: null, error: "Database error: Could not fetch orders for export." };
+  }
+
+  if (!orders || orders.length === 0) {
+    return { data: null, error: "No order data to export." };
+  }
+
+  // Define CSV headers
+  const headers = [
+    "Order ID", "Order Number", "Customer Name", "Customer Email", "Total Amount",
+    "Status", "Payment Type", "Created At", "Updated At", "Shipping Address 1",
+    "Shipping Address 2", "Shipping City", "Shipping State", "Shipping Postal Code",
+    "Shipping Country", "Shipping Phone", "Tracking Number", "Shipping Label URL",
+    "Product Name", "Quantity", "Price at Purchase" // For order items
+  ];
+
+  // Map data to CSV rows, handling multiple order items per order
+  const csvRows: string[] = [];
+  orders.forEach((order: any) => {
+    if (order.order_items && order.order_items.length > 0) {
+      order.order_items.forEach((item: any) => {
+        csvRows.push([
+          order.id,
+          order.order_number,
+          order.customer_name,
+          order.customer_email,
+          order.total_amount,
+          order.status,
+          order.payment_type,
+          order.created_at,
+          order.updated_at,
+          order.shipping_address_line1,
+          order.shipping_address_line2,
+          order.shipping_city,
+          order.shipping_state,
+          order.shipping_postal_code,
+          order.shipping_country,
+          order.shipping_phone,
+          order.tracking_number || "",
+          order.shipping_label_url || "",
+          item.products?.name || "N/A",
+          item.quantity,
+          item.price_at_purchase,
+        ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','));
+      });
+    } else {
+      // Handle orders with no items (shouldn't happen if order_items are mandatory)
+      csvRows.push([
+        order.id,
+        order.order_number,
+        order.customer_name,
+        order.customer_email,
+        order.total_amount,
+        order.status,
+        order.payment_type,
+        order.created_at,
+        order.updated_at,
+        order.shipping_address_line1,
+        order.shipping_address_line2,
+        order.shipping_city,
+        order.shipping_state,
+        order.shipping_postal_code,
+        order.shipping_country,
+        order.shipping_phone,
+        order.tracking_number || "",
+        order.shipping_label_url || "",
+        "N/A", 0, 0 // Placeholder for product details
+      ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','));
+    }
+  });
+
+  const csvContent = [
+    headers.join(','),
+    ...csvRows
+  ].join('\n');
+
+  return { data: csvContent, error: null };
 }

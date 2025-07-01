@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
-import { StockReportsClient } from "@/components/dashboard/ecommerce/stock-reports/stock-reports-client";
+import { StockReportsClient } from "@/components/dashboard/reports/stock/stock-reports-client"; // Updated import path
 import { getProductsForStockReport } from "@/app/actions/products";
 
 export default async function StockReportsPage() {

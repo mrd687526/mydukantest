@@ -8,7 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ReceiptText, BarChart3, TrendingUp, Warehouse } from "lucide-react";
+import { ChevronDown, ReceiptText, BarChart3, TrendingUp, Warehouse, ShoppingCart, Users } from "lucide-react"; // Added ShoppingCart and Users icons
 import { useState } from "react";
 
 interface NavItem {
@@ -18,10 +18,11 @@ interface NavItem {
 }
 
 const reportNavItems: NavItem[] = [
-  { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText },
-  { href: "/dashboard/ecommerce/customer-reports", label: "Customer Reports", icon: BarChart3 },
-  { href: "/dashboard/ecommerce/top-sales-reports", label: "Top Sales Reports", icon: TrendingUp },
-  { href: "/dashboard/ecommerce/stock-reports", label: "Stock Reports", icon: Warehouse },
+  { href: "/dashboard/reports/customer", label: "Customer Reports", icon: Users }, // Changed icon
+  { href: "/dashboard/reports/orders", label: "Order Reports", icon: ShoppingCart }, // New
+  { href: "/dashboard/reports/stock", label: "Stock Reports", icon: Warehouse }, // Changed path
+  { href: "/dashboard/ecommerce/refunds", label: "Refund Requests", icon: ReceiptText }, // Kept existing
+  { href: "/dashboard/ecommerce/top-sales-reports", label: "Top Sales Reports", icon: TrendingUp }, // Kept existing
 ];
 
 export function SidebarReportsSection() {

@@ -15,7 +15,7 @@ export async function getCustomers(): Promise<{ data: Customer[] | null; error: 
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", user.id) // Fetch profile by user.id
     .single();
 
   if (!profile) {
@@ -63,4 +63,63 @@ export async function updateCustomerLastActive(customerId: string) {
     return { error: "Failed to update customer last active time." };
   }
   return { success: true };
+}
+
+export async function exportCustomersToCsv(): Promise<{ data: string | null; error: string | null }> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: "You must be logged in to export data." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { data: null, error: "You must have a profile to export data." };
+  }
+
+  const { data: customers, error } = await supabase.rpc("get_customer_analytics", {
+    p_profile_id: profile.id,
+  });
+
+  if (error) {
+    console.error("Supabase error fetching customers for export:", error.message);
+    return { data: null, error: "Database error: Could not fetch customers for export." };
+  }
+
+  if (!customers || customers.length === 0) {
+    return { data: null, error: "No customer data to export." };
+  }
+
+  // Define CSV headers
+  const headers = [
+    "ID", "Name", "Email", "Created At", "Updated At", "Last Active", "Status",
+    "Orders Count", "Total Spend", "AOV"
+  ];
+
+  // Map data to CSV rows
+  const csvRows = customers.map((customer: Customer) => [
+    customer.id,
+    customer.name,
+    customer.email,
+    customer.created_at,
+    customer.updated_at,
+    customer.last_active || "",
+    customer.status,
+    customer.orders_count,
+    customer.total_spend,
+    customer.aov,
+  ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')); // Enclose fields in quotes and escape existing quotes
+
+  const csvContent = [
+    headers.join(','),
+    ...csvRows
+  ].join('\n');
+
+  return { data: csvContent, error: null };
 }

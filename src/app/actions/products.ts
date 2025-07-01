@@ -37,6 +37,7 @@ const productFormSchema = z.object({
   product_specification: z.string().optional().nullable(),
   product_details: z.string().optional().nullable(),
   is_trending: z.boolean().optional().nullable(),
+  is_downloadable: z.boolean().optional().nullable(), // New
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;

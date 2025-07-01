@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
-import { CustomerReportsClient } from "@/components/dashboard/ecommerce/customer-reports/customer-reports-client";
+import { CustomerReportsClient } from "@/components/dashboard/reports/customer/customer-reports-client"; // Updated import path
 import { getCustomerOrderReports } from "@/app/actions/reports";
 import { format, subMonths, endOfDay } from "date-fns";
 

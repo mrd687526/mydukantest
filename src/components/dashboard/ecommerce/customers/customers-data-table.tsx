@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Download } from "lucide-react"; // Added Download icon
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Link from "next/link"; // Import Link
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Customer } from "@/lib/types";
-import { deleteCustomer } from "@/app/actions/customers";
+import { deleteCustomer, exportCustomersToCsv } from "@/app/actions/customers"; // Import exportCustomersToCsv
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 
 async function handleDelete(customerId: string) {
@@ -229,6 +229,7 @@ export const columns: ColumnDef<Customer>[] = [
 export function CustomersDataTable({ data }: { data: Customer[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [isExporting, setIsExporting] = React.useState(false);
 
   const table = useReactTable({
     data,
@@ -242,9 +243,27 @@ export function CustomersDataTable({ data }: { data: Customer[] }) {
     state: { sorting, columnFilters },
   });
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    const result = await exportCustomersToCsv();
+    if (result.error) {
+      toast.error("Export failed", { description: result.error });
+    } else if (result.data) {
+      const blob = new Blob([result.data], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'customers.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Customers exported successfully!");
+    }
+    setIsExporting(false);
+  };
+
   return (
     <div>
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-4 justify-between">
             <Input
             placeholder="Filter by customer name or email..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -253,6 +272,9 @@ export function CustomersDataTable({ data }: { data: Customer[] }) {
             }
             className="max-w-sm"
             />
+            <Button onClick={handleExport} disabled={isExporting}>
+              {isExporting ? "Exporting..." : <><Download className="mr-2 h-4 w-4" /> Export CSV</>}
+            </Button>
         </div>
         <div className="rounded-md border">
         <Table>

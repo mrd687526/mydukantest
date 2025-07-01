@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Download } from "lucide-react"; // Added Download icon
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Link from "next/link"; // Import Link
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Order } from "@/lib/types";
-import { deleteOrder, updateOrderStatus } from "@/app/actions/orders";
+import { deleteOrder, updateOrderStatus, exportOrdersToCsv } from "@/app/actions/orders"; // Import exportOrdersToCsv
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 import { createRefundRequest } from "@/app/actions/refunds"; // Import refund action
 import {
@@ -269,6 +269,7 @@ export const columns: ColumnDef<Order>[] = [
 export function OrdersDataTable({ data }: { data: Order[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [isExporting, setIsExporting] = React.useState(false);
 
   const table = useReactTable({
     data,
@@ -282,9 +283,27 @@ export function OrdersDataTable({ data }: { data: Order[] }) {
     state: { sorting, columnFilters },
   });
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    const result = await exportOrdersToCsv();
+    if (result.error) {
+      toast.error("Export failed", { description: result.error });
+    } else if (result.data) {
+      const blob = new Blob([result.data], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'orders.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Orders exported successfully!");
+    }
+    setIsExporting(false);
+  };
+
   return (
     <div>
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-4 justify-between">
             <Input
             placeholder="Filter by order number or customer name..."
             value={(table.getColumn("order_number")?.getFilterValue() as string) ?? ""}
@@ -293,6 +312,9 @@ export function OrdersDataTable({ data }: { data: Order[] }) {
             }
             className="max-w-sm"
             />
+            <Button onClick={handleExport} disabled={isExporting}>
+              {isExporting ? "Exporting..." : <><Download className="mr-2 h-4 w-4" /> Export CSV</>}
+            </Button>
         </div>
         <div className="rounded-md border">
         <Table>

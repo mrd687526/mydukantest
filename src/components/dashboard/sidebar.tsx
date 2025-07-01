@@ -43,7 +43,6 @@ export async function DashboardSidebar() {
     { href: "/dashboard/facebook-posts", label: "Facebook Posts", icon: Newspaper },
     { href: "/dashboard/comment-manager", label: "Comment Manager", icon: MessageSquareText },
     { href: "/dashboard/bot-manager", label: "Bot Manager", icon: BotMessageSquare },
-    { href: "/dashboard/reports", label: "Reports", icon: LineChart }, // This is the main "Reports" page, not the e-commerce ones
     { href: "/dashboard/editor", label: "Drag and Drop Editor", icon: LayoutGrid },
   ];
 
@@ -78,6 +77,7 @@ export async function DashboardSidebar() {
               E-Commerce
             </h3>
             <SidebarNav items={ecommerceNavItems} />
+            {/* Moved Reports section here */}
             <SidebarReportsSection />
           </div>
           <div className="px-4 lg:px-6 mb-4">

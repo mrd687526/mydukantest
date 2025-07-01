@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { getProductsForStockReport } from "@/app/actions/products";
 import { Product } from "@/lib/types";
-import { StockReportsDataTable } from "./stock-reports-data-table";
+import { StockReportsDataTable } from "./stock-reports-data-table"; // Updated import path
 
 type StockStatusFilter = 'all' | 'low_stock' | 'out_of_stock' | 'most_stocked';
 

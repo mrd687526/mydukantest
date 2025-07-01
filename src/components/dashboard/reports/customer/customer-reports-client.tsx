@@ -14,7 +14,7 @@ import { getCustomerOrderReports } from "@/app/actions/reports";
 import { CustomerOrderReportData } from "@/lib/types";
 
 // Dynamically import chart components with SSR disabled
-const CustomerOrderVsGuestChart = dynamic(
+const CustomerOrderVsGuestLineChart = dynamic(
   () =>
     import("./customer-order-vs-guest-chart").then(
       (mod) => mod.CustomerOrderVsGuestChart
@@ -25,10 +25,32 @@ const CustomerOrderVsGuestChart = dynamic(
   }
 );
 
-const CustomerVsGuestChart = dynamic(
+const CustomerVsGuestDailyLineChart = dynamic(
   () =>
     import("./customer-vs-guest-chart").then(
       (mod) => mod.CustomerVsGuestChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[350px] w-full" />,
+  }
+);
+
+const CustomerOrderBarChart = dynamic(
+  () =>
+    import("./customer-order-bar-chart").then(
+      (mod) => mod.CustomerOrderBarChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[350px] w-full" />,
+  }
+);
+
+const CustomerVsGuestPieChart = dynamic(
+  () =>
+    import("./customer-vs-guest-pie-chart").then(
+      (mod) => mod.CustomerVsGuestPieChart
     ),
   {
     ssr: false,
@@ -197,29 +219,52 @@ export function CustomerReportsClient({ initialData }: CustomerReportsClientProp
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Order vs Guest Order (Monthly)</CardTitle>
-          <CardDescription>
-            Comparison of orders by registered customers vs. guests over months.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pl-2">
-          <CustomerOrderVsGuestChart data={reportData} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer vs Guest (Daily)</CardTitle>
-          <CardDescription>
-            Daily breakdown of orders by registered customers vs. guests.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pl-2">
-          <CustomerVsGuestChart data={reportData} />
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Order vs Guest Order (Monthly Trend)</CardTitle>
+            <CardDescription>
+              Comparison of orders by registered customers vs. guests over months.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <CustomerOrderVsGuestLineChart data={reportData} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Order vs Guest Order (Monthly Bar)</CardTitle>
+            <CardDescription>
+              Monthly breakdown of orders by registered customers vs. guests.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <CustomerOrderBarChart data={reportData} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer vs Guest (Daily Trend)</CardTitle>
+            <CardDescription>
+              Daily breakdown of orders by registered customers vs. guests.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <CustomerVsGuestDailyLineChart data={reportData} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer vs Guest (Overall Distribution)</CardTitle>
+            <CardDescription>
+              Overall distribution of orders between registered customers and guests.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <CustomerVsGuestPieChart data={reportData} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
