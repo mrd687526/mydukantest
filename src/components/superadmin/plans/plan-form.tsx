@@ -39,7 +39,7 @@ const planFormSchema = z.object({
   interval: z.enum(['month', 'year', 'lifetime'], { message: "Invalid interval type." }),
   stripe_price_id: z.string().optional().nullable(),
   features: z.string().optional().nullable(), // Comma-separated string
-  is_active: z.boolean().default(true),
+  is_active: z.boolean().optional().default(true), // Changed: added .optional()
 });
 
 type PlanFormValues = z.infer<typeof planFormSchema>;
