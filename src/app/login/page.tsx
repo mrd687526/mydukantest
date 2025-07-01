@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
 import LoginForm from '@/components/auth/login-form';
-import { createClient } from '@/integrations/supabase/server';
+import { createServerClient } from '@/integrations/supabase/server';
 import { createNewUserAndProfile } from '@/app/actions/superadmin';
 
 export default async function LoginPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   // Check if a super admin already exists.
   const { count: superAdminCount, error } = await supabase
