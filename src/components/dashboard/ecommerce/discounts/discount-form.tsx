@@ -43,7 +43,7 @@ const discountFormSchema = z.object({
   ),
   start_date: z.string().datetime({ message: "Invalid start date format." }),
   end_date: z.string().datetime({ message: "Invalid end date format." }).optional().nullable(),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(), // Removed .default(true)
 });
 
 type DiscountFormValues = z.infer<typeof discountFormSchema>;
@@ -56,7 +56,6 @@ interface DiscountFormProps {
 export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
   const router = useRouter();
 
-  // Define default values with explicit type to help TypeScript
   const defaultFormValues: DiscountFormValues = {
     code: initialData?.code || "",
     type: initialData?.type || "percentage",
@@ -65,12 +64,12 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
     usage_limit: initialData?.usage_limit || null,
     start_date: initialData?.start_date ? formatISO(new Date(initialData.start_date), { representation: 'complete' }) : formatISO(new Date(), { representation: 'complete' }),
     end_date: initialData?.end_date ? formatISO(new Date(initialData.end_date), { representation: 'complete' }) : null,
-    is_active: initialData?.is_active ?? true, // Use nullish coalescing directly
+    is_active: initialData?.is_active ?? true, // Still ensure a boolean value here
   };
 
   const form = useForm<DiscountFormValues>({
     resolver: zodResolver(discountFormSchema),
-    defaultValues: defaultFormValues, // Pass the explicitly typed default values
+    defaultValues: defaultFormValues,
   });
 
   const onSubmit = async (data: DiscountFormValues) => {
@@ -177,7 +176,7 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
             name="usage_limit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Usage Limit</FormLabel>
+                <FormLabel>Usage Limit</Label>
                 <FormControl>
                   <Input type="number" step="1" placeholder="100" {...field} value={field.value ?? ''} />
                 </FormControl>
