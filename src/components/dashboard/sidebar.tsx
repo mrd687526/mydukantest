@@ -20,10 +20,10 @@ import {
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarReportsSection } from "./sidebar-reports-section";
-import { createClient } from "@/integrations/supabase/server"; // Import server client to check user role
+import { createServerClient } from "@/integrations/supabase/server"; // Corrected import
 
 export async function DashboardSidebar() {
-  const supabase = createClient();
+  const supabase = createServerClient(); // Corrected function call
   const { data: { user } } = await supabase.auth.getUser();
   
   let isSuperAdmin = false;
