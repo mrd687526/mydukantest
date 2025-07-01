@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Brush, Mail, HardDrive, Cookie } from "lucide-react";
+import { Brush, Mail, HardDrive, Cookie, Globe } from "lucide-react";
 
 const settingsNavItems = [
   { href: "/superadmin/settings/brand", label: "Brand", icon: Brush },
   { href: "/superadmin/settings/email", label: "Email", icon: Mail },
   { href: "/superadmin/settings/storage", label: "Storage", icon: HardDrive },
   { href: "/superadmin/settings/cookie", label: "Cookie", icon: Cookie },
+  { href: "/superadmin/settings/geography", label: "Geography", icon: Globe },
 ];
 
 export function SettingsSidebar() {

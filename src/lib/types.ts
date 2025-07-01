@@ -283,6 +283,27 @@ export type OrderRefundRequest = {
   } | null;
 };
 
+export type Country = {
+  id: number;
+  name: string;
+  iso2: string;
+  is_active: boolean;
+};
+
+export type State = {
+  id: number;
+  name: string;
+  country_id: number;
+  is_active: boolean;
+};
+
+export type Region = {
+  id: number;
+  name: string;
+  state_id: number;
+  is_active: boolean;
+};
+
 -- Report types for RPC functions
 export type CustomerOrderReportData = {
   period: string; // YYYY-MM-DD or YYYY-MM
