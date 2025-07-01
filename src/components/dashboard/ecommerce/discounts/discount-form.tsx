@@ -55,18 +55,22 @@ interface DiscountFormProps {
 
 export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
   const router = useRouter();
+
+  // Define default values with explicit type to help TypeScript
+  const defaultFormValues: DiscountFormValues = {
+    code: initialData?.code || "",
+    type: initialData?.type || "percentage",
+    value: initialData?.value || 0,
+    min_purchase_amount: initialData?.min_purchase_amount || null,
+    usage_limit: initialData?.usage_limit || null,
+    start_date: initialData?.start_date ? formatISO(new Date(initialData.start_date), { representation: 'complete' }) : formatISO(new Date(), { representation: 'complete' }),
+    end_date: initialData?.end_date ? formatISO(new Date(initialData.end_date), { representation: 'complete' }) : null,
+    is_active: initialData?.is_active ?? true, // Use nullish coalescing directly
+  };
+
   const form = useForm<DiscountFormValues>({
     resolver: zodResolver(discountFormSchema),
-    defaultValues: {
-      code: initialData?.code || "",
-      type: initialData?.type || "percentage",
-      value: initialData?.value || 0,
-      min_purchase_amount: initialData?.min_purchase_amount || null,
-      usage_limit: initialData?.usage_limit || null,
-      start_date: initialData?.start_date ? formatISO(new Date(initialData.start_date), { representation: 'complete' }) : formatISO(new Date(), { representation: 'complete' }),
-      end_date: initialData?.end_date ? formatISO(new Date(initialData.end_date), { representation: 'complete' }) : null,
-      is_active: initialData?.is_active ?? true, // Use nullish coalescing directly
-    } as DiscountFormValues, // Keep the explicit cast
+    defaultValues: defaultFormValues, // Pass the explicitly typed default values
   });
 
   const onSubmit = async (data: DiscountFormValues) => {
