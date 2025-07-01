@@ -52,3 +52,50 @@ export async function saveCredentials(values: z.infer<typeof credentialsSchema>)
   revalidatePath("/dashboard/settings");
   return { success: true, message: "Credentials saved successfully!" };
 }
+
+// --- Email Settings Actions ---
+
+const emailSettingsSchema = z.object({
+  MAIL_DRIVER: z.string().optional().nullable(),
+  MAIL_HOST: z.string().optional().nullable(),
+  MAIL_PORT: z.string().optional().nullable(),
+  MAIL_ENCRYPTION: z.string().optional().nullable(),
+  MAIL_FROM_ADDRESS: z.string().optional().nullable(),
+  MAIL_FROM_NAME: z.string().optional().nullable(),
+});
+
+export async function getEmailSettings() {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("settings").select("*");
+
+  if (error) {
+    console.error("Error fetching email settings:", error);
+    return { error: "Failed to fetch settings." };
+  }
+
+  const settingsObject = data.reduce((acc, setting) => {
+    acc[setting.key] = setting.value;
+    return acc;
+  }, {} as Record<string, string | null>);
+
+  return { data: settingsObject };
+}
+
+export async function updateEmailSettings(values: z.infer<typeof emailSettingsSchema>) {
+  const supabase = createClient();
+
+  const settingsToUpsert = Object.entries(values).map(([key, value]) => ({
+    key,
+    value: value || null,
+  }));
+
+  const { error } = await supabase.from("settings").upsert(settingsToUpsert);
+
+  if (error) {
+    console.error("Error updating email settings:", error);
+    return { error: "Failed to update settings." };
+  }
+
+  revalidatePath("/superadmin/settings/email");
+  return { success: true, message: "Email settings updated successfully!" };
+}
