@@ -4,7 +4,6 @@ import { ProductsClient } from "@/components/dashboard/ecommerce/products/produc
 import { Product } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { addDemoProducts } from "@/app/actions/demo-products";
 
 interface ProductsPageContentProps {
   products: Product[];
@@ -29,7 +28,7 @@ export function ProductsPageContent({ products }: ProductsPageContentProps) {
             Create, edit, and manage your products and inventory.
           </p>
         </div>
-        <Button onClick={handleAddDemoProducts}>Add 10 Demo Products</Button>
+        {/* Removed the "Add 10 Demo Products" button */}
       </div>
       <ProductsClient products={products} />
     </div>
