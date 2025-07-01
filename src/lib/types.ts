@@ -182,6 +182,17 @@ export type Plan = {
   updated_at: string;
 };
 
+export type PlanCoupon = {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed_amount';
+  value: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CampaignTag = {
   id: string;
   profile_id: string | null;
@@ -258,7 +269,7 @@ export type OrderRefundRequest = {
   } | null;
 };
 
-// Report types for RPC functions
+-- Report types for RPC functions
 export type CustomerOrderReportData = {
   period: string; // YYYY-MM-DD or YYYY-MM
   customer_orders: number;
@@ -290,4 +301,30 @@ export type TopSellingBrandReportData = {
   brand_name: string;
   total_sales_amount: number;
   total_quantity_sold: number;
+};
+
+export type MonthlyOrderTrendData = {
+  period: string;
+  total_orders: number;
+};
+
+export type MostUsedCouponData = {
+  code: string;
+  used_count: number;
+  profile_id: string;
+  profile_name: string;
+};
+
+export type PopularPlanData = {
+  plan_id: string;
+  plan_name: string;
+  active_subscriptions: number;
+};
+
+export type TopCustomerData = {
+  customer_id: string;
+  customer_name: string;
+  customer_email: string;
+  total_spend: number;
+  store_name: string;
 };

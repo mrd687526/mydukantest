@@ -5,7 +5,8 @@ import {
   Users,
   Settings,
   ShieldCheck,
-  DollarSign, // Import DollarSign icon
+  DollarSign,
+  Percent, // Import Percent icon for Coupons
 } from "lucide-react";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"; // Re-using SidebarNav for list rendering
 
@@ -13,7 +14,8 @@ export async function SuperAdminSidebar() {
   const superAdminNavItems = [
     { href: "/superadmin/dashboard", label: "Dashboard", icon: LayoutGrid },
     { href: "/superadmin/users", label: "Users", icon: Users },
-    { href: "/superadmin/plans", label: "Plans", icon: DollarSign }, // New: Plans link
+    { href: "/superadmin/plans", label: "Plans", icon: DollarSign },
+    { href: "/superadmin/coupons", label: "Coupons", icon: Percent }, // New: Coupons link
   ];
 
   return (
