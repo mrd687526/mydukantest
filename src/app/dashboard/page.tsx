@@ -1,7 +1,7 @@
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
-import { DashboardOverviewClient } from "@/components/dashboard/dashboard-overview-client";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
+import { DashboardTabsClient } from "@/components/dashboard/dashboard-tabs-client";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -49,15 +49,13 @@ export default async function DashboardPage() {
 
   const profileId = profile.id;
 
-  // Fetch campaign IDs first
+  // --- Fetch Marketing Data ---
   const { data: campaigns } = await supabase
     .from("automation_campaigns")
     .select("id")
     .eq("profile_id", profileId);
-
   const campaignIds = campaigns?.map((c) => c.id) || [];
 
-  // Fetch all data in parallel for performance
   const [
     actionCountRes,
     campaignCountRes,
@@ -90,19 +88,41 @@ export default async function DashboardPage() {
     supabase.rpc("get_daily_action_counts", { p_profile_id: profileId }),
   ]);
 
-  const actionCount = actionCountRes.count;
-  const campaignCount = campaignCountRes.count;
-  const accountCount = accountCountRes.count;
-  const recentActions = recentActionsRes.data;
-  const dailyCountsData = dailyCountsDataRes.data;
+  const marketingData = {
+    actionCount: actionCountRes.count,
+    campaignCount: campaignCountRes.count,
+    accountCount: accountCountRes.count,
+    recentActions: recentActionsRes.data,
+    dailyCountsData: dailyCountsDataRes.data,
+  };
+
+  // --- Fetch E-Commerce Data ---
+  const [
+    totalProductsRes,
+    totalSalesRes,
+    totalOrdersRes,
+    canceledOrdersRes,
+    refundedOrdersRes,
+  ] = await Promise.all([
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("profile_id", profileId),
+    supabase.from("orders").select("total_amount").eq("profile_id", profileId).eq("status", "delivered"),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("profile_id", profileId),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("profile_id", profileId).eq("status", "cancelled"),
+    supabase.from("order_refund_requests").select("id", { count: "exact", head: true }).eq("profile_id", profileId).eq("status", "approved"),
+  ]);
+
+  const ecommerceData = {
+    totalProducts: totalProductsRes.count,
+    totalSales: totalSalesRes.data?.reduce((sum, order) => sum + order.total_amount, 0) ?? 0,
+    totalOrders: totalOrdersRes.count,
+    canceledOrders: canceledOrdersRes.count,
+    refundedOrders: refundedOrdersRes.count,
+  };
 
   return (
-    <DashboardOverviewClient
-      actionCount={actionCount}
-      campaignCount={campaignCount}
-      accountCount={accountCount}
-      recentActions={recentActions}
-      dailyCountsData={dailyCountsData}
+    <DashboardTabsClient
+      marketingData={marketingData}
+      ecommerceData={ecommerceData}
     />
   );
 }

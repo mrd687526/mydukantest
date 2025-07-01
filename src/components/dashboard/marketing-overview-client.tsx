@@ -18,7 +18,7 @@ import {
 import { DashboardChartContainer } from "@/components/dashboard/dashboard-chart-container";
 import { BotMessageSquare, FileCog, BookUser } from "lucide-react";
 
-interface DashboardOverviewClientProps {
+interface MarketingOverviewClientProps {
   actionCount: number | null;
   campaignCount: number | null;
   accountCount: number | null;
@@ -30,13 +30,13 @@ interface DashboardOverviewClientProps {
   dailyCountsData: { day: string; count: number }[] | null;
 }
 
-export function DashboardOverviewClient({
+export function MarketingOverviewClient({
   actionCount,
   campaignCount,
   accountCount,
   recentActions,
   dailyCountsData,
-}: DashboardOverviewClientProps) {
+}: MarketingOverviewClientProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
