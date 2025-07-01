@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { FacebookPage } from "@/lib/types";
 
 export async function connectFacebookPage(page: FacebookPage) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

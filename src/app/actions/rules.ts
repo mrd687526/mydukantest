@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -13,7 +13,7 @@ const ruleSchema = z.object({
 });
 
 export async function createCampaignRule(values: z.infer<typeof ruleSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { error } = await supabase.from("campaign_rules").insert({
     campaign_id: values.campaign_id,
@@ -33,7 +33,7 @@ export async function createCampaignRule(values: z.infer<typeof ruleSchema>) {
 }
 
 export async function deleteCampaignRule(ruleId: string, campaignId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { error } = await supabase.from("campaign_rules").delete().eq("id", ruleId);
 

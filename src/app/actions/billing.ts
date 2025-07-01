@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { stripe } from "@/lib/stripe";
 import { z } from "zod";
 import { absoluteUrl } from "@/lib/utils"; // Assuming you have a utility for absolute URLs
@@ -10,7 +10,7 @@ const checkoutSessionSchema = z.object({
 });
 
 export async function createCheckoutSession(values: z.infer<typeof checkoutSessionSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

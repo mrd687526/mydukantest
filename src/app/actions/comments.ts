@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 
 const commentSchema = z.object({
@@ -15,7 +15,7 @@ export async function postFacebookComment(values: z.infer<typeof commentSchema>)
   }
   const { postId, message } = validatedFields.data;
 
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Authentication required." };

@@ -1,6 +1,7 @@
+src/app/actions/settings.ts
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -8,7 +9,7 @@ import { revalidatePath } from "next/cache";
 // Helper to check if the current user is a super admin
 async function isSuperAdmin() {
   if (process.env.NODE_ENV === 'development') return true;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
@@ -22,7 +23,7 @@ const credentialsSchema = z.object({
 });
 
 export async function saveCredentials(values: z.infer<typeof credentialsSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in." };
   const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
@@ -45,7 +46,7 @@ export async function saveCredentials(values: z.infer<typeof credentialsSchema>)
 
 // --- Super Admin Settings ---
 export async function getSettings() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -119,7 +120,7 @@ const storageSettingsSchema = z.object({
 });
 export async function updateStorageSettings(values: z.infer<typeof storageSettingsSchema>) {
   if (!await isSuperAdmin()) return { error: "Unauthorized" };
-  const supabase = createClient();
+  const supabase = createServerClient();
   const settingsToUpsert = [
     { key: 'storage_allowed_file_types', value: values.storage_allowed_file_types.join(',') },
     { key: 'storage_max_file_size_mb', value: String(values.storage_max_file_size_mb) },
@@ -140,7 +141,7 @@ const cookieSettingsSchema = z.object({
 });
 export async function updateCookieSettings(values: z.infer<typeof cookieSettingsSchema>) {
   if (!await isSuperAdmin()) return { error: "Unauthorized" };
-  const supabase = createClient();
+  const supabase = createServerClient();
   const settingsToUpsert = Object.entries(values).map(([key, value]) => ({ key, value: String(value) }));
   const { error } = await supabase.from("settings").upsert(settingsToUpsert);
   if (error) return { error: "Failed to update cookie settings." };
@@ -159,7 +160,7 @@ const emailSettingsSchema = z.object({
 });
 export async function updateEmailSettings(values: z.infer<typeof emailSettingsSchema>) {
   if (!await isSuperAdmin()) return { error: "Unauthorized" };
-  const supabase = createClient();
+  const supabase = createServerClient();
   const settingsToUpsert = Object.entries(values).map(([key, value]) => ({ key, value: value || null }));
   const { error } = await supabase.from("settings").upsert(settingsToUpsert);
   if (error) return { error: "Failed to update email settings." };
@@ -174,7 +175,7 @@ const analyticsSettingsSchema = z.object({
 });
 export async function updateAnalyticsSettings(values: z.infer<typeof analyticsSettingsSchema>) {
   if (!await isSuperAdmin()) return { error: "Unauthorized" };
-  const supabase = createClient();
+  const supabase = createServerClient();
   const settingsToUpsert = Object.entries(values).map(([key, value]) => ({ key, value: value || null }));
   const { error } = await supabase.from("settings").upsert(settingsToUpsert);
   if (error) return { error: "Failed to update analytics settings." };
@@ -189,7 +190,7 @@ const notificationsSettingsSchema = z.object({
 });
 
 export async function updateNotificationsSettings(values: z.infer<typeof notificationsSettingsSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 

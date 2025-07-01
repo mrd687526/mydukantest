@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/lib/types"; // Import Product type for price lookup
@@ -39,7 +39,7 @@ const orderSchema = z.object({
 });
 
 export async function createOrder(values: z.infer<typeof orderSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   // The profile_id for the order is now explicitly passed in `values`.
   const profileIdForOrder = values.profile_id;
@@ -182,7 +182,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
 }
 
 export async function deleteOrder(orderId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("orders").delete().eq("id", orderId);
 
   if (error) {
@@ -199,7 +199,7 @@ export async function deleteOrder(orderId: string) {
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled') {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase
     .from("orders")
     .update({ status: newStatus })
@@ -216,7 +216,7 @@ export async function updateOrderStatus(orderId: string, newStatus: 'pending' | 
 }
 
 export async function updateOrderTracking(orderId: string, trackingNumber: string | null, shippingLabelUrl: string | null) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -251,7 +251,7 @@ export async function updateOrderTracking(orderId: string, trackingNumber: strin
 }
 
 export async function exportOrdersToCsv(): Promise<{ data: string | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } = {} } = await supabase.auth.getUser();
   if (!user) {
@@ -395,7 +395,7 @@ const posCheckoutSchema = z.object({
 });
 
 export async function processPOSCheckout(values: z.infer<typeof posCheckoutSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 

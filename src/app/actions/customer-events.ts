@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { CustomerEvent } from "@/lib/types";
@@ -12,7 +12,7 @@ const customerEventSchema = z.object({
 });
 
 export async function logCustomerEvent(values: z.infer<typeof customerEventSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -53,7 +53,7 @@ export async function logCustomerEvent(values: z.infer<typeof customerEventSchem
 }
 
 export async function getCustomerEvents(customerId: string): Promise<{ data: CustomerEvent[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

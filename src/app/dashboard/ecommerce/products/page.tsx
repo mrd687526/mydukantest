@@ -1,10 +1,10 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { ProductsPageContent } from "@/components/dashboard/ecommerce/products/products-page-content";
 
 export default async function ProductsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

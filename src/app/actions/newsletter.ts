@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { NewsletterSubscriber } from "@/lib/types";
@@ -10,7 +10,7 @@ const subscribeSchema = z.object({
 });
 
 export async function subscribeToNewsletter(values: z.infer<typeof subscribeSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   // For public subscription, we need to determine the profile_id of the store.
   // For this demo, we'll fetch the profile_id of the first store_admin.
@@ -44,7 +44,7 @@ export async function subscribeToNewsletter(values: z.infer<typeof subscribeSche
 }
 
 export async function getNewsletterSubscribers(): Promise<{ data: NewsletterSubscriber[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -76,7 +76,7 @@ export async function getNewsletterSubscribers(): Promise<{ data: NewsletterSubs
 }
 
 export async function deleteNewsletterSubscriber(subscriberId: number) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

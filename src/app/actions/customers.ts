@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { revalidatePath } from "next/cache";
 import { Customer } from "@/lib/types"; // Import Customer type
 
 export async function getCustomers(): Promise<{ data: Customer[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -36,7 +36,7 @@ export async function getCustomers(): Promise<{ data: Customer[] | null; error: 
 }
 
 export async function deleteCustomer(customerId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("customers").delete().eq("id", customerId);
 
   if (error) {
@@ -52,7 +52,7 @@ export async function deleteCustomer(customerId: string) {
 }
 
 export async function updateCustomerLastActive(customerId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase
     .from('customers')
     .update({ last_active: new Date().toISOString() })
@@ -66,7 +66,7 @@ export async function updateCustomerLastActive(customerId: string) {
 }
 
 export async function exportCustomersToCsv(): Promise<{ data: string | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

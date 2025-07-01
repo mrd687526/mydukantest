@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import {
@@ -19,7 +19,7 @@ const dateRangeSchema = z.object({
 });
 
 export async function getCustomerOrderReports(values: z.infer<typeof dateRangeSchema>): Promise<{ data: CustomerOrderReportData[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -57,7 +57,7 @@ export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>
   topSellingBrands: TopSellingBrandReportData[] | null;
   error: string | null;
 }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -165,7 +165,7 @@ export async function getTopSalesReports(values: z.infer<typeof dateRangeSchema>
 }
 
 export async function getSalesSummaryReport(values: z.infer<typeof dateRangeSchema>): Promise<{ data: SalesSummaryReportData | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -197,7 +197,7 @@ export async function getSalesSummaryReport(values: z.infer<typeof dateRangeSche
 }
 
 export async function getDownloadableProductsSales(values: z.infer<typeof dateRangeSchema>): Promise<{ data: DownloadableProductSalesData[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

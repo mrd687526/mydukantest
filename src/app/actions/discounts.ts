@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -29,7 +29,7 @@ const discountSchema = z.object({
 });
 
 export async function createDiscount(values: z.infer<typeof discountSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -65,7 +65,7 @@ export async function createDiscount(values: z.infer<typeof discountSchema>) {
 }
 
 export async function updateDiscount(discountId: string, values: z.infer<typeof discountSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -102,7 +102,7 @@ export async function updateDiscount(discountId: string, values: z.infer<typeof 
 }
 
 export async function deleteDiscount(discountId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -136,7 +136,7 @@ export async function deleteDiscount(discountId: string) {
 }
 
 export async function getDiscounts() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

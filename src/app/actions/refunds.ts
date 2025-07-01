@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -15,7 +15,7 @@ const updateRefundRequestStatusSchema = z.object({
 });
 
 export async function createRefundRequest(values: z.infer<typeof createRefundRequestSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -52,7 +52,7 @@ export async function createRefundRequest(values: z.infer<typeof createRefundReq
 }
 
 export async function createCustomerRefundRequest(formData: FormData) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -124,7 +124,7 @@ export async function createCustomerRefundRequest(formData: FormData) {
 }
 
 export async function updateRefundRequestStatus(refundId: string, newStatus: z.infer<typeof updateRefundRequestStatusSchema>['status']) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -158,7 +158,7 @@ export async function updateRefundRequestStatus(refundId: string, newStatus: z.i
 }
 
 export async function deleteRefundRequest(refundId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -192,7 +192,7 @@ export async function deleteRefundRequest(refundId: string) {
 }
 
 export async function getRefundRequests() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

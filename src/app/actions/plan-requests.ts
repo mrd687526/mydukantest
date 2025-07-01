@@ -1,6 +1,7 @@
+src/app/actions/plan-requests.ts
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -12,7 +13,7 @@ const createRequestSchema = z.object({
 });
 
 export async function createPlanRequest(values: z.infer<typeof createRequestSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -35,7 +36,7 @@ export async function createPlanRequest(values: z.infer<typeof createRequestSche
 }
 
 export async function getPlanRequestsForProfile() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -53,7 +54,7 @@ export async function getPlanRequestsForProfile() {
 }
 
 export async function getPendingPlanRequests() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data, error } = await supabase
     .from("plan_requests")
     .select("*, profiles(name, email), plans(name)")
@@ -68,7 +69,7 @@ export async function getPendingPlanRequests() {
 }
 
 async function processPlanRequest(requestId: string, newStatus: 'approved' | 'rejected') {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user: reviewer } } = await supabase.auth.getUser();
   if (!reviewer) return { error: "Authentication required." };
 

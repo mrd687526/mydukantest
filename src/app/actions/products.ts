@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -43,7 +43,7 @@ const productFormSchema = z.object({
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export async function createProduct(values: ProductFormValues) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -81,7 +81,7 @@ export async function updateProduct(
   productId: string,
   values: ProductFormValues
 ) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -129,7 +129,7 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("products").delete().eq("id", productId);
 
   if (error) {
@@ -144,7 +144,7 @@ export async function deleteProduct(productId: string) {
 type StockStatusFilter = 'all' | 'low_stock' | 'out_of_stock' | 'most_stocked';
 
 export async function getProductsForStockReport(filter: StockStatusFilter): Promise<{ data: Product[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -193,7 +193,7 @@ export async function getProductsForStockReport(filter: StockStatusFilter): Prom
 }
 
 export async function getProductsForSelection(): Promise<{ data: { id: string; name: string; image_url: string | null; category: string | null; }[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null, error: "Authentication required." };
 
@@ -214,7 +214,7 @@ export async function getProductsForSelection(): Promise<{ data: { id: string; n
 }
 
 export async function getCategoriesForSelection(): Promise<{ data: string[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null, error: "Authentication required." };
 
@@ -239,7 +239,7 @@ export async function getCategoriesForSelection(): Promise<{ data: string[] | nu
 }
 
 export async function getProductsForPOS(searchTerm: string): Promise<{ data: Product[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null, error: "Authentication required." };
 

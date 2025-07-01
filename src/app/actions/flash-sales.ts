@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { FlashSale } from "@/lib/types";
@@ -28,7 +28,7 @@ const flashSaleSchema = z.object({
 });
 
 export async function createFlashSale(values: z.infer<typeof flashSaleSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -60,7 +60,7 @@ export async function createFlashSale(values: z.infer<typeof flashSaleSchema>) {
 }
 
 export async function updateFlashSale(flashSaleId: string, values: z.infer<typeof flashSaleSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -93,7 +93,7 @@ export async function updateFlashSale(flashSaleId: string, values: z.infer<typeo
 }
 
 export async function deleteFlashSale(flashSaleId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -126,7 +126,7 @@ export async function deleteFlashSale(flashSaleId: string) {
 }
 
 export async function getFlashSales(): Promise<{ data: FlashSale[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

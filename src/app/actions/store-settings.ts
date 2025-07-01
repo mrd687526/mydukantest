@@ -1,12 +1,12 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 // Helper to get the current user's profile ID
 async function getProfileId() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Authentication required." };
 
@@ -35,7 +35,7 @@ export async function updateIdentitySettings(formData: FormData) {
   const logoFile = formData.get('logo_file') as File | null;
   const existingLogoUrl = formData.get('logo_url') as string | null;
 
-  const supabase = createClient();
+  const supabase = createServerClient();
   let newLogoUrl: string | null = existingLogoUrl;
 
   if (logoFile && logoFile.size > 0) {
@@ -91,7 +91,7 @@ export async function updateSeoSettings(formData: FormData) {
   const seoMetaImageFile = formData.get('seo_meta_image_file') as File | null;
   const existingMetaImageUrl = formData.get('seo_meta_image_url') as string | null;
 
-  const supabase = createClient();
+  const supabase = createServerClient();
   let newMetaImageUrl: string | null = existingMetaImageUrl;
 
   if (seoMetaImageFile && seoMetaImageFile.size > 0) {

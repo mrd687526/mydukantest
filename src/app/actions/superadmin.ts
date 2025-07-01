@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient as createServerSupabaseClient } from "@/integrations/supabase/server";
+import { createServerClient as createServerSupabaseClient } from "@/integrations/supabase/server";
 import { createClient as createAdminSupabaseClient } from '@supabase/supabase-js'; // Import directly for admin client
 import { z } from "zod";
 import { revalidatePath } from "next/cache";

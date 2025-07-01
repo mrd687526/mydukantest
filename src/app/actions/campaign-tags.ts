@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -9,7 +9,7 @@ const tagSchema = z.object({
 });
 
 export async function createCampaignTag(values: z.infer<typeof tagSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -41,7 +41,7 @@ export async function createCampaignTag(values: z.infer<typeof tagSchema>) {
 }
 
 export async function deleteCampaignTag(tagId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("campaign_tags").delete().eq("id", tagId);
 
   if (error) {

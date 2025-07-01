@@ -1,6 +1,7 @@
+src/app/actions/templates.ts
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -12,7 +13,7 @@ const commentTemplateFormSchema = z.object({
 export async function createCommentTemplate(
   values: z.infer<typeof commentTemplateFormSchema>
 ) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },
@@ -55,7 +56,7 @@ const replyTemplateFormSchema = z.object({
 export async function createReplyTemplate(
   values: z.infer<typeof replyTemplateFormSchema>
 ) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },
@@ -94,7 +95,7 @@ export async function updateReplyTemplate(
   templateId: string,
   values: z.infer<typeof replyTemplateFormSchema>
 ) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },
@@ -141,7 +142,7 @@ export async function updateReplyTemplate(
 }
 
 export async function deleteCommentTemplate(templateId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("comment_templates").delete().eq("id", templateId);
   if (error) {
     return { error: "Database error: Could not delete template." };
@@ -151,7 +152,7 @@ export async function deleteCommentTemplate(templateId: string) {
 }
 
 export async function deleteReplyTemplate(templateId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { error } = await supabase.from("reply_templates").delete().eq("id", templateId);
   if (error) {
     return { error: "Database error: Could not delete template." };

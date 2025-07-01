@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { OrderNote } from "@/lib/types";
@@ -12,7 +12,7 @@ const createOrderNoteSchema = z.object({
 });
 
 export async function createOrderNote(values: z.infer<typeof createOrderNoteSchema>) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -46,7 +46,7 @@ export async function createOrderNote(values: z.infer<typeof createOrderNoteSche
 }
 
 export async function getOrderNotes(orderId: string): Promise<{ data: OrderNote[] | null; error: string | null }> {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -89,7 +89,7 @@ export async function getOrderNotes(orderId: string): Promise<{ data: OrderNote[
 }
 
 export async function deleteOrderNote(noteId: number, orderId: string) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

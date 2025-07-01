@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/lib/types";
 
 export async function addDemoProducts() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
