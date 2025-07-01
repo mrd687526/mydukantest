@@ -1,3 +1,5 @@
+"use client"; // Add this directive at the top of the file
+
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
