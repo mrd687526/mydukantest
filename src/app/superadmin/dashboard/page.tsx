@@ -3,10 +3,14 @@ import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { UsersClient } from "@/components/superadmin/users-client";
 import { Profile, Subscription, UserProfileWithSubscription } from "@/lib/types"; // Import UserProfileWithSubscription
-import { getDailyNewUserCounts, getAllUsersAndProfiles } from "@/app/actions/superadmin";
+import { getDailyNewUserCounts, getAllUsersAndProfiles, getSuperAdminDashboardMetrics } from "@/app/actions/superadmin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewUsersChartContainer } from "@/components/superadmin/new-users-chart-container";
-import { Users } from "lucide-react";
+import { MonthlyOrderTrendChart } from "@/components/superadmin/monthly-order-trend-chart";
+import { MostUsedCouponsTable } from "@/components/superadmin/most-used-coupons-table";
+import { PopularPlansTable } from "@/components/superadmin/popular-plans-table";
+import { TopCustomersTable } from "@/components/superadmin/top-customers-table";
+import { Users, ShoppingCart, Store, DollarSign, TrendingUp, Percent, Star } from "lucide-react"; // Added new icons
 import { format, subDays } from "date-fns";
 
 export default async function SuperAdminDashboardPage() {
@@ -37,15 +41,13 @@ export default async function SuperAdminDashboardPage() {
   }
 
   // --- Fetch data for User Management ---
-  // The getAllUsersAndProfiles function now returns data in the UserProfileWithSubscription format
   const { data: users, error: usersError } = await getAllUsersAndProfiles();
 
   if (usersError) {
     console.error("Supabase error fetching all profiles for super admin dashboard:", usersError);
-    return <div>Error loading user data. Please try again later.</div>;
+    // Continue rendering with empty data for the table if there's an error
   }
 
-  // No need for profilesWithEmail mapping here, as RPC returns flat structure
   const profilesWithEmail = users || [];
 
   // --- Fetch data for New User Analytics (last 30 days) ---
@@ -63,6 +65,22 @@ export default async function SuperAdminDashboardPage() {
 
   const totalNewUsersLast30Days = dailyNewUserCounts?.reduce((sum, item) => sum + Number(item.count), 0) || 0;
 
+  // --- Fetch data for Super Admin Dashboard Metrics ---
+  const {
+    totalStores,
+    totalOrders,
+    totalActivePlans,
+    monthlyOrderTrend,
+    mostUsedCoupons,
+    popularPlans,
+    topCustomers,
+    error: metricsError,
+  } = await getSuperAdminDashboardMetrics();
+
+  if (metricsError) {
+    console.error("Error fetching super admin dashboard metrics:", metricsError);
+    // Continue rendering with null/empty data for metrics if there's an error
+  }
 
   return (
     <div className="space-y-6">
@@ -70,6 +88,46 @@ export default async function SuperAdminDashboardPage() {
       <p className="text-muted-foreground">
         Manage all user accounts and monitor application-wide metrics.
       </p>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Stores</CardTitle>
+            <Store className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalStores ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Registered store admin accounts
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalOrders ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              All orders processed across stores
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Plans</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalActivePlans ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Currently active subscription plans
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* New User Analytics Card */}
       <Card>
@@ -89,6 +147,48 @@ export default async function SuperAdminDashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Monthly Order Trend Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Monthly Order Trend</CardTitle>
+          <CardDescription>Total orders processed per month.</CardDescription>
+        </CardHeader>
+        <CardContent className="pl-2">
+          <MonthlyOrderTrendChart data={monthlyOrderTrend || []} />
+        </CardContent>
+      </Card>
+
+      {/* Top Lists */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Popular Plans</CardTitle>
+            <CardDescription>Top plans by active subscriptions.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PopularPlansTable data={popularPlans || []} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Most Used Coupons</CardTitle>
+            <CardDescription>Top 10 most frequently used discount codes.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MostUsedCouponsTable data={mostUsedCoupons || []} />
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Top Customers</CardTitle>
+            <CardDescription>Customers with the highest total spend across all stores.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopCustomersTable data={topCustomers || []} />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Existing User Management Table */}
       <div className="mt-8">
