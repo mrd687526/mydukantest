@@ -2,6 +2,7 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { DashboardTabsClient } from "@/components/dashboard/dashboard-tabs-client";
+import { format, subDays } from "date-fns";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -103,12 +104,16 @@ export default async function DashboardPage() {
     totalOrdersRes,
     canceledOrdersRes,
     refundedOrdersRes,
+    recentOrdersRes,
+    dailyOrderCountsRes,
   ] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("profile_id", profileId),
     supabase.from("orders").select("total_amount").eq("profile_id", profileId).eq("status", "delivered"),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("profile_id", profileId),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("profile_id", profileId).eq("status", "cancelled"),
     supabase.from("order_refund_requests").select("id", { count: "exact", head: true }).eq("profile_id", profileId).eq("status", "approved"),
+    supabase.from("orders").select("*").eq("profile_id", profileId).order("created_at", { ascending: false }).limit(5),
+    supabase.rpc("get_daily_order_counts", { p_profile_id: profileId }),
   ]);
 
   const ecommerceData = {
@@ -117,6 +122,8 @@ export default async function DashboardPage() {
     totalOrders: totalOrdersRes.count,
     canceledOrders: canceledOrdersRes.count,
     refundedOrders: refundedOrdersRes.count,
+    recentOrders: recentOrdersRes.data,
+    dailyOrderCounts: dailyOrderCountsRes.data,
   };
 
   return (

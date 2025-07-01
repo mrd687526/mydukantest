@@ -363,3 +363,8 @@ export type TopCustomerData = {
   total_spend: number;
   store_name: string;
 };
+
+export type DailyOrderCountData = {
+  day: string;
+  count: number;
+};
