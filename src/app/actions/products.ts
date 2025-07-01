@@ -237,3 +237,30 @@ export async function getCategoriesForSelection(): Promise<{ data: string[] | nu
   const categories = Array.from(new Set(data.map(item => item.category as string)));
   return { data: categories, error: null };
 }
+
+export async function getProductsForPOS(searchTerm: string): Promise<{ data: Product[] | null; error: string | null }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: "Authentication required." };
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
+  if (!profile) return { data: null, error: "Profile not found." };
+
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .gt("inventory_quantity", 0); // Only show in-stock items
+
+  if (searchTerm) {
+    query = query.or(`name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%`);
+  }
+
+  const { data, error } = await query.limit(20); // Limit results for performance
+
+  if (error) {
+    console.error("Error fetching products for POS:", error.message);
+    return { data: null, error: "Failed to fetch products for POS." };
+  }
+  return { data: data as Product[], error: null };
+}

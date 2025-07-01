@@ -266,6 +266,9 @@ export type Order = {
   shipping_phone: string | null;
   tracking_number: string | null; // Added tracking_number
   shipping_label_url: string | null; // Added shipping_label_url
+  source: 'web' | 'pos'; // New: Differentiates online from POS sales
+  shipping_charge: number; // New: For sales summary
+  discount_amount: number; // New: For sales summary
 };
 
 export type OrderItem = {
