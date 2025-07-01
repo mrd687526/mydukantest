@@ -65,8 +65,8 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
       usage_limit: initialData?.usage_limit || null,
       start_date: initialData?.start_date ? formatISO(new Date(initialData.start_date), { representation: 'complete' }) : formatISO(new Date(), { representation: 'complete' }),
       end_date: initialData?.end_date ? formatISO(new Date(initialData.end_date), { representation: 'complete' }) : null,
-      is_active: initialData?.is_active === false ? false : true, // Ensure this is always a boolean
-    } as DiscountFormValues, // Explicitly cast here
+      is_active: initialData?.is_active ?? true, // Use nullish coalescing directly
+    } as DiscountFormValues, // Keep the explicit cast
   });
 
   const onSubmit = async (data: DiscountFormValues) => {
