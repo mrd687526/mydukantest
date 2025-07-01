@@ -193,6 +193,19 @@ export type PlanCoupon = {
   updated_at: string;
 };
 
+export type PlanRequest = {
+  id: string;
+  profile_id: string;
+  plan_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  notes: string | null;
+  requested_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  profiles: { name: string | null; email: string | null; } | null; // Joined data
+  plans: { name: string | null; } | null; // Joined data
+};
+
 export type CampaignTag = {
   id: string;
   profile_id: string | null;

@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   DollarSign,
   Percent, // Import Percent icon for Coupons
+  FileText, // Import FileText for Plan Requests
 } from "lucide-react";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"; // Re-using SidebarNav for list rendering
 
@@ -15,7 +16,8 @@ export async function SuperAdminSidebar() {
     { href: "/superadmin/dashboard", label: "Dashboard", icon: LayoutGrid },
     { href: "/superadmin/users", label: "Users", icon: Users },
     { href: "/superadmin/plans", label: "Plans", icon: DollarSign },
-    { href: "/superadmin/coupons", label: "Coupons", icon: Percent }, // New: Coupons link
+    { href: "/superadmin/coupons", label: "Coupons", icon: Percent },
+    { href: "/superadmin/plan-requests", label: "Plan Requests", icon: FileText },
   ];
 
   return (
