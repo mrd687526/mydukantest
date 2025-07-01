@@ -27,7 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -42,7 +42,7 @@ interface CompleteProfilePromptProps {
 export function CompleteProfilePrompt({ user }: CompleteProfilePromptProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = createBrowserClient();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),

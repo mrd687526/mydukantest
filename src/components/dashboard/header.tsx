@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ import { clearCacheAction } from "@/app/actions/cache";
 
 export function DashboardHeader({ user }: { user: User | null }) {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = createBrowserClient();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
