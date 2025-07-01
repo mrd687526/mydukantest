@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { DiscountsClient } from "@/components/dashboard/ecommerce/discounts/discounts-client";
 import { getDiscounts } from "@/app/actions/discounts";
 
 export default async function DiscountsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

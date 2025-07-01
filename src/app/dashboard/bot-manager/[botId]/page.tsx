@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { BotEditorClient } from "@/components/dashboard/bot-manager/bot-editor-client";
 import type { Bot } from "@/lib/types";

@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { RefundsClient } from "@/components/dashboard/ecommerce/refunds/refunds-client";
 import { getRefundRequests } from "@/app/actions/refunds";
 
 export default async function RefundsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { ThemesClient } from "@/components/dashboard/themes/themes-client";
 import { getThemes } from "@/app/actions/themes"; // Import the getThemes action
 
 export default async function ThemesPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicSalesChartWrapper } from "@/components/dashboard/ecommerce/analytics/dynamic-sales-chart-wrapper"; // Import the new wrapper
 
 export default async function AnalyticsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

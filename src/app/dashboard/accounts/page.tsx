@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { ConnectAccountsClient } from "@/components/dashboard/accounts/connect-accounts-client";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";

@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { ProductForm } from "@/components/dashboard/ecommerce/products/product-form";
 import { notFound, redirect } from "next/navigation";
 

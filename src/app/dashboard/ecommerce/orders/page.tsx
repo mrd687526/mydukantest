@@ -1,10 +1,10 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { OrdersClient } from "@/components/dashboard/ecommerce/orders/orders-client";
 
 export default async function OrdersPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
