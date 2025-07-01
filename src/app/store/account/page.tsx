@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format } from "date-fns";
+import { RequestRefundDialog } from "@/components/storefront/request-refund-dialog"; // Import new dialog
+import { useState } from "react"; // Import useState for dialog state
 
 export default async function CustomerAccountPage() {
   const supabase = createClient();
@@ -78,7 +80,13 @@ export default async function CustomerAccountPage() {
   // Fetch orders associated with this customer_id and store's profile_id
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
-    .select("*")
+    .select(`
+      *,
+      order_refund_requests (
+        id,
+        status
+      )
+    `)
     .eq("customer_id", customerProfile.id)
     .eq("profile_id", storeProfileId) // Filter by store's profile_id
     .order("created_at", { ascending: false });
@@ -122,19 +130,26 @@ export default async function CustomerAccountPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_number}</TableCell>
-                    <TableCell>{format(new Date(order.created_at), 'yyyy-MM-dd')}</TableCell>
-                    <TableCell>${order.total_amount.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">View Details</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {orders.map((order) => {
+                  const hasPendingRefund = order.order_refund_requests.some(req => req.status === 'pending');
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.order_number}</TableCell>
+                      <TableCell>{format(new Date(order.created_at), 'yyyy-MM-dd')}</TableCell>
+                      <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">{order.status}</Badge>
+                        {hasPendingRefund && <Badge variant="secondary" className="ml-2">Refund Pending</Badge>}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm">View Details</Button>
+                        {order.status === 'delivered' && !hasPendingRefund && (
+                          <RequestRefundButton orderId={order.id} />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
@@ -148,5 +163,20 @@ export default async function CustomerAccountPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Client component to handle the dialog state for "Request Refund" button
+function RequestRefundButton({ orderId }: { orderId: string }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(true)} className="ml-2">
+        Request Refund
+      </Button>
+      {isDialogOpen && (
+        <RequestRefundDialog orderId={orderId} onClose={() => setIsDialogOpen(false)} />
+      )}
+    </>
   );
 }

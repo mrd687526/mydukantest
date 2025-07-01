@@ -15,6 +15,7 @@ import {
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import Link from "next/link"; // Import Link
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +94,11 @@ export const columns: ColumnDef<Order>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("order_number")}</div>,
+    cell: ({ row }) => (
+      <Link href={`/dashboard/ecommerce/orders/${row.original.id}`} className="font-medium pl-4 hover:underline">
+        {row.getValue("order_number")}
+      </Link>
+    ),
   },
   {
     accessorKey: "customer_name",
@@ -190,7 +195,11 @@ export const columns: ColumnDef<Order>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>View Details</DropdownMenuItem>
+            <Link href={`/dashboard/ecommerce/orders/${row.original.id}`} passHref>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                View Details
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Update Status</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => handleUpdateStatus(row.original.id, 'processing')}>

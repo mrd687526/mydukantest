@@ -8,6 +8,7 @@ import { Product } from "@/lib/types"; // Import Product type for price lookup
 // Schema for creating a new order (for future use, e.g., manual order creation or API integration)
 const orderItemSchema = z.object({
   product_id: z.string().uuid("Invalid product ID."),
+  variant_id: z.number().int().optional().nullable(), // Added variant_id
   quantity: z.number().int().min(1, "Quantity must be at least 1."),
 });
 
@@ -29,6 +30,8 @@ const orderSchema = z.object({
   shipping_postal_code: z.string().min(1, "Postal Code is required."),
   shipping_country: z.string().min(1, "Country is required."),
   shipping_phone: z.string().optional().nullable(),
+  tracking_number: z.string().optional().nullable(), // Added tracking_number
+  shipping_label_url: z.string().url("Invalid URL format.").optional().nullable(), // Added shipping_label_url
   items: z.array(orderItemSchema).min(1, "At least one item is required for the order."),
 });
 
@@ -99,6 +102,7 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     calculatedTotalAmount += price * item.quantity;
     return {
       product_id: item.product_id,
+      variant_id: item.variant_id, // Include variant_id
       quantity: item.quantity,
       price_at_purchase: price,
     };
@@ -129,6 +133,8 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
       shipping_postal_code: values.shipping_postal_code,
       shipping_country: values.shipping_country,
       shipping_phone: values.shipping_phone,
+      tracking_number: values.tracking_number, // Include tracking_number
+      shipping_label_url: values.shipping_label_url, // Include shipping_label_url
     })
     .select("id")
     .single();
@@ -194,4 +200,37 @@ export async function updateOrderStatus(orderId: string, newStatus: 'pending' | 
   revalidatePath("/dashboard/ecommerce/orders");
   revalidatePath("/store/account"); // Revalidate customer's account page
   return { success: true };
+}
+
+export async function updateOrderTracking(orderId: string, trackingNumber: string | null, shippingLabelUrl: string | null) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Authentication required." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) return { error: "Profile not found." };
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      tracking_number: trackingNumber,
+      shipping_label_url: shippingLabelUrl,
+    })
+    .eq("id", orderId)
+    .eq("profile_id", profile.id); // Ensure admin owns the order
+
+  if (error) {
+    console.error("Supabase error updating order tracking:", error.message);
+    return { error: "Database error: Could not update tracking information." };
+  }
+
+  revalidatePath(`/dashboard/ecommerce/orders/${orderId}`);
+  revalidatePath("/dashboard/ecommerce/orders");
+  revalidatePath("/store/account"); // Revalidate customer's account page
+  return { success: true, message: "Tracking information updated successfully!" };
 }

@@ -259,12 +259,15 @@ export type Order = {
   shipping_postal_code: string | null;
   shipping_country: string | null;
   shipping_phone: string | null;
+  tracking_number: string | null; // Added tracking_number
+  shipping_label_url: string | null; // Added shipping_label_url
 };
 
 export type OrderItem = {
   id: string;
   order_id: string;
   product_id: string;
+  variant_id: number | null; // Added variant_id
   quantity: number;
   price_at_purchase: number;
   created_at: string;
@@ -287,17 +290,28 @@ export type Customer = {
 export type OrderRefundRequest = {
   id: string;
   order_id: string;
-  profile_id: string;
+  profile_id: string; // Added profile_id (tenant_id)
   request_date: string;
   status: 'pending' | 'approved' | 'rejected';
   reason: string | null;
+  customer_attachment_url: string | null; // Added customer_attachment_url
   created_at: string;
   updated_at: string;
   orders: { // Joined data from orders table
     order_number: string;
     customer_name: string;
     total_amount: number;
+    status: Order['status']; // Added status for conditional rendering
   } | null;
+};
+
+export type OrderNote = {
+  id: number;
+  profile_id: string;
+  order_id: string;
+  note_text: string;
+  is_customer_visible: boolean;
+  created_at: string;
 };
 
 export type Country = {
