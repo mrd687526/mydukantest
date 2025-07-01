@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin";
 import { UsersClient } from "@/components/superadmin/users-client";
@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { getPlans } from "@/app/actions/plans"; // Import getPlans
 
 export default async function SuperAdminUsersPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { getPendingPlanRequests } from "@/app/actions/plan-requests";
 import { PlanRequestsClient } from "@/components/superadmin/plan-requests/plan-requests-client";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function SuperAdminPlanRequestsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

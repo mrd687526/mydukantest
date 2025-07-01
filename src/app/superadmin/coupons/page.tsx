@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { PlanCouponsClient } from "@/components/superadmin/coupons/plan-coupons-client";
 import { getPlanCoupons } from "@/app/actions/superadmin-coupons";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function SuperAdminCouponsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

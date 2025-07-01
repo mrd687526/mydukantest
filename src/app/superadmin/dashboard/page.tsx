@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { UsersClient } from "@/components/superadmin/users-client";
@@ -14,7 +14,7 @@ import { Users, ShoppingCart, Store, DollarSign, TrendingUp, Percent, Star } fro
 import { format, subDays } from "date-fns";
 
 export default async function SuperAdminDashboardPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

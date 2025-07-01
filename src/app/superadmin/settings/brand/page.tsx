@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BrandSettingsForm } from "@/components/superadmin/settings/brand-settings-form";
 import { getSettings } from "@/app/actions/settings";
 
 export default async function SuperAdminBrandSettingsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

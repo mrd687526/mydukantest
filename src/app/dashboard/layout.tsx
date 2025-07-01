@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { type PropsWithChildren } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 
 export default async function DashboardLayout({ children }: PropsWithChildren) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

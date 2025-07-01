@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { PlansClient } from "@/components/superadmin/plans/plans-client";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function SuperAdminPlansPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

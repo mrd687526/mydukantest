@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { OrderReportsClient } from "@/components/dashboard/reports/orders/order-reports-client";
@@ -6,7 +6,7 @@ import { getSalesSummaryReport, getTopSalesReports, getDownloadableProductsSales
 import { format, subMonths, endOfDay } from "date-fns";
 
 export default async function OrderReportsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

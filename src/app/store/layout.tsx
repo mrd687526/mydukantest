@@ -2,17 +2,17 @@ import Link from "next/link";
 import { ShoppingCart, Package2, User } from "lucide-react";
 import { CartProvider } from "@/components/storefront/cart-context";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { NewsletterSignupForm } from "@/components/storefront/newsletter-signup-form"; // New component
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const handleSignOut = async () => {
     "use server";
-    const supabaseAdmin = createClient(); // Use regular client
+    const supabaseAdmin = createServerClient(); // Use regular client
     await supabaseAdmin.auth.signOut();
     redirect("/store/login");
   };

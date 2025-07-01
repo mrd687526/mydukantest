@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/storefront/add-to-cart-button";
 
@@ -12,7 +12,7 @@ interface ProductPageProps {
 export default async function ProductPage(props: ProductPageProps) {
   // Await the params object, as the compiler seems to treat it as a Promise.
   const actualParams = await props.params;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { productId } = actualParams;
 
   const { data: storeProfile, error: profileError } = await supabase

@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Package, User, MapPin, CreditCard, Truck, FileText, MessageSquareText } from "lucide-react";
@@ -51,7 +51,7 @@ interface OrderDetailPageProps {
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const actualParams = await params;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { orderId } = actualParams;
 
   const { data: { user } } = await supabase.auth.getUser();

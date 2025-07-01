@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe'; // Import Stripe namespace
 import { stripe } from '@/lib/stripe';
-import { createClient } from '@/integrations/supabase/server';
+import { createServerClient } from '@/integrations/supabase/server';
 
 const relevantEvents = new Set([
   'payment_intent.succeeded',
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   if (relevantEvents.has(event.type)) {
     try {
-      const supabase = createClient();
+      const supabase = createServerClient();
       switch (event.type) {
         case 'payment_intent.succeeded':
           const paymentIntentSucceeded = event.data.object as Stripe.PaymentIntent;

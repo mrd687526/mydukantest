@@ -1,8 +1,8 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { session },

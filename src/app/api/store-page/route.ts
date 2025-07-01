@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get("slug") || "home";
   const profileId = req.nextUrl.searchParams.get("profileId"); // Optional: for specific store's page
 
-  const supabase = await createClient();
+  const supabase = createServerClient();
 
   let query = supabase
     .from("store_pages")
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const { slug, data: pageData } = await req.json();
-  const supabase = await createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

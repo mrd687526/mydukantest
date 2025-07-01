@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { type PropsWithChildren } from "react";
 import { SuperAdminHeader } from "@/components/superadmin/super-admin-header"; // Import new header
 import { SuperAdminSidebar } from "@/components/superadmin/super-admin-sidebar"; // Import new sidebar
 
 export default async function SuperAdminLayout({ children }: PropsWithChildren) {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

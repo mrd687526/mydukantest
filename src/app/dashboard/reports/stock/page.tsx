@@ -1,11 +1,11 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 import { StockReportsClient } from "@/components/dashboard/reports/stock/stock-reports-client"; // Updated import path
 import { getProductsForStockReport } from "@/app/actions/products";
 
 export default async function StockReportsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

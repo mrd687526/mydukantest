@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/server";
+import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,7 +10,7 @@ import { RequestRefundDialog } from "@/components/storefront/request-refund-dial
 import { useState } from "react"; // Import useState for dialog state
 
 export default async function CustomerAccountPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
