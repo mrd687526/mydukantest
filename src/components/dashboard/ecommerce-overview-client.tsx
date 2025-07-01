@@ -7,18 +7,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DollarSign, Package, ShoppingCart, XCircle, ReceiptText, Users } from "lucide-react";
-import { RecentOrdersList } from "./recent-orders-list";
+import { RecentOrdersList } from "./ecommerce/recent-orders-list";
 import { Order, DailyOrderCountData, CustomerOrderReportData, TopSellingProductReportData, Product } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CustomerVsGuestChart } from "./customer-vs-guest-chart";
-import { TopSellingProductsList } from "./top-selling-products-list";
-import { StoreAnalyticsClient } from "./analytics/store-analytics-client"; // Import new component
+import { CustomerVsGuestChart } from "./ecommerce/customer-vs-guest-chart";
+import { TopSellingProductsList } from "./ecommerce/top-selling-products-list";
+import { StoreAnalyticsClient } from "./ecommerce/analytics/store-analytics-client"; // Import new component
 
 // Dynamically import the chart component with SSR disabled
 const OrderTrendChart = dynamic(
   () =>
-    import("./order-trend-chart").then(
+    import("./ecommerce/order-trend-chart").then(
       (mod) => mod.OrderTrendChart
     ),
   {
