@@ -50,11 +50,11 @@ export default async function EditDiscountPage(props: EditDiscountPageProps) {
   return (
     <div className="space-y-6">
       <Link
-        href="/dashboard/ecommerce/discounts"
+        href="/dashboard/marketing/coupons"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Discounts
+        Back to Coupons
       </Link>
       <div>
         <h1 className="text-2xl font-bold tracking-tight">

@@ -4,6 +4,7 @@ import { CartProvider } from "@/components/storefront/cart-context";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
+import { NewsletterSignupForm } from "@/components/storefront/newsletter-signup-form"; // New component
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -62,7 +63,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         <main className="flex-1 container mx-auto py-8 px-4">{children}</main>
         <footer className="bg-white border-t py-6 text-center text-sm text-muted-foreground">
           <div className="container mx-auto px-4">
-            <p>&copy; {new Date().getFullYear()} MyShop. All rights reserved.</p>
+            <NewsletterSignupForm />
+            <p className="mt-4">&copy; {new Date().getFullYear()} MyShop. All rights reserved.</p>
             <div className="mt-2 space-x-4">
               <Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link>
               <Link href="/data-deletion" className="hover:underline">Data Deletion</Link>

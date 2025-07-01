@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 import {
   ColumnDef,
   flexRender,
@@ -36,69 +36,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Discount } from "@/lib/types";
-import { deleteDiscount } from "@/app/actions/discounts";
+import { FlashSale } from "@/lib/types";
+import { deleteFlashSale } from "@/app/actions/flash-sales";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
+import { EditFlashSaleDialog } from "./edit-flash-sale-dialog";
 
-async function handleDelete(discountId: string) {
-  const result = await deleteDiscount(discountId);
+async function handleDelete(flashSaleId: string) {
+  const result = await deleteFlashSale(flashSaleId);
   if (result.error) {
-    toast.error("Failed to delete discount", { description: result.error });
+    toast.error("Failed to delete flash sale", { description: result.error });
   } else {
     toast.success(result.message);
   }
 }
 
-export const columns: ColumnDef<Discount>[] = [
+export const columns: ColumnDef<FlashSale>[] = [
   {
-    accessorKey: "code",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Code
+          Sale Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("code")}</div>,
+    cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "type",
-    header: "Type",
+    accessorKey: "discount_type",
+    header: "Discount Type",
     cell: ({ row }) => {
-      const type = row.getValue("type") as Discount['type'];
+      const type = row.getValue("discount_type") as FlashSale['discount_type'];
       return <Badge variant="secondary" className="capitalize">{type.replace('_', ' ')}</Badge>;
     },
   },
   {
-    accessorKey: "value",
+    accessorKey: "discount_value",
     header: "Value",
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("value"));
-      const type = row.original.type;
+      const value = parseFloat(row.getValue("discount_value"));
+      const type = row.original.discount_type;
       if (type === 'percentage') return `${value}%`;
       if (type === 'fixed_amount') return `$${value.toFixed(2)}`;
       return "N/A";
-    },
-  },
-  {
-    accessorKey: "min_purchase_amount",
-    header: "Min. Purchase",
-    cell: ({ row }) => {
-      const amount = row.getValue("min_purchase_amount") as number | null;
-      return amount ? `$${amount.toFixed(2)}` : "None";
-    },
-  },
-  {
-    accessorKey: "usage_limit",
-    header: "Usage Limit",
-    cell: ({ row }) => {
-      const limit = row.getValue("usage_limit") as number | null;
-      const used = row.original.used_count;
-      return limit !== null ? `${used}/${limit}` : "Unlimited";
     },
   },
   {
@@ -106,15 +90,15 @@ export const columns: ColumnDef<Discount>[] = [
     header: "Start Date",
     cell: ({ row }) => {
       const date = new Date(row.getValue("start_date"));
-      return <div>{format(date, 'yyyy-MM-dd')}</div>;
+      return <div>{format(date, 'yyyy-MM-dd HH:mm')}</div>;
     },
   },
   {
     accessorKey: "end_date",
     header: "End Date",
     cell: ({ row }) => {
-      const date = row.getValue("end_date") ? new Date(row.getValue("end_date") as string) : null;
-      return <div>{date ? format(date, 'yyyy-MM-dd') : "Never"}</div>;
+      const date = new Date(row.getValue("end_date"));
+      return <div>{format(date, 'yyyy-MM-dd HH:mm')}</div>;
     },
   },
   {
@@ -122,9 +106,29 @@ export const columns: ColumnDef<Discount>[] = [
     header: "Status",
     cell: ({ row }) => {
       const isActive = row.getValue("is_active");
+      const now = new Date();
+      const startDate = new Date(row.original.start_date);
+      const endDate = new Date(row.original.end_date);
+
+      let statusText = "Inactive";
+      let variant: "default" | "secondary" | "outline" | "destructive" = "outline";
+
+      if (isActive) {
+        if (now >= startDate && now <= endDate) {
+          statusText = "Active";
+          variant = "default";
+        } else if (now < startDate) {
+          statusText = "Scheduled";
+          variant = "secondary";
+        } else {
+          statusText = "Expired";
+          variant = "destructive";
+        }
+      }
+
       return (
-        <Badge variant={isActive ? "default" : "outline"}>
-          {isActive ? "Active" : "Inactive"}
+        <Badge variant={variant}>
+          {statusText}
         </Badge>
       );
     },
@@ -132,40 +136,47 @@ export const columns: ColumnDef<Discount>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const discount = row.original;
+      const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+      const flashSale = row.original;
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <Link href={`/dashboard/marketing/coupons/${discount.id}/edit`} passHref>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                Edit
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DeleteConfirmationDialog
-              onConfirm={() => handleDelete(row.original.id)}
-              title="Are you absolutely sure?"
-              description="This action cannot be undone. This will permanently delete this discount code."
-            >
-              <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                Delete
-              </div>
-            </DeleteConfirmationDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Edit</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DeleteConfirmationDialog
+                onConfirm={() => handleDelete(row.original.id)}
+                title="Are you absolutely sure?"
+                description="This action cannot be undone. This will permanently delete this flash sale."
+              >
+                <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                  Delete
+                </div>
+              </DeleteConfirmationDialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {isEditDialogOpen && (
+            <EditFlashSaleDialog
+              flashSale={flashSale}
+              isOpen={isEditDialogOpen}
+              onClose={() => setIsEditDialogOpen(false)}
+            />
+          )}
+        </>
       );
     },
   },
 ];
 
-export function DiscountsDataTable({ data }: { data: Discount[] }) {
+export function FlashSalesDataTable({ data }: { data: FlashSale[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -185,10 +196,10 @@ export function DiscountsDataTable({ data }: { data: Discount[] }) {
     <div>
         <div className="flex items-center py-4">
             <Input
-            placeholder="Filter by code..."
-            value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
+            placeholder="Filter by name..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-                table.getColumn("code")?.setFilterValue(event.target.value)
+                table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
             />
@@ -218,7 +229,7 @@ export function DiscountsDataTable({ data }: { data: Discount[] }) {
             ) : (
                 <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No discounts found.
+                    No flash sales found.
                 </TableCell>
                 </TableRow>
             )}

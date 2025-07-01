@@ -34,6 +34,10 @@ export type Discount = {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  included_product_ids: string[] | null; // New
+  excluded_product_ids: string[] | null; // New
+  included_category_ids: string[] | null; // New
+  excluded_category_ids: string[] | null; // New
 };
 
 export type Product = {
@@ -342,6 +346,42 @@ export type Region = {
   name: string;
   state_id: number;
   is_active: boolean;
+};
+
+export type NewsletterSubscriber = {
+  id: number;
+  profile_id: string;
+  email: string;
+  subscribed_at: string;
+};
+
+export type FlashSale = {
+  id: string;
+  profile_id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  discount_type: 'percentage' | 'fixed_amount';
+  discount_value: number;
+  target_rules: {
+    included_product_ids?: string[];
+    excluded_product_ids?: string[];
+    included_category_ids?: string[];
+    excluded_category_ids?: string[];
+    min_purchase_amount?: number;
+  } | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Cart = {
+  id: string;
+  profile_id: string;
+  customer_id: string | null;
+  cart_items_json: any; // JSONB for cart items structure
+  created_at: string;
+  updated_at: string;
 };
 
 -- Report types for RPC functions

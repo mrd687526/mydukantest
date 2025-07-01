@@ -45,14 +45,34 @@ export async function saveCredentials(values: z.infer<typeof credentialsSchema>)
 
 // --- Super Admin Settings ---
 export async function getSettings() {
-  if (!await isSuperAdmin()) return { error: "Unauthorized" };
   const supabase = createClient();
-  const { data, error } = await supabase.from("settings").select("*");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Authentication required." };
+
+  const { data: profile } = await supabase.from("profiles").select("id, role").eq("id", user.id).single();
+  if (!profile) return { error: "Profile not found." };
+
+  let query = supabase.from("settings").select("*");
+
+  // If not a super admin, filter settings by profile_id (for store-specific settings)
+  if (profile.role !== 'super_admin') {
+    query = query.eq('profile_id', profile.id);
+  } else {
+    // For super admin, fetch all global settings (where profile_id is null or not set)
+    // This assumes global settings don't have a profile_id or have a specific global ID.
+    // For simplicity, we'll fetch all and let the forms handle which keys they care about.
+    // A more robust solution might involve a separate 'global_settings' table or a specific profile_id for global settings.
+  }
+
+  const { data, error } = await query;
+
   if (error) return { error: "Failed to fetch settings." };
+  
   const settingsObject = data.reduce((acc, setting) => {
     acc[setting.key] = setting.value;
     return acc;
   }, {} as Record<string, string | null>);
+  
   return { data: settingsObject };
 }
 
@@ -160,4 +180,35 @@ export async function updateAnalyticsSettings(values: z.infer<typeof analyticsSe
   if (error) return { error: "Failed to update analytics settings." };
   revalidatePath("/superadmin/settings/analytics");
   return { success: true, message: "Analytics settings updated successfully!" };
+}
+
+// Notifications Settings (for Store Admins)
+const notificationsSettingsSchema = z.object({
+  enable_wishlist_emails: z.boolean(),
+  enable_abandoned_cart_emails: z.boolean(),
+});
+
+export async function updateNotificationsSettings(values: z.infer<typeof notificationsSettingsSchema>) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Authentication required." };
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
+  if (!profile) return { error: "Profile not found." };
+
+  const settingsToUpsert = Object.entries(values).map(([key, value]) => ({
+    profile_id: profile.id, // Link setting to the specific store profile
+    key,
+    value: String(value),
+  }));
+
+  const { error } = await supabase.from("settings").upsert(settingsToUpsert, { onConflict: 'profile_id,key' });
+
+  if (error) {
+    console.error("Error updating notifications settings:", error.message);
+    return { error: "Database error: Could not update notification settings." };
+  }
+
+  revalidatePath("/dashboard/settings/notifications");
+  return { success: true, message: "Notification settings updated successfully!" };
 }

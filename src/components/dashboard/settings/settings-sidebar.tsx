@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Store, Search, Code, ShoppingCart, Truck } from "lucide-react";
+import { Store, Search, Code, ShoppingCart, Truck, BellRing } from "lucide-react"; // Import BellRing
 
 const settingsNavItems = [
   { href: "/dashboard/settings/identity", label: "Identity", icon: Store },
@@ -11,6 +11,7 @@ const settingsNavItems = [
   { href: "/dashboard/settings/customizations", label: "Customizations", icon: Code },
   { href: "/dashboard/settings/checkout", label: "Checkout", icon: ShoppingCart },
   { href: "/dashboard/settings/shipping", label: "Shipping", icon: Truck },
+  { href: "/dashboard/settings/notifications", label: "Notifications", icon: BellRing }, // New item
 ];
 
 export function SettingsSidebar() {

@@ -15,6 +15,7 @@ import {
   Palette,
   DollarSign, // Import DollarSign icon for Plans
   Store, // Import Store icon for Store Settings
+  Megaphone, // New icon for Marketing
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarReportsSection } from "./sidebar-reports-section";
@@ -78,6 +79,20 @@ export async function DashboardSidebar() {
             </h3>
             <SidebarNav items={ecommerceNavItems} />
             <SidebarReportsSection />
+          </div>
+          <div className="px-4 lg:px-6 mb-4">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+              Marketing Tools
+            </h3>
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              <Link
+                href="/dashboard/marketing"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Megaphone className="h-4 w-4" />
+                Marketing Overview
+              </Link>
+            </nav>
           </div>
           {/* Super Admin section removed from here, now in its own sidebar */}
         </div>

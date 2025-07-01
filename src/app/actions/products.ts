@@ -190,3 +190,49 @@ export async function getProductsForStockReport(filter: StockStatusFilter): Prom
 
   return { data: products as Product[], error: null };
 }
+
+export async function getProductsForSelection(): Promise<{ data: { id: string; name: string; image_url: string | null; category: string | null; }[] | null; error: string | null }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: "Authentication required." };
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
+  if (!profile) return { data: null, error: "Profile not found." };
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, image_url, category")
+    .eq("profile_id", profile.id)
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching products for selection:", error.message);
+    return { data: null, error: "Failed to fetch products." };
+  }
+  return { data, error: null };
+}
+
+export async function getCategoriesForSelection(): Promise<{ data: string[] | null; error: string | null }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: "Authentication required." };
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
+  if (!profile) return { data: null, error: "Profile not found." };
+
+  // Fetch distinct categories for the current profile
+  const { data, error } = await supabase
+    .from("products")
+    .select("category")
+    .eq("profile_id", profile.id)
+    .not("category", "is", null)
+    .order("category", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching categories for selection:", error.message);
+    return { data: null, error: "Failed to fetch categories." };
+  }
+
+  const categories = Array.from(new Set(data.map(item => item.category as string)));
+  return { data: categories, error: null };
+}

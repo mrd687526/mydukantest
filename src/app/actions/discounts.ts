@@ -22,6 +22,10 @@ const discountSchema = z.object({
   start_date: z.string().datetime({ message: "Invalid start date format." }),
   end_date: z.string().datetime({ message: "Invalid end date format." }).optional().nullable(),
   is_active: z.boolean().default(true),
+  included_product_ids: z.array(z.string().uuid()).optional().nullable(), // New
+  excluded_product_ids: z.array(z.string().uuid()).optional().nullable(), // New
+  included_category_ids: z.array(z.string()).optional().nullable(), // New
+  excluded_category_ids: z.array(z.string()).optional().nullable(), // New
 });
 
 export async function createDiscount(values: z.infer<typeof discountSchema>) {
@@ -56,6 +60,7 @@ export async function createDiscount(values: z.infer<typeof discountSchema>) {
   }
 
   revalidatePath("/dashboard/ecommerce/discounts");
+  revalidatePath("/dashboard/marketing/coupons");
   return { success: true, message: "Discount created successfully!" };
 }
 
@@ -92,6 +97,7 @@ export async function updateDiscount(discountId: string, values: z.infer<typeof 
   }
 
   revalidatePath("/dashboard/ecommerce/discounts");
+  revalidatePath("/dashboard/marketing/coupons");
   return { success: true, message: "Discount updated successfully!" };
 }
 
@@ -125,6 +131,7 @@ export async function deleteDiscount(discountId: string) {
   }
 
   revalidatePath("/dashboard/ecommerce/discounts");
+  revalidatePath("/dashboard/marketing/coupons");
   return { success: true, message: "Discount deleted successfully!" };
 }
 
