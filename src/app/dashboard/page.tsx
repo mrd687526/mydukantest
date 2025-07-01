@@ -5,7 +5,7 @@ import { DashboardTabsClient } from "@/components/dashboard/dashboard-tabs-clien
 import { format, subDays } from "date-fns";
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

@@ -4,7 +4,7 @@ import { CampaignsClient } from "@/components/dashboard/campaigns/campaigns-clie
 import { CompleteProfilePrompt } from "@/components/dashboard/complete-profile-prompt";
 
 export default async function CampaignsPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },

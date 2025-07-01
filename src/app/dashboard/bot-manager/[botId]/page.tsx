@@ -17,7 +17,7 @@ interface BotEditorPageProps {
 export default async function BotEditorPage(props: BotEditorPageProps) {
   // Await the params object, as the compiler seems to treat it as a Promise.
   const actualParams = await props.params;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { botId } = actualParams; // Use the awaited params
 
   const {

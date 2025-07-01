@@ -28,7 +28,7 @@ interface CampaignPageProps {
 export default async function Page(props: CampaignPageProps) {
   // Await the params object, as the compiler seems to treat it as a Promise.
   const actualParams = await props.params;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { campaignId } = actualParams;
 
   const {

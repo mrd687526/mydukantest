@@ -5,7 +5,7 @@ import { CustomersClient } from "@/components/dashboard/ecommerce/customers/cust
 import { getCustomers } from "@/app/actions/customers"; // Import the new action
 
 export default async function CustomersPage() {
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

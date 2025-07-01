@@ -13,7 +13,7 @@ export default async function EditProductPage(props: EditProductPageProps) {
   // Await the params object, as the compiler seems to treat it as a Promise.
   const actualParams = await props.params;
   const { productId } = actualParams;
-  const supabase = createClient();
+  const supabase = createServerClient();
 
   const {
     data: { user },
