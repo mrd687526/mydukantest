@@ -4,6 +4,8 @@ import { createClient } from "@/integrations/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/lib/types"; // Import Product type for price lookup
+import { logCustomerEvent } from "./customer-events"; // Import the new action
+import { updateCustomerLastActive } from "./customers"; // Import the new action
 
 // Schema for creating a new order (for future use, e.g., manual order creation or API integration)
 const orderItemSchema = z.object({
@@ -158,6 +160,16 @@ export async function createOrder(values: z.infer<typeof orderSchema>) {
     console.error("Supabase error creating order items:", orderItemsError.message);
     // Consider rolling back the order if item insertion fails, or handle partial success
     return { error: "Database error: Could not create order items." };
+  }
+
+  // Log 'placed_order' event and update 'last_active' for the customer
+  if (customerId) {
+    await logCustomerEvent({
+      customer_id: customerId,
+      event_type: 'placed_order',
+      event_details: { order_id: order.id, total_amount: values.total_amount, product_ids: productIds },
+    });
+    await updateCustomerLastActive(customerId);
   }
 
   revalidatePath("/dashboard/ecommerce/orders");

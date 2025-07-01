@@ -15,6 +15,7 @@ import {
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import Link from "next/link"; // Import Link
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,10 +64,10 @@ export const columns: ColumnDef<Customer>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="font-medium pl-4">
+      <Link href={`/dashboard/ecommerce/customers/${row.original.id}`} className="font-medium pl-4 hover:underline">
         <div>{row.getValue("name")}</div>
         <div className="text-sm text-muted-foreground">{row.original.email}</div>
-      </div>
+      </Link>
     ),
   },
   {
@@ -203,6 +204,11 @@ export const columns: ColumnDef<Customer>[] = [
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <Link href={`/dashboard/ecommerce/customers/${row.original.id}`} passHref>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              View Profile
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>View Orders</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DeleteConfirmationDialog

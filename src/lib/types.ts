@@ -314,6 +314,15 @@ export type OrderNote = {
   created_at: string;
 };
 
+export type CustomerEvent = {
+  id: number;
+  profile_id: string;
+  customer_id: string;
+  event_type: 'registered' | 'last_login' | 'added_to_wishlist' | 'added_to_cart' | 'placed_order';
+  event_details: Record<string, any> | null;
+  created_at: string;
+};
+
 export type Country = {
   id: number;
   name: string;

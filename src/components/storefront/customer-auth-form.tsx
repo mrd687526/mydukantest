@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { logCustomerEvent } from "@/app/actions/customer-events";
+import { updateCustomerLastActive } from "@/app/actions/customers";
 
 export default function CustomerAuthForm() {
   const supabase = createClient();
@@ -15,16 +17,77 @@ export default function CustomerAuthForm() {
   const error = searchParams.get('error');
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
+        // Determine the store's profile_id for this customer
+        const { data: storeProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("role", "store_admin")
+          .limit(1)
+          .single();
+
+        if (storeProfile) {
+          // Ensure customer record exists and get its ID
+          const { data: customer, error: customerError } = await supabase
+            .from("customers")
+            .upsert({
+              profile_id: storeProfile.id,
+              email: session.user.email!,
+              name: session.user.user_metadata.full_name || session.user.user_metadata.name || session.user.email!,
+              last_active: new Date().toISOString(),
+              status: 'active',
+            }, { onConflict: 'profile_id,email' })
+            .select('id')
+            .single();
+
+          if (customer && !customerError) {
+            if (event === 'SIGNED_IN') {
+              await logCustomerEvent({
+                customer_id: customer.id,
+                event_type: 'last_login',
+                event_details: { user_id: session.user.id },
+              });
+              await updateCustomerLastActive(customer.id);
+            } else if (event === 'SIGNED_UP') {
+              await logCustomerEvent({
+                customer_id: customer.id,
+                event_type: 'registered',
+                event_details: { user_id: session.user.id },
+              });
+              await updateCustomerLastActive(customer.id);
+            }
+          } else {
+            console.error("Failed to create/update customer record:", customerError);
+          }
+        }
         // Redirect to account page if user is logged in
         router.push('/store/account');
       }
     });
 
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        // Also update last_active on initial session load if user is already logged in
+        const { data: storeProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("role", "store_admin")
+          .limit(1)
+          .single();
+
+        if (storeProfile) {
+          const { data: customer } = await supabase
+            .from("customers")
+            .select("id")
+            .eq("email", session.user.email!)
+            .eq("profile_id", storeProfile.id)
+            .single();
+          if (customer) {
+            await updateCustomerLastActive(customer.id);
+          }
+        }
         router.push('/store/account');
       }
     });

@@ -46,5 +46,21 @@ export async function deleteCustomer(customerId: string) {
 
   revalidatePath("/dashboard/ecommerce/customers");
   revalidatePath("/dashboard/ecommerce/orders"); // Orders might be affected
+  revalidatePath("/dashboard/ecommerce/analytics"); // Analytics might be affected
+  revalidatePath("/dashboard/ecommerce/top-sales-reports"); // Top sales reports will be affected
+  return { success: true };
+}
+
+export async function updateCustomerLastActive(customerId: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('customers')
+    .update({ last_active: new Date().toISOString() })
+    .eq('id', customerId);
+
+  if (error) {
+    console.error("Error updating customer last_active:", error.message);
+    return { error: "Failed to update customer last active time." };
+  }
   return { success: true };
 }
