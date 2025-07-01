@@ -14,6 +14,7 @@ import {
   Ticket,
   Palette,
   DollarSign, // Import DollarSign icon for Plans
+  Store, // Import Store icon for Store Settings
 } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarReportsSection } from "./sidebar-reports-section";
@@ -87,6 +88,13 @@ export async function DashboardSidebar() {
             >
               <Settings className="h-4 w-4" />
               Settings
+            </Link>
+            <Link
+              href="/dashboard/settings/identity" // New link for Store Settings
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <Store className="h-4 w-4" />
+              Store Settings
             </Link>
         </div>
       </div>

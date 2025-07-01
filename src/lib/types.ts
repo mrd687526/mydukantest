@@ -153,6 +153,23 @@ export type Profile = {
   avatar: string | null;
   stripe_customer_id: string | null;
   role: 'super_admin' | 'store_admin';
+  logo_url: string | null;
+  seo_google_analytics_id: string | null;
+  seo_facebook_pixel_id: string | null;
+  seo_meta_keywords: string | null;
+  seo_meta_description: string | null;
+  seo_meta_image_url: string | null;
+  custom_domain: string | null;
+  subdomain: string | null;
+  custom_css: string | null;
+  custom_js: string | null;
+  checkout_enable_notes: boolean | null;
+  checkout_require_login: boolean | null;
+  shipping_address: string | null;
+  shipping_city: string | null;
+  shipping_state: string | null;
+  shipping_zip_code: string | null;
+  shipping_country: string | null;
 };
 
 export type Subscription = {
