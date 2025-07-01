@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,37 +31,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input"; // Import Input for name field
-import { updateUserProfile } from "@/app/actions/superadmin"; // Updated action name
-import { UserProfileWithSubscription } from "@/lib/types"; // Use the combined type
+import { Input } from "@/components/ui/input";
+import { updateUserProfile } from "@/app/actions/superadmin";
+import { UserProfileWithSubscription, Plan } from "@/lib/types"; // Import Plan type
+import { ChangeSubscriptionPlanDialog } from "./change-subscription-plan-dialog"; // Import new dialog
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."), // Added name field
+  name: z.string().min(2, "Name must be at least 2 characters."),
   role: z.enum(['super_admin', 'store_admin']),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface EditUserDialogProps {
-  userProfile: UserProfileWithSubscription; // Use the combined type
+  userProfile: UserProfileWithSubscription;
   isOpen: boolean;
   onClose: () => void;
+  allPlans: Plan[]; // Pass all available plans to this dialog
 }
 
-export function EditUserDialog({ userProfile, isOpen, onClose }: EditUserDialogProps) {
+export function EditUserDialog({ userProfile, isOpen, onClose, allPlans }: EditUserDialogProps) {
+  const [isChangePlanDialogOpen, setIsChangePlanDialogOpen] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: userProfile.name || "", // Pre-fill name
+      name: userProfile.name || "",
       role: userProfile.role as 'super_admin' | 'store_admin',
     },
   });
 
   const onSubmit = async (data: FormValues) => {
-    const result = await updateUserProfile({ profileId: userProfile.id, name: data.name, role: data.role }); // Pass name and role
+    const result = await updateUserProfile({ profileId: userProfile.id, name: data.name, role: data.role });
 
     if (result.error) {
-      toast.error("Failed to update user profile", { // Updated toast message
+      toast.error("Failed to update user profile", {
         description: result.error,
       });
     } else {
@@ -73,7 +78,7 @@ export function EditUserDialog({ userProfile, isOpen, onClose }: EditUserDialogP
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit User Profile</DialogTitle> {/* Updated title */}
+          <DialogTitle>Edit User Profile</DialogTitle>
           <DialogDescription>
             Update details for {userProfile.name || userProfile.email}.
           </DialogDescription>
@@ -114,6 +119,32 @@ export function EditUserDialog({ userProfile, isOpen, onClose }: EditUserDialogP
                 </FormItem>
               )}
             />
+
+            {/* Subscription Status Section */}
+            <div className="space-y-2 border-t pt-4 mt-4">
+              <h3 className="text-lg font-semibold">Subscription Status</h3>
+              <p className="text-sm text-muted-foreground">
+                Current Plan: {userProfile.plan_name || "None"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Status: {userProfile.subscription_status ? userProfile.subscription_status.replace('_', ' ') : "None"}
+              </p>
+              {userProfile.subscription_end_date && (
+                <p className="text-sm text-muted-foreground">
+                  Renews/Ends: {format(new Date(userProfile.subscription_end_date), 'PPP')}
+                </p>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsChangePlanDialogOpen(true)}
+                className="mt-2"
+              >
+                Change Plan
+              </Button>
+            </div>
+
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -123,6 +154,15 @@ export function EditUserDialog({ userProfile, isOpen, onClose }: EditUserDialogP
           </form>
         </Form>
       </DialogContent>
+
+      {isChangePlanDialogOpen && (
+        <ChangeSubscriptionPlanDialog
+          userProfile={userProfile}
+          plans={allPlans}
+          isOpen={isChangePlanDialogOpen}
+          onClose={() => setIsChangePlanDialogOpen(false)}
+        />
+      )}
     </Dialog>
   );
 }

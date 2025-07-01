@@ -10,6 +10,7 @@ import {
   MostUsedCouponData,
   PopularPlanData,
   TopCustomerData,
+  Plan,
 } from "@/lib/types"; // Import the new interface
 
 // Helper to check if the current user is a super admin (uses regular client as it checks current user's session)
@@ -282,4 +283,100 @@ export async function getSuperAdminDashboardMetrics(): Promise<{
     topCustomers: topCustomersRes.data as TopCustomerData[] || null,
     error: null // Individual errors are logged, but we return partial data if possible
   };
+}
+
+const updateSubscriptionPlanSchema = z.object({
+  profileId: z.string().uuid("Invalid profile ID."),
+  newStripePriceId: z.string().nullable(), // Can be null for free plan
+  newStatus: z.enum(['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired']),
+  newPeriodEnd: z.string().datetime({ message: "Invalid date format." }).optional().nullable(),
+});
+
+export async function updateSubscriptionPlan(values: z.infer<typeof updateSubscriptionPlanSchema>) {
+  if (!await isSuperAdmin()) {
+    return { error: "Unauthorized: Only super admins can update subscriptions." };
+  }
+
+  const supabaseAdmin = createAdminSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  // Fetch the selected plan to get its details (e.g., interval for period end calculation if needed)
+  let selectedPlan: Plan | null = null;
+  if (values.newStripePriceId) {
+    const { data: plan, error: planError } = await supabaseAdmin
+      .from('plans')
+      .select('*')
+      .eq('stripe_price_id', values.newStripePriceId)
+      .single();
+    if (planError || !plan) {
+      console.error("Error fetching selected plan:", planError?.message);
+      return { error: "Selected plan not found." };
+    }
+    selectedPlan = plan;
+  }
+
+  // Fetch existing subscription for the profile
+  const { data: existingSubscription, error: fetchSubError } = await supabaseAdmin
+    .from('subscriptions')
+    .select('*')
+    .eq('profile_id', values.profileId)
+    .single();
+
+  if (fetchSubError && fetchSubError.code !== 'PGRST116') { // PGRST116 means no rows found
+    console.error("Error fetching existing subscription:", fetchSubError.message);
+    return { error: "Database error: Could not fetch existing subscription." };
+  }
+
+  const subscriptionData: any = {
+    profile_id: values.profileId,
+    stripe_price_id: values.newStripePriceId,
+    status: values.newStatus,
+    current_period_end: values.newPeriodEnd,
+  };
+
+  // If changing to a paid plan and no stripe_customer_id exists, create a dummy one for DB consistency.
+  // In a real app, this would involve Stripe API calls to create a customer and subscription.
+  if (values.newStripePriceId && !existingSubscription?.stripe_customer_id) {
+    // For this demo, we'll just assign a placeholder customer ID if a paid plan is selected
+    // and no customer ID exists. In a real app, you'd create a Stripe customer here.
+    subscriptionData.stripe_customer_id = `cus_dummy_${values.profileId.substring(0, 8)}`;
+  } else if (existingSubscription?.stripe_customer_id) {
+    subscriptionData.stripe_customer_id = existingSubscription.stripe_customer_id;
+  }
+
+  // If changing to a paid plan and no stripe_subscription_id exists, create a dummy one.
+  if (values.newStripePriceId && !existingSubscription?.stripe_subscription_id) {
+    subscriptionData.stripe_subscription_id = `sub_dummy_${values.profileId.substring(0, 8)}`;
+  } else if (existingSubscription?.stripe_subscription_id) {
+    subscriptionData.stripe_subscription_id = existingSubscription.stripe_subscription_id;
+  }
+
+
+  let upsertError;
+  if (existingSubscription) {
+    // Update existing subscription
+    const { error } = await supabaseAdmin
+      .from('subscriptions')
+      .update(subscriptionData)
+      .eq('id', existingSubscription.id);
+    upsertError = error;
+  } else {
+    // Insert new subscription
+    const { error } = await supabaseAdmin
+      .from('subscriptions')
+      .insert(subscriptionData);
+    upsertError = error;
+  }
+
+  if (upsertError) {
+    console.error("Supabase error updating/inserting subscription:", upsertError.message);
+    return { error: "Database error: Could not update subscription." };
+  }
+
+  revalidatePath("/superadmin/users");
+  revalidatePath("/dashboard/pricing"); // Revalidate pricing page for the user
+  revalidatePath("/dashboard"); // Revalidate dashboard for the user
+  return { success: true, message: "User subscription updated successfully!" };
 }

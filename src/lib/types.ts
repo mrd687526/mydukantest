@@ -205,6 +205,7 @@ export type UserProfileWithSubscription = Profile & {
   created_at: string;
   subscription_status: Subscription['status'] | null;
   subscription_end_date: string | null;
+  plan_name: string | null; // Added plan_name
 };
 
 export type Order = {

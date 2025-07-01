@@ -2,9 +2,10 @@ import { createClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { getAllUsersAndProfiles, createNewUserAndProfile } from "@/app/actions/superadmin";
 import { UsersClient } from "@/components/superadmin/users-client";
-import { UserProfileWithSubscription } from "@/lib/types";
+import { UserProfileWithSubscription, Plan } from "@/lib/types"; // Import Plan
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { getPlans } from "@/app/actions/plans"; // Import getPlans
 
 export default async function SuperAdminUsersPage() {
   const supabase = createClient();
@@ -43,11 +44,19 @@ export default async function SuperAdminUsersPage() {
     });
   }
 
-  const { data: users, error } = await getAllUsersAndProfiles();
+  const [{ data: users, error: usersError }, { data: allPlans, error: plansError }] = await Promise.all([
+    getAllUsersAndProfiles(),
+    getPlans(), // Fetch all plans
+  ]);
 
-  if (error) {
-    console.error("Error fetching users for super admin:", error);
+  if (usersError) {
+    console.error("Error fetching users for super admin:", usersError);
     return <div>Error loading users. Please try again later.</div>;
+  }
+
+  if (plansError) {
+    console.error("Error fetching plans for super admin:", plansError);
+    // Continue with empty plans array if there's an error
   }
 
   return (
@@ -65,7 +74,7 @@ export default async function SuperAdminUsersPage() {
           View and manage all user accounts and their profiles.
         </p>
       </div>
-      <UsersClient users={users || []} />
+      <UsersClient users={users || []} allPlans={allPlans || []} />
     </div>
   );
 }

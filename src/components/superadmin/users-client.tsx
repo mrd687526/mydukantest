@@ -3,13 +3,14 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { UsersDataTable } from "./users-data-table";
 import { CreateUserDialog } from "./create-user-dialog";
-import { UserProfileWithSubscription } from "@/lib/types"; // Import from shared types
+import { UserProfileWithSubscription, Plan } from "@/lib/types"; // Import Plan from shared types
 
 interface UsersClientProps {
   users: UserProfileWithSubscription[];
+  allPlans: Plan[]; // Add allPlans prop
 }
 
-export function UsersClient({ users }: UsersClientProps) {
+export function UsersClient({ users, allPlans }: UsersClientProps) {
   return (
     <Card>
       <CardHeader>
@@ -24,7 +25,7 @@ export function UsersClient({ users }: UsersClientProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <UsersDataTable data={users} />
+        <UsersDataTable data={users} allPlans={allPlans} />
       </CardContent>
     </Card>
   );

@@ -94,6 +94,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
     cell: ({ row }) => {
       const status = row.original.subscription_status;
       const endDate = row.original.subscription_end_date ? format(new Date(row.original.subscription_end_date), 'yyyy-MM-dd') : 'N/A';
+      const planName = row.original.plan_name;
       
       if (status) {
         let variant: "default" | "secondary" | "outline" | "destructive" = "default";
@@ -103,6 +104,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
         return (
           <div className="flex flex-col">
             <Badge variant={variant} className="capitalize">{status.replace('_', ' ')}</Badge>
+            {planName && <span className="text-xs text-muted-foreground mt-1">Plan: {planName}</span>}
             {row.original.subscription_end_date && (
               <span className="text-xs text-muted-foreground mt-1">Ends: {endDate}</span>
             )}
@@ -132,9 +134,10 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const [isEditUserDialogOpen, setIsEditUserDialogOpen] = React.useState(false); // Renamed state
+    cell: ({ row, table }) => { // Access table context to get allPlans
+      const [isEditUserDialogOpen, setIsEditUserDialogOpen] = React.useState(false);
       const userProfile = row.original;
+      const allPlans = (table.options.meta as { allPlans: Plan[] }).allPlans; // Access allPlans from meta
 
       return (
         <>
@@ -149,7 +152,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem>View Profile</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsEditUserDialogOpen(true)}>
-                Edit Profile {/* Updated text */}
+                Edit Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DeleteConfirmationDialog
@@ -165,10 +168,11 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
           </DropdownMenu>
 
           {isEditUserDialogOpen && (
-            <EditUserDialog // Updated component name
+            <EditUserDialog
               userProfile={userProfile}
               isOpen={isEditUserDialogOpen}
               onClose={() => setIsEditUserDialogOpen(false)}
+              allPlans={allPlans} // Pass allPlans to EditUserDialog
             />
           )}
         </>
@@ -177,7 +181,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
   },
 ];
 
-export function UsersDataTable({ data }: { data: UserProfileWithSubscription[] }) {
+export function UsersDataTable({ data, allPlans }: { data: UserProfileWithSubscription[]; allPlans: Plan[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -193,6 +197,7 @@ export function UsersDataTable({ data }: { data: UserProfileWithSubscription[] }
     getFilteredRowModel: getFilteredRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     state: { sorting, columnFilters, globalFilter },
+    meta: { allPlans }, // Pass allPlans via meta
   });
 
   return (
