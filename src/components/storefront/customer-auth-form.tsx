@@ -2,7 +2,7 @@
 
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -11,7 +11,7 @@ import { logCustomerEvent } from "@/app/actions/customer-events";
 import { updateCustomerLastActive } from "@/app/actions/customers";
 
 export default function CustomerAuthForm() {
-  const supabase = createClient();
+  const supabase = createBrowserClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');

@@ -2,7 +2,7 @@
 
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -34,7 +34,7 @@ const superAdminLoginSchema = z.object({
 type SuperAdminLoginValues = z.infer<typeof superAdminLoginSchema>;
 
 export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps) {
-  const supabase = createClient();
+  const supabase = createBrowserClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
