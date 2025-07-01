@@ -30,34 +30,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateUserRole } from "@/app/actions/superadmin";
-import { Profile } from "@/lib/types";
+import { Input } from "@/components/ui/input"; // Import Input for name field
+import { updateUserProfile } from "@/app/actions/superadmin"; // Updated action name
+import { UserProfileWithSubscription } from "@/lib/types"; // Use the combined type
 
 const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters."), // Added name field
   role: z.enum(['super_admin', 'store_admin']),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface EditUserRoleDialogProps {
-  userProfile: Profile;
+interface EditUserDialogProps {
+  userProfile: UserProfileWithSubscription; // Use the combined type
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function EditUserRoleDialog({ userProfile, isOpen, onClose }: EditUserRoleDialogProps) {
+export function EditUserDialog({ userProfile, isOpen, onClose }: EditUserDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: userProfile.name || "", // Pre-fill name
       role: userProfile.role as 'super_admin' | 'store_admin',
     },
   });
 
   const onSubmit = async (data: FormValues) => {
-    const result = await updateUserRole({ profileId: userProfile.id, role: data.role }); // Use userProfile.id
+    const result = await updateUserProfile({ profileId: userProfile.id, name: data.name, role: data.role }); // Pass name and role
 
     if (result.error) {
-      toast.error("Failed to update role", {
+      toast.error("Failed to update user profile", { // Updated toast message
         description: result.error,
       });
     } else {
@@ -70,13 +73,26 @@ export function EditUserRoleDialog({ userProfile, isOpen, onClose }: EditUserRol
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit User Role</DialogTitle>
+          <DialogTitle>Edit User Profile</DialogTitle> {/* Updated title */}
           <DialogDescription>
-            Change the role for {userProfile.name || userProfile.email}.
+            Update details for {userProfile.name || userProfile.email}.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="User's Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="role"

@@ -127,14 +127,15 @@ export async function getAllUsersAndProfiles(): Promise<{ data: UserProfileWithS
   return { data: data as UserProfileWithSubscription[], error: null };
 }
 
-const updateUserRoleSchema = z.object({
+const updateUserProfileSchema = z.object({ // Renamed schema
   profileId: z.string().uuid("Invalid profile ID."),
+  name: z.string().min(2, "Name must be at least 2 characters."), // Added name
   role: z.enum(['super_admin', 'store_admin']),
 });
 
-export async function updateUserRole(values: z.infer<typeof updateUserRoleSchema>) {
+export async function updateUserProfile(values: z.infer<typeof updateUserProfileSchema>) { // Renamed action
   if (!await isSuperAdmin()) {
-    return { error: "Unauthorized: Only super admins can update user roles." };
+    return { error: "Unauthorized: Only super admins can update user profiles." };
   }
 
   // Initialize an admin client for privileged updates
@@ -145,16 +146,16 @@ export async function updateUserRole(values: z.infer<typeof updateUserRoleSchema
 
   const { error } = await supabaseAdmin
     .from("profiles")
-    .update({ role: values.role })
+    .update({ name: values.name, role: values.role }) // Update both name and role
     .eq("id", values.profileId); // Use 'id' for the update
 
   if (error) {
-    console.error("Supabase error updating user role:", error.message);
-    return { error: "Database error: Could not update user role." };
+    console.error("Supabase error updating user profile:", error.message);
+    return { error: "Database error: Could not update user profile." };
   }
 
   revalidatePath("/superadmin/users");
-  return { success: true, message: "User role updated successfully!" };
+  return { success: true, message: "User profile updated successfully!" };
 }
 
 export async function deleteUserAndProfile(userId: string) {

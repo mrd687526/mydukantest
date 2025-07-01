@@ -38,7 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/dashboard/delete-confirmation-dialog";
 import { deleteUserAndProfile } from "@/app/actions/superadmin";
 import { UserProfileWithSubscription } from "@/lib/types"; // Import from shared types
-import { EditUserRoleDialog } from "./edit-user-role-dialog";
+import { EditUserDialog } from "./edit-user-dialog"; // Updated import
 
 async function handleDelete(userId: string) {
   const result = await deleteUserAndProfile(userId);
@@ -133,7 +133,7 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = React.useState(false);
+      const [isEditUserDialogOpen, setIsEditUserDialogOpen] = React.useState(false); // Renamed state
       const userProfile = row.original;
 
       return (
@@ -148,8 +148,8 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem>View Profile</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsEditRoleDialogOpen(true)}>
-                Edit Role
+              <DropdownMenuItem onClick={() => setIsEditUserDialogOpen(true)}>
+                Edit Profile {/* Updated text */}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DeleteConfirmationDialog
@@ -164,11 +164,11 @@ export const columns: ColumnDef<UserProfileWithSubscription>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {isEditRoleDialogOpen && (
-            <EditUserRoleDialog
+          {isEditUserDialogOpen && (
+            <EditUserDialog // Updated component name
               userProfile={userProfile}
-              isOpen={isEditRoleDialogOpen}
-              onClose={() => setIsEditRoleDialogOpen(false)}
+              isOpen={isEditUserDialogOpen}
+              onClose={() => setIsEditUserDialogOpen(false)}
             />
           )}
         </>
