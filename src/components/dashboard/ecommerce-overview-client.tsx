@@ -5,6 +5,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription, // Added CardDescription import
 } from "@/components/ui/card";
 import { DollarSign, Package, ShoppingCart, XCircle, ReceiptText, Users } from "lucide-react";
 import { RecentOrdersList } from "./ecommerce/recent-orders-list";
