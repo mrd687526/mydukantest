@@ -6,11 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DollarSign, Package, ShoppingCart, XCircle, ReceiptText } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, XCircle, ReceiptText, Users } from "lucide-react";
 import { RecentOrdersList } from "./recent-orders-list";
-import { Order, DailyOrderCountData } from "@/lib/types";
+import { Order, DailyOrderCountData, CustomerOrderReportData, TopSellingProductReportData, Product } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CustomerVsGuestChart } from "./customer-vs-guest-chart";
+import { TopSellingProductsList } from "./top-selling-products-list";
 
 // Dynamically import the chart component with SSR disabled
 const OrderTrendChart = dynamic(
@@ -32,6 +34,8 @@ interface EcommerceOverviewClientProps {
   refundedOrders: number | null;
   recentOrders: Order[] | null;
   dailyOrderCounts: DailyOrderCountData[] | null;
+  customerOrderReports: CustomerOrderReportData[] | null;
+  topSellingProducts: (TopSellingProductReportData & { stock_status?: Product['stock_status'] })[] | null;
 }
 
 export function EcommerceOverviewClient({
@@ -42,7 +46,12 @@ export function EcommerceOverviewClient({
   refundedOrders,
   recentOrders,
   dailyOrderCounts,
+  customerOrderReports,
+  topSellingProducts,
 }: EcommerceOverviewClientProps) {
+  const totalCustomerOrders = customerOrderReports?.reduce((sum, item) => sum + item.customer_orders, 0) ?? 0;
+  const totalGuestOrders = customerOrderReports?.reduce((sum, item) => sum + item.guest_orders, 0) ?? 0;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
@@ -131,6 +140,43 @@ export function EcommerceOverviewClient({
           </CardHeader>
           <CardContent>
             <RecentOrdersList orders={recentOrders || []} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer vs. Guest Orders</CardTitle>
+            <CardDescription>
+              Breakdown of orders by registered customers and guest users.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <Card className="p-4 text-center">
+              <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold">{totalCustomerOrders}</div>
+              <p className="text-sm text-muted-foreground">Customer Orders</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <Users className="h-8 w-8 text-secondary-foreground mx-auto mb-2" />
+              <div className="text-2xl font-bold">{totalGuestOrders}</div>
+              <p className="text-sm text-muted-foreground">Guest Orders</p>
+            </Card>
+            <div className="col-span-2 pl-2">
+              <CustomerVsGuestChart data={customerOrderReports || []} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Selling Products</CardTitle>
+            <CardDescription>
+              Your top 5 products by quantity sold.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopSellingProductsList products={topSellingProducts || []} />
           </CardContent>
         </Card>
       </div>

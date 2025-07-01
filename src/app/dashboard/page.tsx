@@ -98,6 +98,12 @@ export default async function DashboardPage() {
   };
 
   // --- Fetch E-Commerce Data ---
+  // Define date range for customer order reports and top selling products (e.g., last 30 days)
+  const today = new Date();
+  const thirtyDaysAgo = subDays(today, 29);
+  const startDate = format(thirtyDaysAgo, 'yyyy-MM-dd');
+  const endDate = format(today, 'yyyy-MM-dd');
+
   const [
     totalProductsRes,
     totalSalesRes,
@@ -106,6 +112,8 @@ export default async function DashboardPage() {
     refundedOrdersRes,
     recentOrdersRes,
     dailyOrderCountsRes,
+    customerOrderReportsRes,
+    topSellingProductsRes,
   ] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("profile_id", profileId),
     supabase.from("orders").select("total_amount").eq("profile_id", profileId).eq("status", "delivered"),
@@ -114,7 +122,30 @@ export default async function DashboardPage() {
     supabase.from("order_refund_requests").select("id", { count: "exact", head: true }).eq("profile_id", profileId).eq("status", "approved"),
     supabase.from("orders").select("*").eq("profile_id", profileId).order("created_at", { ascending: false }).limit(5),
     supabase.rpc("get_daily_order_counts", { p_profile_id: profileId }),
+    supabase.rpc("get_customer_order_analytics", { p_profile_id: profileId, p_start_date: startDate, p_end_date: endDate }),
+    supabase.rpc("get_top_selling_products", { p_profile_id: profileId, p_start_date: startDate, p_end_date: endDate }),
   ]);
+
+  // Enrich top selling products with stock status
+  let topSellingProductsWithStock: (TopSellingProductReportData & { stock_status?: Product['stock_status'] })[] = [];
+  if (topSellingProductsRes.data && topSellingProductsRes.data.length > 0) {
+    const productIds = topSellingProductsRes.data.map(p => p.product_id);
+    const { data: productsDetails, error: productsDetailsError } = await supabase
+      .from('products')
+      .select('id, stock_status, category')
+      .in('id', productIds);
+
+    if (productsDetailsError) {
+      console.error("Error fetching product details for top selling products:", productsDetailsError);
+    } else {
+      const productDetailsMap = new Map(productsDetails?.map(p => [p.id, { stock_status: p.stock_status, category: p.category }]));
+      topSellingProductsWithStock = topSellingProductsRes.data.map(p => ({
+        ...p,
+        stock_status: productDetailsMap.get(p.product_id)?.stock_status,
+        category: productDetailsMap.get(p.product_id)?.category, // Add category here
+      }));
+    }
+  }
 
   const ecommerceData = {
     totalProducts: totalProductsRes.count,
@@ -124,6 +155,8 @@ export default async function DashboardPage() {
     refundedOrders: refundedOrdersRes.count,
     recentOrders: recentOrdersRes.data,
     dailyOrderCounts: dailyOrderCountsRes.data,
+    customerOrderReports: customerOrderReportsRes.data,
+    topSellingProducts: topSellingProductsWithStock,
   };
 
   return (

@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MarketingOverviewClient } from "./marketing-overview-client";
 import { EcommerceOverviewClient } from "./ecommerce-overview-client";
-import { Order, DailyOrderCountData } from "@/lib/types";
+import { Order, DailyOrderCountData, CustomerOrderReportData, TopSellingProductReportData, Product } from "@/lib/types";
 
 interface DashboardTabsClientProps {
   marketingData: {
@@ -25,6 +25,8 @@ interface DashboardTabsClientProps {
     refundedOrders: number | null;
     recentOrders: Order[] | null;
     dailyOrderCounts: DailyOrderCountData[] | null;
+    customerOrderReports: CustomerOrderReportData[] | null;
+    topSellingProducts: (TopSellingProductReportData & { stock_status?: Product['stock_status'] })[] | null;
   };
 }
 
