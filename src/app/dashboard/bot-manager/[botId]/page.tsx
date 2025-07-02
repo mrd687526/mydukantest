@@ -48,5 +48,15 @@ export default async function BotEditorPage(props: BotEditorPageProps) {
     );
   }
 
-  return <BotEditorClient bot={bot as Bot} />;
+  // TODO: Check if bot is connected to Meta, for now always show onboarding link
+  return (
+    <div>
+      <div className="mb-4">
+        <Button asChild variant="secondary">
+          <Link href={`./onboarding`}>Meta App Onboarding</Link>
+        </Button>
+      </div>
+      <BotEditorClient bot={bot as Bot} />
+    </div>
+  );
 }

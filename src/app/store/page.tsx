@@ -2,6 +2,9 @@ import { StorefrontRenderEngine } from "@/components/storefront/StorefrontRender
 import { createServerClient } from "@/integrations/supabase/server";
 import { ProductCard } from "@/components/storefront/product-card";
 import { Product } from "@/lib/types";
+import HeroSection from "@/components/storefront/HeroSection";
+import HighlightsSection from "@/components/storefront/HighlightsSection";
+import StorefrontHomeClient from "@/components/storefront/StorefrontHomeClient";
 
 export default async function StoreHomePage() {
   const supabase = createServerClient();
@@ -15,7 +18,7 @@ export default async function StoreHomePage() {
     .select("id")
     .eq("role", "store_admin")
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (profileError || !storeProfile) {
     console.error("Error fetching store profile for public storefront:", profileError?.message);
@@ -37,7 +40,7 @@ export default async function StoreHomePage() {
     .select("data")
     .eq("slug", "home")
     .eq("profile_id", storeProfileId) // Filter by profile_id
-    .single();
+    .maybeSingle();
 
   if (pageError && pageError.code !== "PGRST116") { // PGRST116 means no rows found, which is fine
     console.error("Error fetching store page content:", pageError);
@@ -54,30 +57,39 @@ export default async function StoreHomePage() {
 
   const contentTree = pageData?.data || null;
 
-  // Fetch products for the specific store
+  // Fetch all products for the specific store
   const { data: products, error: productsError } = await supabase
     .from("products")
     .select("*")
-    .eq("profile_id", storeProfileId) // Filter by profile_id
+    .eq("profile_id", storeProfileId)
     .order("created_at", { ascending: false });
 
-  if (productsError) {
-    console.error("Error fetching products:", productsError);
-    // Fallback or error message for products
-  }
+  // Fetch distinct categories for the specific store
+  const { data: categoryRows, error: categoriesError } = await supabase
+    .from("products")
+    .select("category")
+    .eq("profile_id", storeProfileId)
+    .not("category", "is", null)
+    .order("category", { ascending: true });
+
+  const categories = Array.from(
+    new Set((categoryRows || []).map((row) => row.category))
+  );
+
+  // Highlights logic
+  const bestSellers = (products || []).filter((p) => p.is_trending).slice(0, 8);
+  const newArrivals = (products || []).slice(0, 8);
+  const deals = (products || []).filter((p) => p.sale_price && p.sale_price < p.price).slice(0, 8);
 
   return (
     <div className="container mx-auto py-8">
-      {contentTree ? (
-        <StorefrontRenderEngine node={contentTree} />
-      ) : (
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">Welcome to Your Store!</h2>
-          <p className="text-muted-foreground">
-            No custom page content found. You can design your home page using the visual editor in the dashboard.
-          </p>
-        </div>
-      )}
+      <HeroSection />
+      <HighlightsSection bestSellers={bestSellers} newArrivals={newArrivals} deals={deals} />
+      <StorefrontHomeClient
+        contentTree={contentTree}
+        products={products || []}
+        categories={categories}
+      />
 
       <h1 className="text-3xl font-bold text-center mb-8 mt-12">Our Products</h1>
       {products && products.length > 0 ? (

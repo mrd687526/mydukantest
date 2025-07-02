@@ -1,4 +1,3 @@
-src/app/actions/templates.ts
 "use server";
 
 import { createServerClient } from "@/integrations/supabase/server";

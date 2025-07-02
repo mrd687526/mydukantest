@@ -56,7 +56,7 @@ export default function LoginForm({ redirectTo = '/dashboard' }: LoginFormProps)
           .from('profiles')
           .select('role')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (profile?.role === 'super_admin') {
           router.push('/superadmin/dashboard');

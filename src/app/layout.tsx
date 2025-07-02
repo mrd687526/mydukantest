@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
+import Link from "next/link";
+import { useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import ClientNavBar from "@/components/storefront/ClientNavBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,15 +24,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ClientNavBar />
+        <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
           {children}
-          <Toaster />
-        </ThemeProvider>
+        </main>
+        {/* Footer */}
+        <footer className="w-full bg-white dark:bg-gray-900 border-t py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+          © {new Date().getFullYear()} My Dukan. All rights reserved.
+        </footer>
+        <Toaster />
       </body>
     </html>
   );

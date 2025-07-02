@@ -13,7 +13,7 @@ export default async function HomePage() {
       .from("profiles")
       .select("role")
       .eq("id", session.user.id) // Fetch profile by user.id
-      .single();
+      .maybeSingle();
     if (error || !profile) {
       console.error("Error fetching profile for redirection:", error);
       redirect("/login"); // Or to a profile completion page if that's the flow

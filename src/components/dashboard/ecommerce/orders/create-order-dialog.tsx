@@ -34,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createOrder } from "@/app/actions/orders";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 import { Product } from "@/lib/types";
 
 const orderItemSchema = z.object({
@@ -62,7 +62,7 @@ interface CreateOrderDialogProps {
 }
 
 export function CreateOrderDialog({ onClose }: CreateOrderDialogProps) {
-  const supabase = createClient();
+  const supabase = createBrowserClient();
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<
     Array<{ product: Product; quantity: number }>

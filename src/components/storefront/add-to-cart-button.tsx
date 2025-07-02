@@ -2,12 +2,12 @@
 import { useCart } from "./cart-context";
 import { useState } from "react";
 import { logCustomerEvent } from "@/app/actions/customer-events";
-import { createClient } from "@/integrations/supabase/client"; // Import client for fetching customer_id
+import { createBrowserClient } from "@/integrations/supabase/client";
 
 export default function AddToCartButton({ product }: { product: any }) {
   const { addToCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = createBrowserClient();
 
   const handleAddToCart = async () => {
     setLoading(true);
@@ -28,7 +28,7 @@ export default function AddToCartButton({ product }: { product: any }) {
         .select("id")
         .eq("role", "store_admin")
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (storeProfile) {
         const { data: customer } = await supabase
@@ -36,7 +36,7 @@ export default function AddToCartButton({ product }: { product: any }) {
           .select("id")
           .eq("email", user.email!)
           .eq("profile_id", storeProfile.id)
-          .single();
+          .maybeSingle();
 
         if (customer) {
           await logCustomerEvent({

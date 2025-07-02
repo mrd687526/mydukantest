@@ -1,3 +1,4 @@
+'use client';
 import { createServerClient } from "@/integrations/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,7 +24,7 @@ export default async function CustomerAccountPage() {
     .select("id")
     .eq("role", "store_admin")
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (profileError || !storeProfile) {
     console.error("Error fetching store profile for customer account page:", profileError?.message);
@@ -49,7 +50,7 @@ export default async function CustomerAccountPage() {
     .select("id, name, email")
     .eq("email", user.email!) // Assuming customer email matches auth email
     .eq("profile_id", storeProfileId) // Filter by store's profile_id
-    .single();
+    .maybeSingle();
 
   if (customerError || !customerProfile) {
     console.error("Error fetching customer profile:", customerError);
@@ -107,10 +108,65 @@ export default async function CustomerAccountPage() {
     );
   }
 
+  // Mock saved addresses
+  const [addresses, setAddresses] = useState([
+    { id: "1", line1: "123 Main St", city: "Metropolis", country: "USA" },
+  ]);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: customerProfile.name || "",
+    email: customerProfile.email || "",
+  });
+  function handleProfileChange(e) {
+    setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
+  }
+  function handleProfileSave() {
+    setEditingProfile(false);
+    // TODO: Save to backend
+  }
+  function handleAddAddress() {
+    setAddresses([...addresses, { id: Date.now().toString(), line1: "", city: "", country: "" }]);
+  }
+  function handleRemoveAddress(id) {
+    setAddresses(addresses.filter(a => a.id !== id));
+  }
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 space-y-6">
       <h1 className="text-2xl font-bold">My Account</h1>
       <p className="text-muted-foreground">Welcome, {customerProfile.name || customerProfile.email}!</p>
+
+      {/* Profile management */}
+      <section className="mb-8">
+        <h2 className="text-lg font-bold mb-2">Profile</h2>
+        {editingProfile ? (
+          <div className="space-y-2">
+            <input name="name" value={profileForm.name} onChange={handleProfileChange} className="border rounded px-2 py-1" />
+            <input name="email" value={profileForm.email} onChange={handleProfileChange} className="border rounded px-2 py-1" />
+            <button onClick={handleProfileSave} className="btn btn-primary">Save</button>
+            <button onClick={() => setEditingProfile(false)} className="btn btn-secondary ml-2">Cancel</button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <span>{profileForm.name} ({profileForm.email})</span>
+            <button onClick={() => setEditingProfile(true)} className="btn btn-outline">Edit</button>
+          </div>
+        )}
+      </section>
+
+      {/* Saved addresses */}
+      <section className="mb-8">
+        <h2 className="text-lg font-bold mb-2">Saved Addresses</h2>
+        <ul className="space-y-2 mb-2">
+          {addresses.map(addr => (
+            <li key={addr.id} className="flex items-center gap-2">
+              <span>{addr.line1}, {addr.city}, {addr.country}</span>
+              <button onClick={() => handleRemoveAddress(addr.id)} className="btn btn-sm btn-danger">Remove</button>
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleAddAddress} className="btn btn-sm btn-primary">Add Address</button>
+      </section>
 
       <Card>
         <CardHeader>

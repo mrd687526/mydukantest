@@ -15,7 +15,7 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { createClient } from "@/integrations/supabase/client";
+import { createBrowserClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Heading1,
@@ -26,7 +26,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-const supabase = createClient();
+const supabase = createBrowserClient();
 
 export type Node = {
   id: string;

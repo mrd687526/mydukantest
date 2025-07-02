@@ -50,20 +50,10 @@ export async function createProduct(values: ProductFormValues) {
     return { error: "You must be logged in to create a product." };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!profile) {
-    return { error: "You must have a profile to create a product." };
-  }
-
   const tagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim()) : null;
 
   const { error } = await supabase.from("products").insert({
-    profile_id: profile.id,
+    profile_id: user.id,
     ...values,
     tags: tagsArray,
   });
@@ -243,13 +233,10 @@ export async function getProductsForPOS(searchTerm: string): Promise<{ data: Pro
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null, error: "Authentication required." };
 
-  const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
-  if (!profile) return { data: null, error: "Profile not found." };
-
   let query = supabase
     .from("products")
     .select("*")
-    .eq("profile_id", profile.id)
+    .eq("profile_id", user.id)
     .gt("inventory_quantity", 0); // Only show in-stock items
 
   if (searchTerm) {

@@ -7,39 +7,57 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServerClient();
 
-  let query = supabase
-    .from("store_pages")
-    .select("data")
-    .eq("slug", slug);
+  let targetProfileId: string | null = null;
 
   // If a profileId is provided, filter by it. This is for dashboard editor or specific store views.
   if (profileId) {
-    query = query.eq("profile_id", profileId);
+    targetProfileId = profileId;
   } else {
     // For public storefront, we need to determine which store's page to show.
     // For this demo, we'll fetch the profile_id of the first store_admin.
     // In a real multi-tenant app, this would come from subdomain/path.
-    const { data: firstStoreProfile, error: profileError } = await supabase
+    const { data: firstStoreProfiles, error: profileError } = await supabase
       .from("profiles")
       .select("id")
       .eq("role", "store_admin")
-      .limit(1)
-      .single();
+      .limit(1); // Use limit(1) instead of single()
 
-    if (profileError || !firstStoreProfile) {
-      console.error("Error fetching first store profile for public page:", profileError?.message);
-      return NextResponse.json({ error: "No store profile found for public page." }, { status: 404 });
+    if (profileError) {
+      console.error("Error fetching first store profile for public page:", profileError.message);
+      return NextResponse.json({ error: "Database error fetching profile." }, { status: 500 });
     }
-    query = query.eq("profile_id", firstStoreProfile.id);
+    
+    if (firstStoreProfiles && firstStoreProfiles.length > 0) {
+      targetProfileId = firstStoreProfiles[0].id;
+    } else {
+      // If no store_admin profile exists, return null data for public view
+      return NextResponse.json({ data: null }); // Return 200 OK with null data
+    }
   }
 
-  const { data, error } = await query.single();
+  if (!targetProfileId) {
+    return NextResponse.json({ error: "Profile ID could not be determined." }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("store_pages")
+    .select("data")
+    .eq("slug", slug)
+    .eq("profile_id", targetProfileId)
+    .maybeSingle(); // Use maybeSingle() to handle 0 or 1 row
 
   if (error) {
     console.error("Error fetching store page:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 404 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ data: data?.data });
+
+  // If data is null, it means no page was found. Return 200 OK with null data.
+  // The client-side will then use DEFAULT_TREE.
+  if (!data) {
+    return NextResponse.json({ data: null });
+  }
+
+  return NextResponse.json({ data: data.data });
 }
 
 export async function POST(req: NextRequest) {

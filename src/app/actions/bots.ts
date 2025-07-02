@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 const botSchema = z.object({
   name: z.string().min(3, "Bot name must be at least 3 characters."),
-  connected_account_id: z.string().uuid(),
+  connected_account_id: z.string().uuid().nullable(),
 });
 
 export async function createBot(values: z.infer<typeof botSchema>) {
@@ -17,20 +17,9 @@ export async function createBot(values: z.infer<typeof botSchema>) {
     return { error: "You must be logged in." };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!profile) {
-    return { error: "You must have a profile." };
-  }
-
   const { error } = await supabase.from("bots").insert({
     name: values.name,
     connected_account_id: values.connected_account_id,
-    profile_id: profile.id,
     status: "inactive",
   });
 

@@ -18,7 +18,7 @@ export default async function StockReportsPage() {
     .from("profiles")
     .select("id")
     .eq("id", user.id) // Fetch profile by user.id
-    .single();
+    .maybeSingle();
 
   if (!profile) {
     return <CompleteProfilePrompt user={user} />;

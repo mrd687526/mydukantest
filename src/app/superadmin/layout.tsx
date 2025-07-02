@@ -40,7 +40,7 @@ export default async function SuperAdminLayout({ children }: PropsWithChildren) 
     .from("profiles")
     .select("role")
     .eq("id", user.id) // Fetch profile by user.id
-    .single();
+    .maybeSingle();
 
   if (error || !profile || profile.role !== 'super_admin') {
     // Redirect to dashboard or a permission denied page if not super admin

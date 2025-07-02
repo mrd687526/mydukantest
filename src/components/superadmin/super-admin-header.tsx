@@ -92,6 +92,9 @@ export function SuperAdminHeader({ user }: { user: User | null }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{user?.email || "Super Admin"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">Profile</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleClearCache}>Clear Cache</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />

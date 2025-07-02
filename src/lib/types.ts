@@ -175,6 +175,7 @@ export type Profile = {
   shipping_state: string | null;
   shipping_zip_code: string | null;
   shipping_country: string | null;
+  guest_checkout_enabled?: boolean;
 };
 
 export type Subscription = {

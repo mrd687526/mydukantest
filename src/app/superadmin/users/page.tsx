@@ -21,7 +21,7 @@ export default async function SuperAdminUsersPage() {
     .from("profiles")
     .select("role")
     .eq("id", user.id) // Fetch profile by user.id
-    .single();
+    .maybeSingle();
 
   // In development, the middleware bypasses this role check.
   // In production, this ensures only super admins can access this page.

@@ -18,21 +18,15 @@ interface BotManagerClientProps {
 }
 
 export function BotManagerClient({ accounts }: BotManagerClientProps) {
-  if (accounts.length === 0) {
+  if (!accounts || accounts.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-full">
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h3 className="text-2xl font-bold tracking-tight">
-            No Facebook Pages Connected
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Please connect a Facebook page from the 'Connect Accounts' page to create a bot.
-          </p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16">
+        <h3 className="text-2xl font-bold mb-2">No Connected Accounts</h3>
+        <p className="text-muted-foreground mb-4">You have not connected any Facebook or Instagram accounts yet. You can still create a bot for testing or future channels.</p>
+        <CreateBotDialog connectedAccountId={null} />
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {accounts.map((account) => {

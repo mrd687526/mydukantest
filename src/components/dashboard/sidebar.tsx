@@ -32,7 +32,7 @@ export async function DashboardSidebar() {
       .from("profiles")
       .select("role")
       .eq("id", user.id) // Fetch profile by user.id
-      .single();
+      .maybeSingle();
     if (profile && profile.role === 'super_admin') {
       isSuperAdmin = true;
     }

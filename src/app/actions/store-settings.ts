@@ -168,6 +168,7 @@ export async function updateCustomSettings(values: z.infer<typeof customSettings
 const checkoutSettingsSchema = z.object({
   checkout_enable_notes: z.boolean(),
   checkout_require_login: z.boolean(),
+  guest_checkout_enabled: z.boolean().optional(),
 });
 
 export async function updateCheckoutSettings(values: z.infer<typeof checkoutSettingsSchema>) {
@@ -175,12 +176,17 @@ export async function updateCheckoutSettings(values: z.infer<typeof checkoutSett
   if (profileRes.error) return { error: profileRes.error };
   const profileId = profileRes.profileId;
 
+  const updateObj: Record<string, any> = {
+    checkout_enable_notes: values.checkout_enable_notes,
+    checkout_require_login: values.checkout_require_login,
+  };
+  if (typeof values.guest_checkout_enabled === 'boolean') {
+    updateObj.guest_checkout_enabled = values.guest_checkout_enabled;
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      checkout_enable_notes: values.checkout_enable_notes,
-      checkout_require_login: values.checkout_require_login,
-    })
+    .update(updateObj)
     .eq("id", profileId);
 
   if (error) {

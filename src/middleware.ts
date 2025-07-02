@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
     .from('profiles')
     .select('id, stripe_customer_id, role')
     .eq('id', user.id) // Fetch profile by user.id
-    .single();
+    .maybeSingle();
 
   let isSuperAdmin = false;
   if (profileError || !profile) {
@@ -97,7 +97,7 @@ export async function middleware(request: NextRequest) {
       .from('subscriptions')
       .select('status')
       .eq('profile_id', profile?.id) // Use profile.id if it exists
-      .single();
+      .maybeSingle();
 
     // Define allowed statuses for dashboard access
     const allowedStatuses = ['trialing', 'active'];

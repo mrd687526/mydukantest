@@ -22,6 +22,7 @@ import { Profile } from "@/lib/types";
 const checkoutSettingsSchema = z.object({
   checkout_enable_notes: z.boolean(),
   checkout_require_login: z.boolean(),
+  guest_checkout_enabled: z.boolean(),
 });
 
 type CheckoutSettingsFormValues = z.infer<typeof checkoutSettingsSchema>;
@@ -36,6 +37,7 @@ export function CheckoutSettingsForm({ initialData }: CheckoutSettingsFormProps)
     defaultValues: {
       checkout_enable_notes: initialData.checkout_enable_notes ?? true,
       checkout_require_login: initialData.checkout_require_login ?? false,
+      guest_checkout_enabled: initialData.guest_checkout_enabled ?? true,
     },
   });
 
@@ -73,6 +75,20 @@ export function CheckoutSettingsForm({ initialData }: CheckoutSettingsFormProps)
               <div className="space-y-0.5">
                 <FormLabel>Require Customers to Log In for Checkout</FormLabel>
                 <FormDescription>Force customers to log in or create an account before completing a purchase.</FormDescription>
+              </div>
+              <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="guest_checkout_enabled"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel>Enable Guest Checkout</FormLabel>
+                <FormDescription>Allow customers to checkout without creating an account.</FormDescription>
               </div>
               <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
               <FormMessage />

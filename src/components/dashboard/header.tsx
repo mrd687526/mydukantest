@@ -113,6 +113,9 @@ export function DashboardHeader({ user }: { user: User | null }) {
             <Link href="/dashboard/settings">Settings</Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleClearCache}>Clear Cache</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">Profile</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>

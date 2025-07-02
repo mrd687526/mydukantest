@@ -25,7 +25,7 @@ export default function CustomerAuthForm() {
           .select("id")
           .eq("role", "store_admin")
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (storeProfile) {
           // Ensure customer record exists and get its ID
@@ -39,7 +39,7 @@ export default function CustomerAuthForm() {
               status: 'active',
             }, { onConflict: 'profile_id,email' })
             .select('id')
-            .single();
+            .maybeSingle();
 
           if (customer && !customerError) {
             if (event === 'SIGNED_IN') {
@@ -75,7 +75,7 @@ export default function CustomerAuthForm() {
           .select("id")
           .eq("role", "store_admin")
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (storeProfile) {
           const { data: customer } = await supabase
@@ -83,7 +83,7 @@ export default function CustomerAuthForm() {
             .select("id")
             .eq("email", session.user.email!)
             .eq("profile_id", storeProfile.id)
-            .single();
+            .maybeSingle();
           if (customer) {
             await updateCustomerLastActive(customer.id);
           }
